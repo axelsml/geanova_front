@@ -2,7 +2,7 @@ import http from "./axiosService.js";
 import axios from "axios";
 
 class plazosService {
-  getPlazos(callback, error) {
+  getPlazos(params, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -10,7 +10,7 @@ class plazosService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get("getIPlazos", { cancelToken: call.token })
+      .get("getIPlazos", { params }, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })

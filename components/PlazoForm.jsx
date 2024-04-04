@@ -8,7 +8,7 @@ import { useState } from "react";
 import plazosService from "@/services/plazosService";
 import { formatPrecio } from "@/helpers/formatters";
 
-export default function PlazosForm({ setNuevoPlazo, setWatch, watch }) {
+export default function PlazosForm({ setNuevoPlazo, setWatch, watch, terrenoId }) {
   const [loading, setLoading] = useState(false);
 
   const onGuardarPlazo = (values) => {
@@ -25,7 +25,7 @@ export default function PlazosForm({ setNuevoPlazo, setWatch, watch }) {
     }).then((result) => {
       if (result.isConfirmed) {
         setLoading(true);
-        plazosService.createPlazo(values, onPlazoGuardado, onError);
+        plazosService.createPlazo({...values, terreno_id: terrenoId}, onPlazoGuardado, onError);
       }
     });
   };

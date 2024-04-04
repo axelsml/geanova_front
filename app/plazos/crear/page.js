@@ -6,13 +6,13 @@ import plazosService from "@/services/plazosService";
 import { Button, Col, Collapse, Row, Typography } from "antd";
 import { useState, useEffect } from "react";
 
-export default function PlazosCrear() {
+export default function PlazosCrear({ terrenoId }) {
   const [nuevoPlazo, setNuevoPlazo] = useState(false);
   const [plazos, setPlazos] = useState(null);
   const [changeState, setChangeState] = useState(false);
 
   useEffect(() => {
-    plazosService.getPlazos(setPlazos, Error);
+    plazosService.getPlazos({terreno_id: terrenoId}, setPlazos, Error);
   }, [changeState]);
 
   const CreateNuevoPlazo = () => {
@@ -37,21 +37,22 @@ export default function PlazosCrear() {
               setNuevoPlazo={setNuevoPlazo}
               setWatch={setChangeState}
               watch={changeState}
+              terrenoId={terrenoId}
             />
           )}
         </Col>
       </Row>
 
-      {(!nuevoPlazo && plazos?.length > 0) && (
+      {!nuevoPlazo && plazos?.length > 0 && (
         <Row justify={"center"}>
           <Collapse className="w-3/4">
-            <Collapse.Panel header="Lista de Plazos" >
+            <Collapse.Panel header="Lista de Plazos">
               {plazos?.map((plazo, index) => (
                 <span className="flex justify-around py-2" key={index}>
                   <Typography>{plazo.descripcion}</Typography>
                   <Typography>${formatPrecio(plazo.precio)}</Typography>
                 </span>
-                ))}
+              ))}
             </Collapse.Panel>
           </Collapse>
         </Row>

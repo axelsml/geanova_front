@@ -36,7 +36,6 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
-    plazosService.getPlazos(setPlazos, Error);
   }, []);
 
   const onBuscarLotes = (value) => {
@@ -48,6 +47,12 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
       },
       onError
     );
+    onBuscarPlazos(value)
+  };
+
+  const onBuscarPlazos = (value) => {
+    setTerrenoSelected(terrenos.find((terreno) => terreno.id == value));
+    plazosService.getPlazos({terreno_id: value}, setPlazos, onError);
   };
 
   const calcularMontoContratoPlazo = (plazo) => {

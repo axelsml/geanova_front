@@ -64,7 +64,7 @@ export default function TerrenosCrear() {
                   </Radio.Group>
                 </Row>
                 {value == 1 && <AsignarM2 terrenoId={terreno.id} />}
-                {value == 2 && <PlazosCrear/>}
+                {value == 2 && <PlazosCrear terrenoId={terreno.id}/>}
               </Collapse.Panel>
             </Collapse>
           ))}
