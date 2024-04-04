@@ -32,8 +32,9 @@ export default function Header() {
     },
 
     {
-      label: <button onClick={onCerrarSesion}>Cerrar Sesión</button>,
+      label:"Cerrar Sesión",
       icon: <BiExit  />,
+      onClick: onCerrarSesion
     },
   ];
 
