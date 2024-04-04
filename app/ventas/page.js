@@ -5,6 +5,7 @@ import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
 import { Button, Col, Collapse, Row, Typography } from "antd";
+import { AiOutlineFilePdf } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import {
   Paper,
@@ -25,6 +26,8 @@ export default function VentasCrear() {
   const [changeState, setChangeState] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [control, setControl] = useState();
+  const Panel = Collapse.Panel;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -93,11 +96,11 @@ export default function VentasCrear() {
           <Row justify={"start"}>
             <h1 className="text-3xl">Lista de Ventas</h1>
           </Row>
-          <Row justify={"center"}>
-            <Collapse className="w-3/4">
+          <Row justify={"center"} align={"middle"}>
+            <Collapse className="w-3/4" accordion>
               {ventas?.map((venta, index) => (
-                <Collapse.Panel key={index} header={venta.nombre_cliente}>
-                  <div className="flex justify-around">
+                <Panel key={index} header={venta.nombre_cliente}>
+                  <div className="flex justify-between items-center mx-7">
                     <Typography className="py-2">
                       Folio Cliente: {venta.folio_cliente}
                     </Typography>
@@ -121,7 +124,19 @@ export default function VentasCrear() {
                       Número de Lote: {venta.numero_lote}
                     </Typography>
                   </div>
-
+                  <br />
+                  <div className="flex mx-7">
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        window.open(
+                          `https://api.santamariadelaluz.com/iUsuarios/${venta.folio_cliente}.pdf`
+                        );
+                      }}
+                    >
+                      Amortización
+                    </Button>
+                  </div>
                   <br />
 
                   <Row justify={"center"} className="w-3/4 m-auto">
@@ -190,7 +205,7 @@ export default function VentasCrear() {
                       </Table>
                     </TableContainer>
                   </Row>
-                </Collapse.Panel>
+                </Panel>
               ))}
             </Collapse>
           </Row>
