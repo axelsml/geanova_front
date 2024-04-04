@@ -50,13 +50,12 @@ export default function VentasCrear() {
   return (
     <div className="p-8 grid gap-4">
       {!nuevaVenta && !nuevoPago && (
-        <Row justify={"center"} className="gap-5">
+        <Row justify={"center"} className="gap-10">
           <Col>
             <Button size={"large"} onClick={CreateNuevaVenta}>
               Crear Nueva Venta
             </Button>
           </Col>
-
           <Col>
             <Button size={"large"} onClick={CreateNuevoPago}>
               Crear Nuevo Pago
