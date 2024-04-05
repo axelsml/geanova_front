@@ -1,10 +1,18 @@
 "use client";
 
-import { Button, Form, InputNumber, DatePicker, Select } from "antd";
+import {
+  Button,
+  Form,
+  InputNumber,
+  DatePicker,
+  Select,
+  Radio,
+  Row,
+} from "antd";
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import Loader from "./Loader";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   formatPrecio,
   calcularSemanas,
@@ -15,9 +23,10 @@ import plazosService from "@/services/plazosService";
 import lotesService from "@/services/lotesService";
 import ventasService from "@/services/ventasService";
 import { usuario_id } from "@/helpers/user";
+import { LoadingContext } from "@/contexts/loading";
 
 export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
-  const [loading, setLoading] = useState(false);
+  const { setIsLoading } = useContext(LoadingContext)
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [plazos, setPlazos] = useState(null);
@@ -25,13 +34,27 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
   const [lotes, setLotes] = useState(null);
   const [loteSelected, setLoteSelected] = useState(null);
   const [plazoSelected, setPlazoSelected] = useState(null);
+  const [buttonSelected, setButtonSelected] = useState(1);
+  const [dataForm, setDataForm] = useState(null) 
   const [form] = Form.useForm();
 
   const [valoresIniciales, setValoresIniciales] = useState({
+    primer_nombre: "",
+    segundo_nombre: "",
+    primer_apellido: "",
+    segundo_apellido: "",
+    calle: "",
+    colonia: "",
+    numero_ext: null,
+    numero_int: null,
+    cp: null,
+    celular_cliente: null, 
+    celular_cliente_2: null,
     montoContrato: 0,
     anticipo: 0,
+    lote_id: null,
+    plazo_id: null,
     semanas: 0,
-    montoPago: 0,
   });
 
   useEffect(() => {
@@ -47,12 +70,12 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
       },
       onError
     );
-    onBuscarPlazos(value)
+    onBuscarPlazos(value);
   };
 
   const onBuscarPlazos = (value) => {
     setTerrenoSelected(terrenos.find((terreno) => terreno.id == value));
-    plazosService.getPlazos({terreno_id: value}, setPlazos, onError);
+    plazosService.getPlazos({ terreno_id: value }, setPlazos, onError);
   };
 
   const calcularMontoContratoPlazo = (plazo) => {
@@ -77,9 +100,9 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
     }
   };
 
-  const onGuardarVenta = (values) => {
+  const onGuardarVenta = async (values) => {
     values["fechaInicioContrato"] = formatDate(values.fechaInicioContrato);
-    console.log(values);
+
     Swal.fire({
       title: "Verifique que los datos sean correctos",
       icon: "info",
@@ -92,8 +115,12 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
       denyButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        setLoading(true);
-        ventasService.createVenta({...values, usuarioId: usuario_id}, onVentaGuardada, onError);
+        setIsLoading(true);
+        ventasService.createVenta(
+          { ...dataForm, usuarioId: usuario_id, ...values },
+          onVentaGuardada,
+          onError
+        );
       }
     });
   };
@@ -121,7 +148,7 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
   const validacionMensajes = {
     required: "${label} es requerido",
     types: {
-      number: "${label} no es un número válido!",
+      number: "${label} no es un número válido",
     },
     number: {
       min: "${label} no puede ser menor a ${min}",
@@ -129,8 +156,8 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
   };
 
   const onVentaGuardada = (data) => {
+    setIsLoading(false);
     if (data.success) {
-      setLoading(false);
       setWatch(!watch);
       Swal.fire({
         title: "Guardado con Éxito",
@@ -142,7 +169,6 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
       });
       setNuevaVenta(false);
     } else {
-      setLoading(false);
       Swal.fire({
         title: "Error",
         icon: "error",
@@ -156,12 +182,37 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
   };
 
   const onError = (e) => {
-    setLoading(false);
+    setIsLoading(false);
     console.log(e);
   };
 
-  if (loading) {
-    return <Loader />;
+  const handleClick = async (value) => {
+    try {
+      const values = await form.validateFields();
+      setDataForm({...dataForm, ...values})
+      setButtonSelected(value);
+    } catch (errorInfo) {
+      console.log("Failed:", errorInfo);
+    }
+  };
+
+  function BotonesSiguiente({ option }) {
+    return (
+      <span className="flex gap-2 justify-end">
+        <Button
+          onClick={() => {
+            handleClick(option);
+          }}
+          size="large"
+        >
+          Siguiente
+        </Button>
+
+        <Button onClick={handleCancel} danger size="large">
+          Cancelar
+        </Button>
+      </span>
+    );
   }
 
   return (
@@ -179,211 +230,341 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
         layout="vertical"
         initialValues={valoresIniciales}
       >
-        <InputIn
-          placeholder="Ingrese el Primer Nombre del Cliente"
-          name="primer_nombre"
-          label="Primer Nombre del Cliente"
-          rules={[
-            {
-              required: true,
-              message: "Primer Nombre del Cliente es requerido",
-            },
-          ]}
-        />
-
-        <InputIn
-          placeholder="Ingrese el Segundo Nombre del Cliente"
-          name="segundo_nombre"
-          label="Segundo Nombre del Cliente"
-        />
-
-        <InputIn
-          placeholder="Ingrese el Primer Apellido del Cliente"
-          name="primer_apellido"
-          label="Primer Apellido del Cliente"
-          rules={[
-            {
-              required: true,
-              message: "Primer Apellido del Cliente es requerido",
-            },
-          ]}
-        />
-
-        <InputIn
-          placeholder="Ingrese el Segundo Apellido del Cliente"
-          name="segundo_apellido"
-          label="Segundo Apellido del Cliente"
-        />
-
-        <Form.Item
-          label={"Terreno"}
-          name={"terreno"}
-          style={{ width: "100%" }}
-          rules={[{ required: true, message: "Terreno no seleccionado" }]}
-          initialValue={terrenoSelected?.nombre}
-        >
-          <Select
-            showSearch
-            placeholder="Seleccione un Terreno"
-            optionLabelProp="label"
-            onChange={onBuscarLotes}
-          >
-            {terrenos?.map((item) => (
-              <Option key={item.nombre} value={item.id} label={item.nombre}>
-                {item?.nombre}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          label={"Lote"}
-          name="lote_id"
-          style={{ width: "100%" }}
-          rules={[{ required: true, message: "Lote no seleccionado" }]}
-        >
-          <Select
-            showSearch
-            placeholder="Seleccione un Lote"
-            optionLabelProp="label"
-            onChange={(value) => {
-              const loteSelected = lotes.find((lote) => lote.id == value);
-              setLoteSelected(loteSelected);
-              setValoresIniciales({
-                ...valoresIniciales,
-                montoContrato: calcularMontoContratoLote(loteSelected),
-              });
+        <Row justify={"center"}>
+          <Radio.Group
+            onChange={(e) => {
+              handleClick(e.target.value);
             }}
+            value={buttonSelected}
           >
-            {lotes?.map((item) => (
-              <Option key={item.numero} value={item.id} label={item.numero}>
-                {item?.numero}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+            <Radio.Button value={1}>Cliente</Radio.Button>
+            <Radio.Button value={2}>Domicilio</Radio.Button>
+            <Radio.Button value={3}>Contacto</Radio.Button>
+            <Radio.Button value={4}>Lote</Radio.Button>
+          </Radio.Group>
+        </Row>
 
-        <Form.Item
-          label={"Plazo"}
-          name="plazo_id"
-          style={{ width: "100%" }}
-          rules={[{ required: true, message: "Plazo no seleccionado" }]}
-        >
-          <Select
-            showSearch
-            disabled={!loteSelected}
-            placeholder="Seleccione un Plazo"
-            optionLabelProp="label"
-            onChange={(value) => {
-              const plazoSelected = plazos.find((plazo) => plazo.id == value);
-              setPlazoSelected(plazoSelected);
-              setValoresIniciales({
-                ...valoresIniciales,
-                montoContrato: calcularMontoContratoPlazo(plazoSelected),
-              });
-            }}
-          >
-            {plazos?.map((item) => (
-              <Option
-                key={item.descripcion}
-                value={item.id}
-                label={item.descripcion}
+        {buttonSelected === 1 && (
+          <>
+            <InputIn
+              placeholder="Ingrese el Primer Nombre del Cliente"
+              name="primer_nombre"
+              label="Primer Nombre del Cliente"
+              rules={[
+                {
+                  required: true,
+                  message: "Primer Nombre del Cliente es requerido",
+                },
+              ]}
+            />
+
+            <InputIn
+              placeholder="Ingrese el Segundo Nombre del Cliente"
+              name="segundo_nombre"
+              label="Segundo Nombre del Cliente"
+            />
+
+            <InputIn
+              placeholder="Ingrese el Primer Apellido del Cliente"
+              name="primer_apellido"
+              label="Primer Apellido del Cliente"
+              rules={[
+                {
+                  required: true,
+                  message: "Primer Apellido del Cliente es requerido",
+                },
+              ]}
+            />
+
+            <InputIn
+              placeholder="Ingrese el Segundo Apellido del Cliente"
+              name="segundo_apellido"
+              label="Segundo Apellido del Cliente"
+            />
+
+            <BotonesSiguiente option={2} />
+          </>
+        )}
+
+        {buttonSelected === 2 && (
+          <>
+            <InputIn
+              placeholder="Ingrese la Calle del Cliente"
+              name="calle"
+              label="Calle del Cliente"
+              rules={[
+                {
+                  required: true,
+                  message: "Calle del Cliente es requerida",
+                },
+              ]}
+            />
+
+            <InputIn
+              placeholder="Ingrese la Colonia del Cliente"
+              name="colonia"
+              label="Colonia del Cliente"
+              rules={[
+                {
+                  required: true,
+                  message: "Colonia del Cliente es requerida",
+                },
+              ]}
+            />
+
+            <Form.Item
+              name="numero_ext"
+              label="Número Exterior del Cliente"
+              style={{ width: "100%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Número Exterior es requerido",
+                },
+                { type: "number", min: 1 },
+              ]}
+            >
+              <InputNumber
+                placeholder="Ingrese el Número Exterior del Cliente"
+                style={{
+                  width: "100%",
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="numero_int"
+              label="Número Interior del Cliente"
+              style={{ width: "100%" }}
+              rules={[
+                { type: "number", min: 1 },
+              ]}
+            >
+              <InputNumber
+                placeholder="Ingrese el Número Interior del Cliente"
+                style={{
+                  width: "100%",
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="cp"
+              label="Código Postal del Cliente"
+              style={{ width: "100%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Código Postal del Cliente es requerida",
+                },
+                { type: "number", min: 1 },
+              ]}
+            >
+              <InputNumber
+                placeholder="Ingrese el Código Postal del Cliente"
+                style={{
+                  width: "100%",
+                }}
+              />
+            </Form.Item>
+
+            <BotonesSiguiente option={3} />
+          </>
+        )}
+
+        {buttonSelected === 3 && (
+          <>
+            <InputIn
+              name="celular_cliente"
+              label="Celular de Contacto"
+              placeholder="Ingrese el Número de Celular de Contacto"
+              rules={[
+                {
+                  required: true,
+                  message: "Número de Celular del Cliente es requerido",
+                },
+                {
+                  pattern: new RegExp(/^(\+52)?\d{10}$/),
+                  message: "Número de Celular no es Válido",
+                },
+              ]}
+            />
+
+            <InputIn
+              name="celular_cliente_2"
+              label="Celular de Contacto Secundario"
+              placeholder="Ingrese el Número de Celular Secundario de Contacto"
+              rules={[
+                {
+                  pattern: new RegExp(/^(\+52)?\d{10}$/),
+                  message: "Número de Celular Secundario no es Válido",
+                },
+              ]}
+            />
+
+            <BotonesSiguiente option={4} />
+          </>
+        )}
+
+        {buttonSelected === 4 && (
+          <>
+            <Form.Item
+              label={"Terreno"}
+              name={"terreno"}
+              style={{ width: "100%" }}
+              rules={[{ required: true, message: "Terreno no seleccionado" }]}
+              initialValue={terrenoSelected?.nombre}
+            >
+              <Select
+                showSearch
+                placeholder="Seleccione un Terreno"
+                optionLabelProp="label"
+                onChange={onBuscarLotes}
               >
-                {item?.descripcion}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+                {terrenos?.map((item) => (
+                  <Option key={item.nombre} value={item.id} label={item.nombre}>
+                    {item?.nombre}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-        <Form.Item
-          name={"montoContrato"}
-          label={"Monto de Contrato"}
-          style={{ width: "100%" }}
-        >
-          <InputNumber
-            disabled
-            style={{
-              width: "100%",
-            }}
-            formatter={formatPrecio}
-            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-            prefix="$"
-            suffix="MXN"
-          />
-        </Form.Item>
+            <Form.Item
+              label={"Lote"}
+              name="lote_id"
+              style={{ width: "100%" }}
+              rules={[{ required: true, message: "Lote no seleccionado" }]}
+            >
+              <Select
+                showSearch
+                placeholder="Seleccione un Lote"
+                optionLabelProp="label"
+                onChange={(value) => {
+                  const loteSelected = lotes.find((lote) => lote.id == value);
+                  setLoteSelected(loteSelected);
+                  setValoresIniciales({
+                    ...valoresIniciales,
+                    montoContrato: calcularMontoContratoLote(loteSelected),
+                  });
+                }}
+              >
+                {lotes?.map((item) => (
+                  <Option key={item.numero} value={item.id} label={item.numero}>
+                    {item?.numero}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-        <Form.Item
-          name={"anticipo"}
-          label={"Anticipo"}
-          style={{ width: "100%" }}
-        >
-          <InputNumber
-            style={{
-              width: "100%",
-            }}
-            formatter={formatPrecio}
-            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-            prefix="$"
-            suffix="MXN"
-          />
-        </Form.Item>
+            <Form.Item
+              label={"Plazo"}
+              name="plazo_id"
+              style={{ width: "100%" }}
+              rules={[{ required: true, message: "Plazo no seleccionado" }]}
+            >
+              <Select
+                showSearch
+                disabled={!loteSelected}
+                placeholder="Seleccione un Plazo"
+                optionLabelProp="label"
+                onChange={(value) => {
+                  const plazoSelected = plazos.find(
+                    (plazo) => plazo.id == value
+                  );
+                  setPlazoSelected(plazoSelected);
+                  setValoresIniciales({
+                    ...valoresIniciales,
+                    montoContrato: calcularMontoContratoPlazo(plazoSelected),
+                  });
+                }}
+              >
+                {plazos?.map((item) => (
+                  <Option
+                    key={item.descripcion}
+                    value={item.id}
+                    label={item.descripcion}
+                  >
+                    {item?.descripcion}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-        <Form.Item
-          name={"semanas"}
-          label={"Plazo Semanal"}
-          style={{ width: "100%" }}
-        >
-          <InputNumber
-            disabled
-            suffix={"Semanas"}
-            style={{
-              width: "100%",
-            }}
-          />
-        </Form.Item>
+            <Form.Item
+              name={"montoContrato"}
+              label={"Monto de Contrato"}
+              style={{ width: "100%" }}
+            >
+              <InputNumber
+                disabled
+                style={{
+                  width: "100%",
+                }}
+                formatter={formatPrecio}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                prefix="$"
+                suffix="MXN"
+              />
+            </Form.Item>
 
-        <Form.Item
-          name="fechaInicioContrato"
-          label="Fecha de Inicio de Contrato"
-          style={{ width: "100%" }}
-          rules={[
-            {
-              required: true,
-              message: "Fecha de Inicio de Contrato es requerida",
-            },
-          ]}
-        >
-          <DatePicker
-            style={{ width: "100%" }}
-            placeholder="Ingrese la Fecha de Inicio de Contrato"
-          />
-        </Form.Item>
+            <Form.Item
+              name={"anticipo"}
+              label={"Anticipo"}
+              style={{ width: "100%" }}
+            >
+              <InputNumber
+                style={{
+                  width: "100%",
+                }}
+                formatter={formatPrecio}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                prefix="$"
+                suffix="MXN"
+              />
+            </Form.Item>
 
-        <InputIn
-          name="celular_cliente"
-          label="Celular de Contacto"
-          placeholder="Ingrese el Número de Celular de Contacto"
-          rules={[
-            {
-              required: true,
-              message: "Celular de Contacto es requerido",
-            },
-            {
-              pattern: new RegExp(/^(\+52)?\d{10}$/),
-              message: "Número de Celular no es Válido",
-            },
-          ]}
-        />
+            <Form.Item
+              name={"semanas"}
+              label={"Plazo Semanal"}
+              style={{ width: "100%" }}
+            >
+              <InputNumber
+                disabled
+                suffix={"Semanas"}
+                style={{
+                  width: "100%",
+                }}
+              />
+            </Form.Item>
 
-        <span className="flex gap-2 justify-end">
-          <Button htmlType="submit" size="large">
-            Guardar
-          </Button>
+            <Form.Item
+              name="fechaInicioContrato"
+              label="Fecha de Inicio de Contrato"
+              style={{ width: "100%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Fecha de Inicio de Contrato es requerida",
+                },
+              ]}
+            >
+              <DatePicker
+                style={{ width: "100%" }}
+                placeholder="Ingrese la Fecha de Inicio de Contrato"
+              />
+            </Form.Item>
 
-          <Button onClick={handleCancel} danger size="large">
-            Cancelar
-          </Button>
-        </span>
+            <span className="flex gap-2 justify-end">
+              <Button htmlType="submit" size="large">
+                Guardar
+              </Button>
+
+              <Button onClick={handleCancel} danger size="large">
+                Cancelar
+              </Button>
+            </span>
+          </>
+        )}
       </Form>
     </div>
   );

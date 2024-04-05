@@ -4,18 +4,26 @@ import { Button, Form, InputNumber } from "antd";
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import Loader from "./Loader";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import plazosService from "@/services/plazosService";
 import { formatPrecio } from "@/helpers/formatters";
+import { LoadingContext } from "@/contexts/loading";
 
-export default function PlazosForm({ setNuevoPlazo, setWatch, watch, terrenoId }) {
-  const [loading, setLoading] = useState(false);
+export default function PlazosForm({
+  setNuevoPlazo,
+  setWatch,
+  watch,
+  terrenoId,
+}) {
+  const { setIsLoading } = useContext(LoadingContext);
 
   const onGuardarPlazo = (values) => {
     Swal.fire({
       title: "Verifique que los datos sean correctos",
       icon: "info",
-      html: `Cantidad de meses: ${values.cantidadMeses}<br/><br/>Precio por m<sup>2</sup>: $${formatPrecio(values.precio)}`,
+      html: `Cantidad de meses: ${
+        values.cantidadMeses
+      }<br/><br/>Precio por m<sup>2</sup>: $${formatPrecio(values.precio)}`,
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
       showDenyButton: true,
@@ -24,8 +32,12 @@ export default function PlazosForm({ setNuevoPlazo, setWatch, watch, terrenoId }
       denyButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        setLoading(true);
-        plazosService.createPlazo({...values, terreno_id: terrenoId}, onPlazoGuardado, onError);
+        setIsLoading(true);
+        plazosService.createPlazo(
+          { ...values, terreno_id: terrenoId },
+          onPlazoGuardado,
+          onError
+        );
       }
     });
   };
@@ -61,8 +73,8 @@ export default function PlazosForm({ setNuevoPlazo, setWatch, watch, terrenoId }
   };
 
   const onPlazoGuardado = (data) => {
+    setIsLoading(false);
     if (data.success) {
-      setLoading(false);
       setWatch(!watch);
       Swal.fire({
         title: "Guardado con Éxito",
@@ -74,7 +86,6 @@ export default function PlazosForm({ setNuevoPlazo, setWatch, watch, terrenoId }
       });
       setNuevoPlazo(false);
     } else {
-      setLoading(false);
       Swal.fire({
         title: "Error",
         icon: "error",
@@ -88,13 +99,9 @@ export default function PlazosForm({ setNuevoPlazo, setWatch, watch, terrenoId }
   };
 
   const onError = (e) => {
-    setLoading(false);
+    setIsLoading(false);
     console.log(e);
   };
-
-  if (loading) {
-    return <Loader />;
-  }
 
   return (
     <div className="w-1/2 max-w-md mx-auto p-6 m-7 bg-white rounded-lg shadow-md">

@@ -16,10 +16,14 @@ import BuscarCliente from "./BuscarCliente";
 import { LoadingContext } from "@/contexts/loading";
 import pagosService from "@/services/pagosService";
 import { usuario_id } from "@/helpers/user";
+import InputIn from "./Input";
 
 export default function PagoForm({ setNuevoPago, setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext);
   const [sistemas_pago, setSistemasPago] = useState(null);
+  const [sistemaSelected, setSistemaSelected] = useState(null);
+  const [tipoPagoSelected, setTipoPagoSelected] = useState(null);
+  const [tipo_pagos, setTipoPagos] = useState(null);
   const [cliente, setCliente] = useState(null);
   const [form] = Form.useForm();
   const { Option } = Select;
@@ -28,18 +32,21 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
     monto_pago: 0,
   });
 
-
   useEffect(() => {
-    pagosService.getSistemasPago(setSistemasPago, Error);
+    pagosService.getSistemasPago(setSistemasPago, onError);
+    pagosService.getTipoPagos(setTipoPagos, onError);
   }, []);
 
   const onGuardarPago = (values) => {
     values["fecha"] = formatDate(values.fecha);
-    console.log(values);
     Swal.fire({
       title: "Verifique que los datos sean correctos",
       icon: "info",
-      html: `Cliente: ${cliente[0].nombre_cliente}<br/><br/>Folio: ${cliente[0].folio_cliente}<br/><br/>Monto de Pago:  $${formatPrecio(values.monto_pagado)}<br/><br/>Fecha: ${values.fecha}`,
+      html: `Cliente: ${cliente[0].nombre_cliente}<br/><br/>Folio: ${
+        cliente[0].folio_cliente
+      }<br/><br/>Monto de Pago:  $${formatPrecio(
+        values.monto_pagado
+      )}<br/><br/>Fecha: ${values.fecha}`,
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
       showDenyButton: true,
@@ -52,9 +59,9 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
         let params = {
           ...values,
           usuario_id: usuario_id,
-          cliente_id: cliente[0].folio_cliente
-        }
-        pagosService.createPago({pago: params}, onPagoGuardado, onError);
+          cliente_id: cliente[0].folio_cliente,
+        };
+        pagosService.createPago({ pago: params }, onPagoGuardado, onError);
       }
     });
   };
@@ -81,7 +88,6 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
 
   const onPagoGuardado = (data) => {
     setIsLoading(false);
-    console.log(data);
     if (data.success) {
       setWatch(!watch);
       Swal.fire({
@@ -220,6 +226,9 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
                   showSearch
                   placeholder="Seleccione un Sistema de Pago"
                   optionLabelProp="label"
+                  onChange={(value) => {
+                    setSistemaSelected(value);
+                  }}
                 >
                   {sistemas_pago?.map((item, index) => (
                     <Option key={index} value={item.id} label={item.Nombre}>
@@ -228,6 +237,100 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
                   ))}
                 </Select>
               </Form.Item>
+
+              {sistemaSelected === 1 && (
+                <>
+                  <Form.Item
+                    label={"Tipo de Pago"}
+                    name={"tipo_pago_id"}
+                    style={{ width: "100%" }}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Tipo de Pago no seleccionado",
+                      },
+                    ]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Seleccione un Tipo de Pago"
+                      optionLabelProp="label"
+                      onChange={(value) => {
+                        setTipoPagoSelected(value);
+                      }}
+                    >
+                      {tipo_pagos?.map((item, index) => (
+                        <Option key={index} value={item.id} label={item.nombre}>
+                          {item?.nombre}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  {tipoPagoSelected === 1 && (
+                    <InputIn
+                      placeholder="Ingrese Nombre de Quién Recibió"
+                      name="usuario_recibio"
+                      label="Recibió"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Nombre de Quién Recibió es requerido",
+                        },
+                      ]}
+                    />
+                  )}
+                </>
+              )}
+
+              {sistemaSelected === 2 && (
+                <div>
+                  <Form.Item
+                    name="fechaTransferencia"
+                    label="Fecha de Transferencia"
+                    style={{ width: "100%" }}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Fecha de Transferencia requerida",
+                      },
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      placeholder="Ingrese la Fecha en la que se Realizó la Transferencia"
+                    />
+                  </Form.Item>
+
+                  <InputIn
+                    placeholder="Ingrese la Cuenta"
+                    name="comentario"
+                    label="Cuenta a la que se Depositó"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Cuenta es requerida",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name={"numeroMoviento"}
+                    label={"Folio de Pago"}
+                    style={{ width: "100%" }}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Folio de Pago es requerido",
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      style={{
+                        width: "100%",
+                      }}
+                    />
+                  </Form.Item>
+                </div>
+              )}
             </Col>
 
             <span className="flex gap-2 justify-end">
@@ -241,6 +344,13 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
             </span>
           </Form>
         </div>
+      )}
+      {!cliente && (
+        <span className="flex gap-2 justify-end">
+          <Button onClick={handleCancel} danger size="large">
+            Cancelar
+          </Button>
+        </span>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useContext } from "react";
-import { Select, Row, Form, Button, InputNumber } from "antd";
+import { Select, Row, Form, Button, InputNumber, Typography } from "antd";
 import Swal from "sweetalert2";
 import { LoadingContext } from "@/contexts/loading";
 
@@ -17,6 +17,7 @@ import {
   TableFooter,
 } from "@mui/material";
 import lotesService from "@/services/lotesService";
+import { formatPrecio } from "@/helpers/formatters";
 
 export default function AsignarM2({ terrenoId }) {
   const { setIsLoading } = useContext(LoadingContext);
@@ -24,6 +25,8 @@ export default function AsignarM2({ terrenoId }) {
   const [changeState, setChangeState] = useState(false);
   const prevChangeStateRef = useRef(changeState);
   const [lotes, setLotes] = useState(null);
+  const [areaVendible, setAreaVendible] = useState(0);
+  const [areaAsignada, setAreaAsignada] = useState(0);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -40,7 +43,9 @@ export default function AsignarM2({ terrenoId }) {
     lotesService.getLoteByTerrenoId(
       terrenoId,
       (data) => {
-        setLotes(data);
+        setLotes(data.lotes);
+        setAreaVendible(data.area_vendible);
+        setAreaAsignada(data.area_asignada);
       },
       onError
     );
@@ -53,7 +58,9 @@ export default function AsignarM2({ terrenoId }) {
       lotesService.getLoteByTerrenoId(
         terrenoId,
         (data) => {
-          setLotes(data);
+          setLotes(data.lotes);
+          setAreaVendible(data.area_vendible);
+          setAreaAsignada(data.area_asignada);
         },
         onError
       );
@@ -110,7 +117,7 @@ export default function AsignarM2({ terrenoId }) {
     const onSuperficieAsignada = (data) => {
       setTimeout(() => {
         setIsLoading(false);
-      }, 3000);
+      }, 2000);
       if (data.success) {
         setWatch(!watch);
       }
@@ -129,6 +136,7 @@ export default function AsignarM2({ terrenoId }) {
               label=""
               suffix={"M2"}
               status={estatus}
+              value={lote.superficie}
               onChange={(e) => {
                 handleSuperficieChange(e);
               }}
@@ -154,6 +162,16 @@ export default function AsignarM2({ terrenoId }) {
     <div className="p-8 grid gap-8">
       <Row justify={"start"}>
         <h1>Asignación de Superficie</h1>
+      </Row>
+
+      <Row justify={"space-between"}>
+        <Typography>
+          Área Asignada: {formatPrecio(areaAsignada.toFixed(2))}
+        </Typography>
+        <Typography>
+          Área por Asignar:{" "}
+          {formatPrecio((areaVendible - areaAsignada).toFixed(2))}
+        </Typography>
       </Row>
 
       {lotes && (

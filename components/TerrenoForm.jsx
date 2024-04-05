@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Form, InputNumber } from "antd";
+import { Button, Form, InputNumber, Select } from "antd";
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import { useContext } from "react";
@@ -8,10 +8,15 @@ import { LoadingContext } from "@/contexts/loading";
 import terrenosService from "@/services/terrenosService";
 import { formatPrecio } from "@/helpers/formatters";
 
-
 export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext);
 
+  const empresas = [
+    {
+      id: 1,
+      nombre: "Sucursal 1",
+    },
+  ];
   const onGuardarTerreno = (values) => {
     Swal.fire({
       title: "Verifique que los datos sean correctos",
@@ -62,9 +67,9 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
   };
 
   const onTerrenoGuardado = (data) => {
-    setIsLoading(false)
+    setIsLoading(false);
     if (data.success) {
-      setWatch(!watch)
+      setWatch(!watch);
       Swal.fire({
         title: "Guardado con Éxito",
         icon: "success",
@@ -72,9 +77,9 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
         cancelButtonColor: "#ff4d4f",
         showDenyButton: true,
         confirmButtonText: "Aceptar",
-      })
-      setTerrenoNuevo(false)
-    }else{
+      });
+      setTerrenoNuevo(false);
+    } else {
       Swal.fire({
         title: "Error",
         icon: "error",
@@ -83,12 +88,12 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
         cancelButtonColor: "#ff4d4f",
         showDenyButton: true,
         confirmButtonText: "Aceptar",
-      })
+      });
     }
   };
 
   const onError = (e) => {
-    setIsLoading(false)
+    setIsLoading(false);
     console.log(e);
   };
 
@@ -105,6 +110,25 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
         validateMessages={validacionMensajes}
         layout="vertical"
       >
+        <Form.Item
+          label={"Empresa"}
+          name={"empresaId"}
+          style={{ width: "100%" }}
+          rules={[{ required: true, message: "Empresa no seleccionada" }]}
+        >
+          <Select
+            showSearch
+            placeholder="Seleccione una Empresa"
+            optionLabelProp="label"
+          >
+            {empresas?.map((item) => (
+              <Option key={item.nombre} value={item.id} label={item.nombre}>
+                {item?.nombre}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
         <InputIn
           placeholder="Ingrese el Nombre del Terreno"
           name="nombreTerreno"
@@ -113,6 +137,18 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
             {
               required: true,
               message: "Nombre del Terreno es requerido",
+            },
+          ]}
+        />
+
+        <InputIn
+          placeholder="Ingrese el Domicilio del Terreno"
+          name="domicilioTerreno"
+          label="Domicilio del Terreno"
+          rules={[
+            {
+              required: true,
+              message: "Domicilio del Terreno es requerido",
             },
           ]}
         />
@@ -131,6 +167,90 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
         >
           <InputNumber
             placeholder="Ingrese la Cantidad de Lotes"
+            style={{
+              width: "100%",
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={"superficieTotal"}
+          label={"Superficie Total"}
+          style={{ width: "100%" }}
+          rules={[
+            {
+              type: "number",
+              min: 1,
+              required: true,
+            },
+          ]}
+        >
+          <InputNumber
+            placeholder="Ingrese la Superficie del Total en M2"
+            suffix={"M2"}
+            style={{
+              width: "100%",
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={"areaReserva"}
+          label={"Área de Reserva"}
+          style={{ width: "100%" }}
+          rules={[
+            {
+              type: "number",
+              min: 1,
+              required: true,
+            },
+          ]}
+        >
+          <InputNumber
+            placeholder="Ingrese el Área de Reserva en M2"
+            suffix={"M2"}
+            style={{
+              width: "100%",
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={"areaVendible"}
+          label={"Área Vendible"}
+          style={{ width: "100%" }}
+          rules={[
+            {
+              type: "number",
+              min: 1,
+              required: true,
+            },
+          ]}
+        >
+          <InputNumber
+            placeholder="Ingrese el Área Vendible en M2"
+            suffix={"M2"}
+            style={{
+              width: "100%",
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={"areaVialidad"}
+          label={"Área de Vialidad"}
+          style={{ width: "100%" }}
+          rules={[
+            {
+              type: "number",
+              min: 1,
+              required: true,
+            },
+          ]}
+        >
+          <InputNumber
+            placeholder="Ingrese el Área de Vialidad en M2"
+            suffix={"M2"}
             style={{
               width: "100%",
             }}

@@ -3,7 +3,7 @@ import { Spin } from "antd";
 
 export default function Loader() {
   return (
-    <div className="h-screen w-screen z-50 absolute grid justify-center items-center bg-white">
+    <div className="h-screen w-screen grid justify-center items-center bg-white ">
         <Spin
           indicator={
             <LoadingOutlined
