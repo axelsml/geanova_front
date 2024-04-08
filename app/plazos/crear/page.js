@@ -26,7 +26,7 @@ export default function PlazosCrear({ terrenoId }) {
 
   useEffect(() => {
     plazosService.getPlazos({ terreno_id: terrenoId }, setPlazos, Error);
-  }, [changeState]);
+  }, [terrenoId, changeState]);
 
   const CreateNuevoPlazo = () => {
     setNuevoPlazo(!nuevoPlazo);
@@ -38,7 +38,7 @@ export default function PlazosCrear({ terrenoId }) {
 
     useEffect(() => {
       form.setFieldValue("precio", plazo.precio);
-    }, [editar]);
+    }, [form, editar]);
 
     const guardarPrecioEditado = (values) => {
       let params = {

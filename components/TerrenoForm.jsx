@@ -10,13 +10,15 @@ import { formatPrecio } from "@/helpers/formatters";
 
 export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext);
-
+  const { Option } = Select;
+  
   const empresas = [
     {
       id: 1,
       nombre: "Sucursal 1",
     },
   ];
+
   const onGuardarTerreno = (values) => {
     Swal.fire({
       title: "Verifique que los datos sean correctos",

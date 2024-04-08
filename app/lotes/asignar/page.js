@@ -49,7 +49,7 @@ export default function AsignarM2({ terrenoId }) {
       },
       onError
     );
-  }, []);
+  }, [terrenoId]);
 
   const onError = () => {};
 
@@ -67,7 +67,7 @@ export default function AsignarM2({ terrenoId }) {
 
       prevChangeStateRef.current = changeState;
     }
-  }, [changeState]);
+  }, [terrenoId, changeState]);
 
   function Lote({ lote, setWatch, watch }) {
     const { setIsLoading } = useContext(LoadingContext);

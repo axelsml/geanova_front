@@ -47,7 +47,7 @@ export default function Header() {
     <>
       {!(pathname.includes("/login") || pathname.includes("/registro")) && (
         <Ant.Header className="p-4 flex items-center bg-inherit gap-10">
-          <Image src={"/geanova.svg"} width={150} height={10} priority/>
+          <Image src={"/geanova.svg"} width={150} height={10} priority alt="Logo Geanova"/>
           <Menu
             onClick={onClick}
             selectedKeys={[current]}
