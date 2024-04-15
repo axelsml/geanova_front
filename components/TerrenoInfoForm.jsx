@@ -28,6 +28,7 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
   const [precio_compra, setPrecioCompra] = useState(0.0);
   const [superficie_total_proyecto, setSuperficieTotalProyecto] = useState(0.0);
   const [lotes, setAsignarLotes] = useState(false);
+  const [plazos, setPlazos] = useState(false);
   const [terreno_info, setTerrenoInfo] = useState(null);
 //   useEffect(() => {
 //      lotesService.getLoteByTerrenoId(
@@ -46,6 +47,14 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
     },
   ];
 
+  const verTerrenos = () => {
+     setAsignarLotes(!lotes)
+   };
+
+   const verPlazos = () => {
+     setPlazos(!lotes)
+   };
+
   const onError = (e) => {
     setIsLoading(false);
     console.log(e);
@@ -53,11 +62,8 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
 
   return (
     <div>
-      {lotes &&(<>
-        <PlazosCrear terrenoId={terreno_info.id} />
-        <AsignarM2 terrenoId={terreno_info.id}/>
-      </>)}
-      {!lotes &&(<>
+     
+     
         
       <Row justify={"center"} gutter={[16]}>
         <Col xs={24} sm={12} lg={12}>
@@ -128,15 +134,16 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
           </Paper>
         </Col> 
       </Row>
-      <Row justify={"center"} gutter={[16]}>
+      
+      <Row style={{paddingTop:"30px"}} justify={"center"} gutter={[16]}>
       <Row gutter={[16]}>
                <Col>
-               <Button onClick={() => {}} size="large">
+               <Button onClick={verTerrenos} size="large">
                     Superficie
                </Button>
                </Col>
                <Col>
-               <Button onClick={() => {}} size="large">
+               <Button onClick={verPlazos} size="large">
                     Plazos
                </Button>
                </Col>
@@ -144,6 +151,13 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
       </Row>
       
         
+      {lotes &&(<>
+        {/* <PlazosCrear terrenoId={terrenoSeleccionado.id} /> */}
+        <AsignarM2 terrenoId={terrenoSeleccionado.id}/>
+      </>)}
+      {plazos &&(<>
+        <PlazosCrear terrenoId={terrenoSeleccionado.id} />
+        {/* <AsignarM2 terrenoId={terrenoSeleccionado.id}/> */}
       </>)}
     </div>
   );
