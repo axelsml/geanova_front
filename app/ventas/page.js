@@ -5,8 +5,8 @@ import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
 import { Button, Col, Collapse, Row, Typography } from "antd";
-import { AiOutlineFilePdf } from "react-icons/ai";
-import { useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
+import { LoadingContext } from "@/contexts/loading";
 import {
   Paper,
   Table,
@@ -18,6 +18,7 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
+import Swal from "sweetalert2";
 
 export default function VentasCrear() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
@@ -26,8 +27,9 @@ export default function VentasCrear() {
   const [changeState, setChangeState] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [control, setControl] = useState();
   const Panel = Collapse.Panel;
+  const { setIsLoading } = useContext(LoadingContext);
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -48,6 +50,59 @@ export default function VentasCrear() {
 
   const CreateNuevoPago = () => {
     setNuevoPago(!nuevoPago);
+  };
+
+  const eliminarCliente = (cliente) => {
+    Swal.fire({
+      title: "¿Desea eliminar este cliente?",
+      icon: "warning",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      showCancelButton: false,
+      allowOutsideClick: false,
+      confirmButtonText: "Aceptar",
+      denyButtonText: `Cancelar`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        ventasService.deleteCliente(
+          {folio_cliente: cliente.folio_cliente},
+          onClienteEliminado,
+          onError
+        );
+      }
+    });
+  };
+
+  const onClienteEliminado = (data) => {
+    setIsLoading(false);
+    if (data.success) {
+      Swal.fire({
+        title: "Cliente Eliminado con Éxito",
+        icon: "success",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+      });
+      setChangeState(!changeState);
+    } else {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: data.message,
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+      });
+    }
+  };
+
+  const onError = (e) => {
+    setIsLoading(false);
+    console.log(e);
   };
 
   return (
@@ -125,7 +180,7 @@ export default function VentasCrear() {
                     </Typography>
                   </div>
                   <br />
-                  <div className="flex mx-7">
+                  <div className="flex mx-7 gap-3">
                     <Button
                       size="small"
                       onClick={() => {
@@ -135,6 +190,16 @@ export default function VentasCrear() {
                       }}
                     >
                       Amortización
+                    </Button>
+
+                    <Button
+                      size="small"
+                      danger
+                      onClick={() => {
+                        eliminarCliente(venta);
+                      }}
+                    >
+                      Eliminar
                     </Button>
                   </div>
                   <br />

@@ -11,7 +11,7 @@ export default function Home() {
         <Card hoverable>
           <div>
             <BiBuildings className="m-auto" size={"20px"} />
-            <p className="text-lg text-center">Crear Terrreno</p>
+            <p className="text-lg text-center">Terreno</p>
           </div>
         </Card>
       </Link>

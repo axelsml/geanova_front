@@ -5,14 +5,32 @@ import PlazosCrear from "@/app/plazos/crear/page";
 import TerrenoForm from "@/components/TerrenoForm";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
+import {FaArrowUpRightFromSquare} from "react-icons/fa6";
 import { Button, Col, Collapse, Row, Typography, Radio } from "antd";
 import { useState, useEffect } from "react";
-
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  TableFooter,
+} from "@mui/material";
+import TerrenoInfoForm from "@/components/TerrenoInfoForm";
 export default function TerrenosCrear() {
   const [nuevoTerreno, setNuevoTerreno] = useState(false);
+  const [infoTerreno, setInfoTerreno] = useState(false);
+
   const [terrenos, setTerrenos] = useState(null);
+  const [terreno, setTerreno] = useState(null);
+
   const [changeState, setChangeState] = useState(false);
   const [value, setValue] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const empresas = [
     {
@@ -32,10 +50,17 @@ export default function TerrenosCrear() {
   const CreateNuevoTerreno = () => {
     setNuevoTerreno(!nuevoTerreno);
   };
+ const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   return (
     <div className="p-8 grid gap-4">
-      {!nuevoTerreno && (
+      {!nuevoTerreno && !infoTerreno && (
         <Row justify={"center"}>
           <Col>
             <Button size={"large"} onClick={CreateNuevoTerreno}>
@@ -57,58 +82,91 @@ export default function TerrenosCrear() {
         </Col>
       </Row>
 
-      {!nuevoTerreno && terrenos?.length > 0 && (
+      <Row justify={"center"}>
+        <Col span={24}>
+          {infoTerreno && (
+            <TerrenoInfoForm
+              setTerrenoNuevo={setNuevoTerreno}
+              terrenoSeleccionado={terreno}
+              setWatch={setChangeState}
+              watch={changeState}
+            />
+          )}
+        </Col>
+      </Row>
+
+      {!nuevoTerreno && !infoTerreno && terrenos?.length > 0 && (
         <Row justify={"center"}>
           <Col span={21}>
             <Typography>Lista de Terrenos</Typography>
             <br />
           </Col>
-          <Collapse className="w-11/12">
-            {terrenos?.map((terreno, index) => (
-              <Collapse.Panel header={terreno.nombre} key={index}>
-                <Row justify={"space-between"}>
-                  <Col className="px-5 grid gap-1">
-                    <Typography className="text-lg">
-                      Empresa:{" "}
-                      {
-                        empresas.find(
-                          (empresa) => empresa.id === terreno.empresa_id
-                        )?.nombre
-                      }
-                    </Typography>
-                    <Typography className="text-lg">
-                      Superficie Total: {formatPrecio(terreno.superficie_total)}{" "}
-                      m<sup>2</sup>
-                    </Typography>
-                    <Typography className="text-lg">
-                      Área de Reserva: {formatPrecio(terreno.area_reserva)} m
-                      <sup>2</sup>
-                    </Typography>
-                    <Typography className="text-lg">
-                      Área Vendible: {formatPrecio(terreno.area_vendible)} m
-                      <sup>2</sup>
-                    </Typography>
-                    <Typography className="text-lg">
-                      Área Vialidad: {formatPrecio(terreno.area_vialidad)} m
-                      <sup>2</sup>
-                    </Typography>
-                  </Col>
-                </Row>
-                <br />
-                <br />
-                <Row justify={"center"}>
-                  <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Asignar Superficie</Radio>
-                    <Radio value={2}>Crear Plazos</Radio>
-                  </Radio.Group>
-                </Row>
-                {value == 1 && <AsignarM2 terrenoId={terreno.id} />}
-                {value == 2 && <PlazosCrear terrenoId={terreno.id} />}
-              </Collapse.Panel>
-            ))}
-          </Collapse>
+          <Row justify={"center"} className="w-3/4 m-auto">
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Proyecto</TableCell>
+                            <TableCell>Propietario</TableCell>
+                            <TableCell>Domicilio</TableCell>
+                            <TableCell>Colonia/Localidad</TableCell>
+                            <TableCell>Ciudad</TableCell>
+                            <TableCell>Superficie</TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {terrenos?.map((terreno, index) => (
+                              <TableRow key={index}>
+                                <TableCell>
+                                  {terreno.nombre}
+                                </TableCell>
+                                <TableCell>
+                                  {terreno.propietario}
+                                </TableCell>
+                                <TableCell>
+                                  {terreno.domicilio}
+                                </TableCell>
+                                <TableCell>
+                                  {terreno.colonia}
+                                </TableCell>
+                                <TableCell>
+                                  {terreno.ciudad}
+                                </TableCell>
+                                <TableCell>
+                                  {formatPrecio(terreno.superficie_total)}
+                                </TableCell>
+                                <TableCell>
+                                  <Button onClick={() => {setTerreno(terreno);setInfoTerreno(true)}} size="large">
+                                    <FaArrowUpRightFromSquare className="m-auto" size={"20px"} />
+                                  </Button>
+                                </TableCell>
+
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                       
+                      </Table>
+                    </TableContainer>
+                  </Row>
         </Row>
+        
       )}
+    <div>
+      {terreno != null &&(<>
+      <div>
+        <Row>
+          <h1>{terreno.proyecto}</h1>
+        </Row>
+        <Row>
+          <Col>
+          
+          </Col>
+        </Row>
+
+      </div>
+      </>)}
+    </div>
     </div>
   );
 }
