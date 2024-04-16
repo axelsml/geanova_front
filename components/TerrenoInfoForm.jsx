@@ -52,7 +52,7 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
    };
 
    const verPlazos = () => {
-     setPlazos(!lotes)
+     setPlazos(!plazos)
    };
 
   const onError = (e) => {
