@@ -39,6 +39,7 @@ export default function ClientesInfo() {
 
   const [info_lote, setInfoLote] = useState(null);
   const [info_cliente, setInfoCliente] = useState(null);
+  const { Option } = Select;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -51,12 +52,8 @@ export default function ClientesInfo() {
 
   useEffect(() => {
 //     ventasService.getVentas(setVentas, Error);
-     if(terrenoSelected == null || loteSelected == null){
      terrenosService.getTerrenos(setTerrenos, Error);
-     }
-    if(terrenoSelected != null && loteSelected != null){
-         BuscarInfoLote()
-    }
+     //     BuscarInfoLote()
   }, [changeState]);
 
   const CreateNuevaVenta = () => {
