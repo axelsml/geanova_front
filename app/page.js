@@ -1,12 +1,12 @@
 "use client";
 
 import { Card } from "antd";
-import { BiBuildings, BiCart } from "react-icons/bi";
+import { BiBuildings, BiCart,BiUser  } from "react-icons/bi";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="m-auto w-1/2 h-screen grid gap-4 items-center justify-center grid-cols-2 grid-rows-2">
+    <main className="m-auto w-1/2 h-screen grid gap-4 items-center justify-center grid-cols-3 grid-rows-3">
       <Link key={"TerrenosCrear"} href={"/terrenos/crear"}>
         <Card hoverable>
           <div>
@@ -21,6 +21,15 @@ export default function Home() {
           <div>
             <BiCart className="m-auto" size={"20px"} />
             <p className="text-lg text-center">Ventas</p>
+          </div>
+        </Card>
+      </Link>
+
+      <Link key={"Ventas"} href={"/cliente"}>
+        <Card hoverable>
+          <div>
+            <BiUser  className="m-auto" size={"20px"} />
+            <p className="text-lg text-center">Clientes</p>
           </div>
         </Card>
       </Link>

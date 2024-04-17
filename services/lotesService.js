@@ -26,6 +26,30 @@ class lotesService {
         }
       });
   }
+  getLotesAsignados(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`getLotesAsignados/${params}`, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
   
   getLoteSuperficie(params, callback, error) {
     var call;
@@ -36,6 +60,30 @@ class lotesService {
     call = CancelToken.source();
     return http
       .get(`getLoteSuperficie/${params}`, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+  getClienteByLote(terreno_id,lote_id, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`getClienteByLote/${terreno_id}/${lote_id}`, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })

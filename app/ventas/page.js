@@ -107,7 +107,7 @@ export default function VentasCrear() {
 
   return (
     <div className="p-8 grid gap-4">
-      {!nuevaVenta && !nuevoPago && (
+      {/* {!nuevaVenta && !nuevoPago && (
         <Row justify={"center"} className="gap-10">
           <Col>
             <Button size={"large"} onClick={CreateNuevaVenta}>
@@ -120,21 +120,21 @@ export default function VentasCrear() {
             </Button>
           </Col>
         </Row>
-      )}
+      )} */}
 
       <Row justify={"center"}>
         <Col span={24}>
-          {nuevaVenta && (
+          {/* {nuevaVenta && ( */}
             <VentaForm
               setNuevaVenta={setNuevaVenta}
               setWatch={setChangeState}
               watch={changeState}
             />
-          )}
+          {/* )} */}
         </Col>
       </Row>
 
-      <Row justify={"center"}>
+      {/* <Row justify={"center"}>
         <Col span={24}>
           {nuevoPago && (
             <PagoForm
@@ -275,7 +275,7 @@ export default function VentasCrear() {
             </Collapse>
           </Row>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

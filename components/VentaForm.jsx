@@ -208,9 +208,9 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
           Siguiente
         </Button>
 
-        <Button onClick={handleCancel} danger size="large">
+        {/* <Button onClick={handleCancel} danger size="large">
           Cancelar
-        </Button>
+        </Button> */}
       </span>
     );
   }

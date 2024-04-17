@@ -6,6 +6,7 @@ import InputIn from "./Input";
 import { useContext, useEffect, useState } from "react";
 import { LoadingContext } from "@/contexts/loading";
 import terrenosService from "@/services/terrenosService";
+import {FaArrowCircleLeft } from "react-icons/fa";
 import { formatPrecio } from "@/helpers/formatters";
 import {
      Paper,
@@ -68,9 +69,18 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
       <Row justify={"center"} gutter={[16]}>
         <Col xs={24} sm={12} lg={12}>
           <Paper style={{ backgroundColor:"lightgrey"}}>
-            <h1 className="text-2xl font-semibold mb-4 text-center">
-              Datos del Terreno seleccionado
-            </h1>
+               <Row justify={"center"} gutter={[16]}>
+                    <Col>
+                         <Button style={{ backgroundColor:"lightgrey"}} href={"/terrenos/crear"} size="large">
+                              <FaArrowCircleLeft  className="m-auto" size={"20px"} />
+                         </Button>
+                    </Col>
+                    <Col>
+                         <h1 className="text-2xl font-semibold mb-4 text-center">
+                              Datos del Terreno seleccionado
+                         </h1>
+                    </Col>
+               </Row>
           </Paper>
         </Col> 
       </Row>
@@ -131,6 +141,7 @@ export default function TerrenoInfoForm({ setTerrenoNuevo,terrenoSeleccionado, s
                          Precio M2: {terrenoSeleccionado.precio_m2}
                     </Col>
                </Row>
+               
           </Paper>
         </Col> 
       </Row>

@@ -18,13 +18,13 @@ import pagosService from "@/services/pagosService";
 import { usuario_id } from "@/helpers/user";
 import InputIn from "./Input";
 
-export default function PagoForm({ setNuevoPago, setWatch, watch }) {
+export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext);
   const [sistemas_pago, setSistemasPago] = useState(null);
   const [sistemaSelected, setSistemaSelected] = useState(null);
   const [tipoPagoSelected, setTipoPagoSelected] = useState(null);
   const [tipo_pagos, setTipoPagos] = useState(null);
-  const [cliente, setCliente] = useState(null);
+  // const [cliente, setCliente] = useState(null);
   const [form] = Form.useForm();
   const { Option } = Select;
 
@@ -42,8 +42,8 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
     Swal.fire({
       title: "Verifique que los datos sean correctos",
       icon: "info",
-      html: `Cliente: ${cliente[0].nombre_cliente}<br/><br/>Folio: ${
-        cliente[0].folio_cliente
+      html: `Cliente: ${cliente.nombre_completo}<br/><br/>Lote: ${
+        lote.lote
       }<br/><br/>Monto de Pago:  $${formatPrecio(
         values.monto_pagado
       )}<br/><br/>Fecha: ${values.fecha}`,
@@ -59,8 +59,9 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
         let params = {
           ...values,
           usuario_id: usuario_id,
-          cliente_id: cliente[0].folio_cliente,
+          solicitud_id: lote.solicitud_id,
         };
+        debugger
         pagosService.createPago({ pago: params }, onPagoGuardado, onError);
       }
     });
@@ -130,40 +131,14 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
   return (
     <div className="w-3/4 mx-auto p-6 m-7 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-semibold mb-4 text-center">Datos de Pago</h1>
-      <BuscarCliente
+      {/* <BuscarCliente
         setCliente={setCliente}
         setWatch={setWatch}
         watch={watch}
-      />
+      /> */}
 
-      {cliente && (
+     
         <div className="grid gap-10">
-          <div className="flex justify-around flex-wrap">
-            <Typography className="py-2">
-              Folio Cliente: {cliente[0].folio_cliente}
-            </Typography>
-
-            <Typography className="py-2">
-              Cliente: {cliente[0].nombre_cliente}
-            </Typography>
-
-            <Typography className="py-2">
-              Celular Cliente: {cliente[0].celular_cliente}
-            </Typography>
-
-            <Typography className="py-2">
-              Monto de Contrato: ${formatPrecio(cliente[0].monto_contrato)}
-            </Typography>
-            <Typography className="py-2">
-              Anticipo: ${formatPrecio(cliente[0].anticipo)}
-            </Typography>
-
-            <Typography className="py-2">Plazo: {cliente[0].plazo}</Typography>
-
-            <Typography className="py-2">
-              Número de Lote: {cliente[0].numero_lote}
-            </Typography>
-          </div>
 
           <Form
             form={form}
@@ -344,14 +319,8 @@ export default function PagoForm({ setNuevoPago, setWatch, watch }) {
             </span>
           </Form>
         </div>
-      )}
-      {!cliente && (
-        <span className="flex gap-2 justify-end">
-          <Button onClick={handleCancel} danger size="large">
-            Cancelar
-          </Button>
-        </span>
-      )}
+  
+      
     </div>
   );
 }
