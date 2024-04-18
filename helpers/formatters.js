@@ -60,7 +60,7 @@ export const fecha_mes_anterior = () => {
 };
 
 export const formatPrecio = (value) => 
-  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+`${value.toLocaleString('es-MX')}`;
 
 export const FormatDate = (date) => {
   var aux, months, newDate, dias, diaNumero;

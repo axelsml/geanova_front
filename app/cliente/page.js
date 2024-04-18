@@ -1,5 +1,4 @@
 "use client";
-
 import { formatPrecio } from "@/helpers/formatters";
 import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
@@ -162,7 +161,7 @@ export default function ClientesInfo() {
      <Row justify={"center"} className="gap-10">
           <Col>
           <Form.Item
-              label={"Terreno"}
+              label={"Proyecto"}
               name={"terreno"}
               style={{ width: "100%" }}
               rules={[{ required: true, message: "Terreno no seleccionado" }]}
@@ -170,7 +169,7 @@ export default function ClientesInfo() {
             >
               <Select
                 showSearch
-                placeholder="Seleccione un Terreno"
+                placeholder="Seleccione un Proyecto"
                 optionLabelProp="label"
                 onChange={onBuscarLotes}
               >
@@ -266,7 +265,7 @@ export default function ClientesInfo() {
           
                <Row gutter={[16]}>
                     <Col xs={24} sm={12} lg={12}>
-                         Terreno: {info_lote.terreno}
+                         Proyecto: {info_lote.terreno}
                     </Col>
                     <Col xs={24} sm={12} lg={12}>
                          Fecha De Solicitud: {info_lote.fecha_solicitud}
@@ -293,6 +292,9 @@ export default function ClientesInfo() {
                     <Col xs={24} sm={12} lg={12}>
                          Plazo: {info_lote.plazo}
                     </Col>
+                    <Col xs={24} sm={12} lg={12}>
+                         Monto Requerido: ${formatPrecio(info_lote.monto_pago_requerido)}
+                    </Col>
                    
                </Row>
                
@@ -309,10 +311,10 @@ export default function ClientesInfo() {
                </Row>
                <Row gutter={[16]}>
                     <Col xs={24} sm={12} lg={12}>
-                         Monto Pagado: ${(info_lote.monto_pagado)}
+                         Monto Pagado: ${formatPrecio(info_lote.monto_pagado)}
                     </Col>
                     <Col xs={24} sm={12} lg={12}>
-                         Monto Vencido: ${(info_lote.monto_vencido)}
+                         Monto Vencido: ${formatPrecio(info_lote.monto_vencido)}
                     </Col>
                </Row>
           
@@ -356,7 +358,35 @@ export default function ClientesInfo() {
               Nuevo Pago
             </Button>
           </Col>
+          <Col>
+          <Button
+               size="large"
+               onClick={() => {
+               window.open(
+                    `https://api.santamariadelaluz.com/iUsuarios/${info_lote.solicitud_id}.pdf`
+               );
+               }}
+          >
+               Amortización
+          </Button>
+
+          </Col>
+          <Col>
+          <Button
+               size="large"
+               onClick={() => {
+                    // terrenoSelected.id,loteSelected.id
+               window.open(
+                    `localhost:3000/getClienteByLote/${terrenoSelected.id}/${loteSelected.id}.pdf?debug`
+               );
+               }}
+          >
+               Estado De Cuenta
+          </Button>
+
+          </Col>
         </Row>
+        
       )} 
 
 
@@ -373,6 +403,78 @@ export default function ClientesInfo() {
           )}
         </Col>
       </Row>
+
+      {info_lote != null &&(<>
+          <Row justify={"center"} className="w-3/4 m-auto">
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>#</TableCell>
+                            <TableCell>Folio</TableCell>
+                            <TableCell>Fecha Operacion</TableCell>
+                            <TableCell>Fecha</TableCell>
+                            <TableCell>Requerido</TableCell>
+                            <TableCell>Realizado</TableCell>
+                            <TableCell>Saldo Pendiente</TableCell>
+                            <TableCell>Sistema Pago</TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                          {info_lote.pagos.slice(
+                              page * rowsPerPage,
+                              page * rowsPerPage + rowsPerPage
+                            )
+                            .map((pago, index) => (
+                              <TableRow key={index}>
+                              <TableCell>
+                                  {pago.no_pago}
+                                </TableCell>
+                                <TableCell>
+                                  {pago.folio}
+                                </TableCell>
+                                <TableCell>
+                                  {pago.fecha_operacion}
+                                </TableCell>
+                                <TableCell>
+                                  {pago.fecha}
+                                </TableCell>
+                                <TableCell>
+                                ${formatPrecio(pago.monto_requerido)}
+                                </TableCell>
+                                <TableCell>
+                                  ${formatPrecio(pago.monto_pagado)}
+                                </TableCell>
+                                <TableCell>
+                                  ${formatPrecio(pago.saldo_pendiente)}
+                                </TableCell>
+                                <TableCell>
+                                  {pago.sistema_pago}
+
+                                </TableCell>
+
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                        <TableFooter>
+                          <TableRow>
+                            <TablePagination
+                              rowsPerPageOptions={[5, 10, 25]}
+                              count={info_lote.pagos.length}
+                              rowsPerPage={rowsPerPage}
+                              page={page}
+                              onPageChange={handleChangePage}
+                              onRowsPerPageChange={handleChangeRowsPerPage}
+                              labelRowsPerPage="Amortizaciones por Página"
+                            />
+                          </TableRow>
+                        </TableFooter>
+                      </Table>
+                    </TableContainer>
+                  </Row>
+      </>)}
 
       {/* {!nuevoPago && ventas?.length > 0 && (
         <div className="p-8 grid gap-8">
