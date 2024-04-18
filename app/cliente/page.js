@@ -377,7 +377,7 @@ export default function ClientesInfo() {
                onClick={() => {
                     // terrenoSelected.id,loteSelected.id
                window.open(
-                    `localhost:3000/getClienteByLote/${terrenoSelected.id}/${loteSelected.id}.pdf?debug`
+                    `https://api.santamariadelaluz.com/getClienteByLote/${terrenoSelected.id}/${loteSelected.id}.pdf?debug`
                );
                }}
           >
