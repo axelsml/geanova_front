@@ -100,6 +100,10 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
         confirmButtonText: "Aceptar",
       });
       setNuevoPago(false);
+      window.open(
+        `https://api.santamariadelaluz.com/iPagos/recibo/${data.pago.id}.pdf`
+      );
+   
     } else {
       Swal.fire({
         title: "Error",

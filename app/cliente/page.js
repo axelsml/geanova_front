@@ -7,6 +7,8 @@ import { Button, Col, Collapse, Row, Typography,Form,Select  } from "antd";
 import { useContext, useEffect, useState } from "react";
 import {FaArrowCircleLeft } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
+import {FaPrint } from "react-icons/fa";
+
 import {
   Paper,
   Table,
@@ -454,7 +456,15 @@ export default function ClientesInfo() {
                                   {pago.sistema_pago}
 
                                 </TableCell>
-
+                              <TableCell>
+                              <Button key={pago} onClick={() => {
+                        window.open(
+                         `https://api.santamariadelaluz.com/iPagos/recibo/${pago.pago_id}.pdf`
+                        );
+                      }} size="large">
+                                    <FaPrint  className="m-auto" size={"20px"} />
+                                  </Button>
+                              </TableCell>
                               </TableRow>
                             ))}
                         </TableBody>
