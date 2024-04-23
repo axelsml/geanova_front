@@ -30,9 +30,11 @@ import {
 import Swal from "sweetalert2";
 import pagosService from "@/services/pagosService";
 import { formatDate } from "@/helpers/formatters";
+import terrenosService from "@/services/terrenosService";
 
 export default function ReporteIngresos() {
   const { setIsLoading } = useContext(LoadingContext);
+  const { Option } = Select;
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -40,6 +42,9 @@ export default function ReporteIngresos() {
 
   const [fechaInicial, setFechaInicial] = useState(null);
   const [fechaFinal, setFechaFinal] = useState(null);
+
+  const [proyectos, setProyectos] = useState([]);
+  const [proyectoID, setProyectoID] = useState(null);
 
   const [resumenIngresos, setResumenIngresos] = useState({});
   const [detalleIngresos, setDetalleIngresos] = useState({});
@@ -52,12 +57,20 @@ export default function ReporteIngresos() {
   const [totalAnticipo, setTotalAnticipo] = useState(0.0);
   const [total, setTotal] = useState(0.0);
 
+  useEffect(() => {
+    terrenosService.getTerrenosAll(onTerreno);
+  }, []);
+
+  async function onTerreno(terrenos) {
+    setProyectos(terrenos);
+  }
+
   function handleSearchButton() {
     var params = {
       fecha_inicial: fechaInicial,
       fecha_final: fechaFinal,
+      id_terreno: proyectoID,
     };
-    // debugger;
     setIsLoading(true);
     console.log(fechaInicial);
     console.log(fechaFinal);
@@ -84,15 +97,6 @@ export default function ReporteIngresos() {
     setIsLoading(false);
   };
 
-  // const handleInitialDatePicker = (fecha) => {
-  //   formatDate(fecha);
-  //   setFechaInicial(fecha);
-  // };
-  // const handleFinalDatePicker = (fecha) => {
-  //   formatDate(fecha);
-  //   setFechaFinal(fecha);
-  // };
-
   var formatNumero = function (n, currency) {
     return currency + "" + n.toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
   };
@@ -118,6 +122,26 @@ export default function ReporteIngresos() {
                 setFechaFinal(formatDate(e));
               }}
             />
+          </Col>
+          <Col>
+            <Select
+              showSearch
+              placeholder="Seleccione un proyecto"
+              optionLabelProp="label"
+              onChange={(value) => {
+                setProyectoID(value);
+              }}
+            >
+              {proyectos?.map((proyecto) => (
+                <Option
+                  key={proyecto.nombre}
+                  value={proyecto.id}
+                  label={proyecto.nombre}
+                >
+                  {proyecto?.nombre}
+                </Option>
+              ))}
+            </Select>
           </Col>
           <Col className="rep-ing-boton--buscar">
             <Button onClick={handleSearchButton}>BUSCAR</Button>
