@@ -14,8 +14,11 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (usuario_id) {
-      redirect('/')
+    console.log("usuario "+usuario_id);
+    debugger
+    console.log("usuario_id != null = "+usuario_id != null);
+    if (usuario_id != null) {
+      router.push("/");
     }
   }, []);
 
