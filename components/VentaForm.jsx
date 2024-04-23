@@ -18,6 +18,17 @@ import {
   calcularSemanas,
   formatDate,
 } from "@/helpers/formatters";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  TableFooter,
+} from "@mui/material";
 import terrenosService from "@/services/terrenosService";
 import plazosService from "@/services/plazosService";
 import lotesService from "@/services/lotesService";
@@ -61,16 +72,20 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
     terrenosService.getTerrenos(setTerrenos, Error);
   }, []);
 
-  const onBuscarLotes = (value) => {
-    setTerrenoSelected(terrenos.find((terreno) => terreno.id == value));
-    lotesService.getLoteSuperficie(
-      value,
+  function onBuscarLotes(plazo_id) {
+    console.log(terrenoSelected)
+    console.log(plazoSelected)
+    console.log(plazo_id)
+    debugger
+    lotesService.getLoteByTerrenoIdPlazo(
+      terrenoSelected.id,
+      plazo_id,
       (data) => {
-        setLotes(data);
+        setLotes(data.lotes);
       },
       onError
     );
-    onBuscarPlazos(value);
+    // onBuscarPlazos(value);
   };
 
   const onBuscarPlazos = (value) => {
@@ -237,14 +252,14 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
             }}
             value={buttonSelected}
           >
-            <Radio.Button value={1}>Cliente</Radio.Button>
-            <Radio.Button value={2}>Domicilio</Radio.Button>
-            <Radio.Button value={3}>Contacto</Radio.Button>
-            <Radio.Button value={4}>Lote</Radio.Button>
+            <Radio.Button value={1}>Lote</Radio.Button>
+            <Radio.Button value={2}>Cliente</Radio.Button>
+            <Radio.Button value={3}>Domicilio</Radio.Button>
+            <Radio.Button value={4}>Contacto</Radio.Button>
           </Radio.Group>
         </Row>
 
-        {buttonSelected === 1 && (
+        {buttonSelected === 2 && (
           <>
             <InputIn
               placeholder="Ingrese el Primer Nombre del Cliente"
@@ -282,11 +297,11 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
               label="Segundo Apellido del Cliente"
             />
 
-            <BotonesSiguiente option={2} />
+            <BotonesSiguiente option={3} />
           </>
         )}
 
-        {buttonSelected === 2 && (
+        {buttonSelected === 3 && (
           <>
             <InputIn
               placeholder="Ingrese la Calle del Cliente"
@@ -368,11 +383,11 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
               />
             </Form.Item>
 
-            <BotonesSiguiente option={3} />
+            <BotonesSiguiente option={4} />
           </>
         )}
 
-        {buttonSelected === 3 && (
+        {buttonSelected === 4 && (
           <>
             <InputIn
               name="celular_cliente"
@@ -402,24 +417,33 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
               ]}
             />
 
-            <BotonesSiguiente option={4} />
+            {/* <BotonesSiguiente option={4} /> */}
+            <span className="flex gap-2 justify-end">
+              <Button htmlType="submit" size="large">
+                Guardar
+              </Button>
+
+              <Button onClick={handleCancel} danger size="large">
+                Cancelar
+              </Button>
+            </span>
           </>
         )}
 
-        {buttonSelected === 4 && (
+        {buttonSelected === 1 && (
           <>
             <Form.Item
-              label={"Terreno"}
+              label={"Proyecto"}
               name={"terreno"}
               style={{ width: "100%" }}
-              rules={[{ required: true, message: "Terreno no seleccionado" }]}
+              rules={[{ required: true, message: "Proyecto no seleccionado" }]}
               initialValue={terrenoSelected?.nombre}
             >
               <Select
                 showSearch
-                placeholder="Seleccione un Terreno"
+                placeholder="Seleccione un Proyecto"
                 optionLabelProp="label"
-                onChange={onBuscarLotes}
+                onChange={onBuscarPlazos}
               >
                 {terrenos?.map((item) => (
                   <Option key={item.nombre} value={item.id} label={item.nombre}>
@@ -429,32 +453,7 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              label={"Lote"}
-              name="lote_id"
-              style={{ width: "100%" }}
-              rules={[{ required: true, message: "Lote no seleccionado" }]}
-            >
-              <Select
-                showSearch
-                placeholder="Seleccione un Lote"
-                optionLabelProp="label"
-                onChange={(value) => {
-                  const loteSelected = lotes.find((lote) => lote.id == value);
-                  setLoteSelected(loteSelected);
-                  setValoresIniciales({
-                    ...valoresIniciales,
-                    montoContrato: calcularMontoContratoLote(loteSelected),
-                  });
-                }}
-              >
-                {lotes?.map((item) => (
-                  <Option key={item.numero} value={item.id} label={item.numero}>
-                    {item?.numero}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+           
 
             <Form.Item
               label={"Plazo"}
@@ -464,7 +463,7 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
             >
               <Select
                 showSearch
-                disabled={!loteSelected}
+
                 placeholder="Seleccione un Plazo"
                 optionLabelProp="label"
                 onChange={(value) => {
@@ -472,10 +471,11 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
                     (plazo) => plazo.id == value
                   );
                   setPlazoSelected(plazoSelected);
-                  setValoresIniciales({
-                    ...valoresIniciales,
-                    montoContrato: calcularMontoContratoPlazo(plazoSelected),
-                  });
+                  onBuscarLotes(value)
+                  // setValoresIniciales({
+                  //   ...valoresIniciales,
+                  //   montoContrato: calcularMontoContratoPlazo(plazoSelected),
+                  // });
                 }}
               >
                 {plazos?.map((item) => (
@@ -489,6 +489,49 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
                 ))}
               </Select>
             </Form.Item>
+            <Row  className="m-auto">
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>No. Lote</TableCell>
+                      <TableCell>SuPerficie</TableCell>
+                      <TableCell>Precio</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {lotes?.map((lote, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            {lote.numero}
+                          </TableCell>
+                          <TableCell>
+                            {lote.superficie}
+                          </TableCell>
+                          <TableCell>
+                            ${formatPrecio(lote.costo)}
+                          </TableCell>
+                          <TableCell>
+                            <Button onClick={() => {setLoteSelected(lote);
+                            setValoresIniciales({
+                              ...valoresIniciales,
+                              montoContrato: lote.costo,
+                            });debugger
+                            }} size="large">
+                              Seleccionar
+                            </Button>
+                          </TableCell>
+
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                  
+                </Table>
+              </TableContainer>
+            </Row>
+
+            
 
             <Form.Item
               name={"montoContrato"}
@@ -553,16 +596,9 @@ export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
                 placeholder="Ingrese la Fecha de Inicio de Contrato"
               />
             </Form.Item>
+            <BotonesSiguiente option={2} />
 
-            <span className="flex gap-2 justify-end">
-              <Button htmlType="submit" size="large">
-                Guardar
-              </Button>
-
-              <Button onClick={handleCancel} danger size="large">
-                Cancelar
-              </Button>
-            </span>
+           
           </>
         )}
       </Form>

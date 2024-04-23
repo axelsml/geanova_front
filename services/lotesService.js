@@ -75,6 +75,30 @@ class lotesService {
         }
       });
   }
+  getLoteByTerrenoIdPlazo(terreno_id,lote_id, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`getLoteByTerrenoIdPlazo/${terreno_id}/${lote_id}`, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
   getClienteByLote(terreno_id,lote_id, callback, error) {
     var call;
     if (call) {
