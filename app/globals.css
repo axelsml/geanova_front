@@ -33,3 +33,52 @@
   align-items: center;
   overflow: hidden;
 }
+
+/* --------------------------------------------------------------------------- */
+/* CSS PARA TABLA DE REPORTE DE INGRESOS */
+.rep-ing-row__header {
+  margin: 5px auto;
+  justify-content: center;
+}
+
+.rep-ing-title__h1 {
+  margin: 20px auto;
+  width: 200px;
+  color: #55575A;
+}
+
+.rep-ing-main-div__table {
+  margin: 50px auto;
+  width: 600px;
+}
+
+.rep-ing__table {
+  text-align: left;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.rep-ing__th,
+.rep-ing__td {
+  padding: 20px;
+}
+
+.rep-ing__thead {
+  background-color: #6B99CA;
+  color: white;
+  font-weight: normal;
+
+}
+
+.rep-ing__tr:nth-child(even) {
+  background-color: #C8D1DB;
+}
+
+.rep-ing__tr:hover {
+  background-color: #7FB9F7;
+  color: white;
+}
+
+.rerp_ing__modal {
+  width: 900px;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "antd";
-import { BiBuildings, BiCart,BiUser  } from "react-icons/bi";
+import { BiBuildings, BiCart, BiMoneyWithdraw, BiUser } from "react-icons/bi";
 import Link from "next/link";
 
 export default function Home() {
@@ -25,11 +25,20 @@ export default function Home() {
         </Card>
       </Link>
 
-      <Link key={"Ventas"} href={"/cliente"}>
+      <Link key={"clientes"} href={"/cliente"}>
         <Card hoverable>
           <div>
-            <BiUser  className="m-auto" size={"20px"} />
+            <BiUser className="m-auto" size={"20px"} />
             <p className="text-lg text-center">Clientes</p>
+          </div>
+        </Card>
+      </Link>
+
+      <Link key={"ReporteIngresos"} href={"/ingresos"}>
+        <Card hoverable>
+          <div>
+            <BiMoneyWithdraw className="m-auto" size={"20px"} />
+            <p className="text-lg text-center">Ingresos</p>
           </div>
         </Card>
       </Link>

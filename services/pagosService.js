@@ -52,6 +52,35 @@ class pagosService {
       });
   }
 
+  getReporteIngresos(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(
+        "i_reporte_ingresos",
+        { params: params },
+        { cancelToken: call.token }
+      )
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
   createPago(params, callback, error) {
     var call;
     if (call) {
