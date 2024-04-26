@@ -5,7 +5,7 @@ import PlazosCrear from "@/app/plazos/crear/page";
 import TerrenoForm from "@/components/TerrenoForm";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
-import {FaArrowUpRightFromSquare} from "react-icons/fa6";
+import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { Button, Col, Collapse, Row, Typography, Radio } from "antd";
 import { useState, useEffect } from "react";
 import {
@@ -20,9 +20,12 @@ import {
   TableFooter,
 } from "@mui/material";
 import TerrenoInfoForm from "@/components/TerrenoInfoForm";
+import ReporteProyectoForm from "@/components/ReporteProyectoForm";
 export default function TerrenosCrear() {
   const [nuevoTerreno, setNuevoTerreno] = useState(false);
   const [infoTerreno, setInfoTerreno] = useState(false);
+
+  const [reporteProyecto, setReporteProyecto] = useState(false);
 
   const [terrenos, setTerrenos] = useState(null);
   const [terreno, setTerreno] = useState(null);
@@ -47,10 +50,17 @@ export default function TerrenosCrear() {
     terrenosService.getTerrenos(setTerrenos, Error);
   }, [changeState]);
 
+  async function onTerreno(terrenos) {
+    setProyectos(terrenos);
+  }
+
   const CreateNuevoTerreno = () => {
     setNuevoTerreno(!nuevoTerreno);
   };
- const handleChangePage = (event, newPage) => {
+  const CreateReporteProyecto = () => {
+    setReporteProyecto(!reporteProyecto);
+  };
+  const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
@@ -60,14 +70,23 @@ export default function TerrenosCrear() {
   };
   return (
     <div className="p-8 grid gap-4">
-      {!nuevoTerreno && !infoTerreno && (
-        <Row justify={"center"}>
-          <Col>
-            <Button size={"large"} onClick={CreateNuevoTerreno}>
-              Crear Nuevo Terreno
-            </Button>
-          </Col>
-        </Row>
+      {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
+        <>
+          <Row justify={"center"}>
+            <Col>
+              <Button size={"large"} onClick={CreateNuevoTerreno}>
+                Crear Nuevo Terreno
+              </Button>
+            </Col>
+          </Row>
+          <Row justify={"center"}>
+            <Col>
+              <Button size={"large"} onClick={CreateReporteProyecto}>
+                Reporte general proyecto
+              </Button>
+            </Col>
+          </Row>
+        </>
       )}
 
       <Row justify={"center"}>
@@ -95,78 +114,88 @@ export default function TerrenosCrear() {
         </Col>
       </Row>
 
-      {!nuevoTerreno && !infoTerreno && terrenos?.length > 0 && (
-        <Row justify={"center"}>
-          <Col span={21}>
-            <Typography>Lista de Terrenos</Typography>
-            <br />
-          </Col>
-          <Row justify={"center"} className="w-3/4 m-auto">
-                    <TableContainer component={Paper}>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Proyecto</TableCell>
-                            <TableCell>Propietario</TableCell>
-                            <TableCell>Domicilio</TableCell>
-                            <TableCell>Colonia/Localidad</TableCell>
-                            <TableCell>Ciudad</TableCell>
-                            <TableCell>Superficie</TableCell>
-                            <TableCell></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {terrenos?.map((terreno, index) => (
-                              <TableRow key={index}>
-                                <TableCell>
-                                  {terreno.nombre}
-                                </TableCell>
-                                <TableCell>
-                                  {terreno.propietario}
-                                </TableCell>
-                                <TableCell>
-                                  {terreno.domicilio}
-                                </TableCell>
-                                <TableCell>
-                                  {terreno.colonia}
-                                </TableCell>
-                                <TableCell>
-                                  {terreno.ciudad}
-                                </TableCell>
-                                <TableCell>
-                                  {formatPrecio(terreno.superficie_total)}
-                                </TableCell>
-                                <TableCell>
-                                  <Button onClick={() => {setTerreno(terreno);setInfoTerreno(true)}} size="large">
-                                    <FaArrowUpRightFromSquare className="m-auto" size={"20px"} />
-                                  </Button>
-                                </TableCell>
+      <Row justify={"center"}>
+        <Col span={24}>
+          {reporteProyecto && (
+            <ReporteProyectoForm
+              setReporteNuevo={setReporteProyecto}
+              setWatch={setChangeState}
+              watch={changeState}
+            />
+          )}
+        </Col>
+      </Row>
 
-                              </TableRow>
-                            ))}
-                        </TableBody>
-                       
-                      </Table>
-                    </TableContainer>
-                  </Row>
-        </Row>
-        
-      )}
-    <div>
-      {terreno != null &&(<>
+      {!nuevoTerreno &&
+        !infoTerreno &&
+        terrenos?.length > 0 &&
+        !reporteProyecto && (
+          <Row justify={"center"}>
+            <Col span={21}>
+              <Typography>Lista de Terrenos</Typography>
+              <br />
+            </Col>
+            <Row justify={"center"} className="w-3/4 m-auto">
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Proyecto</TableCell>
+                      <TableCell>Propietario</TableCell>
+                      <TableCell>Domicilio</TableCell>
+                      <TableCell>Colonia/Localidad</TableCell>
+                      <TableCell>Ciudad</TableCell>
+                      <TableCell>Superficie</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {terrenos?.map((terreno, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{terreno.nombre}</TableCell>
+                        <TableCell>{terreno.propietario}</TableCell>
+                        <TableCell>{terreno.domicilio}</TableCell>
+                        <TableCell>{terreno.colonia}</TableCell>
+                        <TableCell>{terreno.ciudad}</TableCell>
+                        <TableCell>
+                          {formatPrecio(terreno.superficie_total)}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            onClick={() => {
+                              setTerreno(terreno);
+                              setInfoTerreno(true);
+                            }}
+                            size="large"
+                          >
+                            <FaArrowUpRightFromSquare
+                              className="m-auto"
+                              size={"20px"}
+                            />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Row>
+          </Row>
+        )}
       <div>
-        <Row>
-          <h1>{terreno.proyecto}</h1>
-        </Row>
-        <Row>
-          <Col>
-          
-          </Col>
-        </Row>
-
+        {terreno != null && (
+          <>
+            <div>
+              <Row>
+                <h1>{terreno.proyecto}</h1>
+              </Row>
+              <Row>
+                <Col></Col>
+              </Row>
+            </div>
+          </>
+        )}
       </div>
-      </>)}
-    </div>
     </div>
   );
 }

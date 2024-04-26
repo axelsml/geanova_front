@@ -82,3 +82,35 @@
 .rerp_ing__modal {
   width: 900px;
 }
+
+/* CSS PARA REPORTE DE PROYECTOS*/
+
+.rep-pro__header {
+  text-align: center;
+}
+
+.rep-pro__button--buscar {
+  margin-left: 5%;
+}
+
+/* TABLA */
+.rep-pro__table--proyecto {
+  margin-top: 25px;
+}
+
+.rep-pro__tr--header {
+  background-color: #6B99CA;
+  color: white;
+}
+
+.rep-pro__th {
+  text-align: center;
+  color: white;
+  padding: 10px;
+}
+
+/* ---------------------------------------------------------- */
+.rep-pro-button__salir {
+  position: relative;
+  left: 30%;
+}
