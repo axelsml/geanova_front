@@ -132,6 +132,10 @@ export default function ReporteIngresos() {
                 setProyectoID(value);
               }}
             >
+              {" "}
+              <Option value={0} label="Todos">
+                Todos
+              </Option>
               {proyectos?.map((proyecto) => (
                 <Option
                   key={proyecto.nombre}
