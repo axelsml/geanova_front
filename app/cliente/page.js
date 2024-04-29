@@ -40,6 +40,8 @@ export default function ClientesInfo() {
 
   const [info_lote, setInfoLote] = useState(null);
   const [info_cliente, setInfoCliente] = useState(null);
+  const [imagenes, verImagenes] = useState(false);
+  
   const { Option } = Select;
 
   const handleChangePage = (event, newPage) => {
@@ -68,6 +70,7 @@ export default function ClientesInfo() {
   const BuscarInfoLote = () => {
      // console.log(terrenoSelected)
      // console.log(loteSelected)
+     verImagenes(false)
      setInfoCliente(null)
      setInfoLote(null)
      setIsLoading(true)
@@ -385,12 +388,38 @@ export default function ClientesInfo() {
           >
                Estado De Cuenta
           </Button>
+          <Button
+               size="large"
+               onClick={() => {
+                verImagenes(true)
+               }}
+          >
+               Ver Imagenes
+          </Button>
 
           </Col>
         </Row>
         
       )} 
+      {imagenes &&(<>
+      <b>imagenes</b>
+      <div>
+        {info_cliente.imagenes.map(file => (
+          <div key={file.id}>
+              <b>imagenes1: {file.img_doc_content_type}</b>
 
+            {file.tipo === 'imagen' && (<>
+              <b>imagenes2: {file.img_doc_content_type}</b>
+              <img src={"localhost:3000"+file.url} alt={file.img_doc_file_name} />
+            </>
+            )}
+            {file.tipo === 'pdf' && (
+              <embed src={"localhost:3000"+file.url} type="application/pdf" width="600" height="400" />
+            )}
+          </div>
+        ))}
+      </div>
+        </>)}
 
       <Row justify={"center"}>
         <Col span={24}>
