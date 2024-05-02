@@ -49,14 +49,6 @@ export default function ReporteIngresos() {
   const [resumenIngresos, setResumenIngresos] = useState({});
   const [detalleIngresos, setDetalleIngresos] = useState({});
 
-  const [cobranzaNum, setCobranzaNum] = useState(0.0);
-  const [cobranzaMonto, setCobranzaMonto] = useState(0.0);
-  const [totalCobranza, setTotalCobranza] = useState(0.0);
-  const [anticipoNum, setAnticipoNum] = useState(0.0);
-  const [anticipoMonto, setAnticipoMonto] = useState(0.0);
-  const [totalAnticipo, setTotalAnticipo] = useState(0.0);
-  const [total, setTotal] = useState(0.0);
-
   useEffect(() => {
     terrenosService.getTerrenosAll(onTerreno);
   }, []);

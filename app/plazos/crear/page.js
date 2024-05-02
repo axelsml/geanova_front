@@ -68,7 +68,7 @@ export default function PlazosCrear({ terrenoId }) {
       setIsLoading(false);
       setEditar(false);
       if (data.success) {
-        setChangeState(!changeState)
+        setChangeState(!changeState);
         Swal.fire({
           title: "Guardado con Éxito",
           icon: "success",
@@ -145,7 +145,11 @@ export default function PlazosCrear({ terrenoId }) {
         >
           Editar
         </Checkbox>
-        {editar && <Button htmlType="submit" size="small">Guardar</Button>}
+        {editar && (
+          <Button htmlType="submit" size="small">
+            Guardar
+          </Button>
+        )}
       </Form>
     );
   };

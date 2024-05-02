@@ -114,3 +114,17 @@
   position: relative;
   left: 30%;
 }
+
+/*-----------------FORM EDITAR TERRENO--------------------*/
+.terreno-edit__form-item {
+  margin-bottom: 5px;
+}
+
+.terreno-edit__input-in {
+  margin-bottom: 5px;
+}
+
+.terreno-edit__botones-footer {
+  margin-top: 20px;
+  margin-bottom: -20px;
+}
