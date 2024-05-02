@@ -41,7 +41,6 @@ import { LoadingContext } from "@/contexts/loading";
 import { UploadOutlined } from '@ant-design/icons';
 import pagosService from "@/services/pagosService";
 import BuscarCliente from "./BuscarCliente";
-import Image from "next/image";
 
 export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext)
@@ -1114,13 +1113,13 @@ debugger
                   {imagenBase64 && (
                     <div>
                       <h2>Imagen INE FRENTE:</h2>
-                      <Image src={imagenBase64} alt="Imagen subida" />
+                      <img src={imagenBase64} alt="Imagen subida" />
                     </div>
                   )}
                    {imagenBase64R && (
                     <div>
                       <h2>Imagen INE REVERSO:</h2>
-                      <Image src={imagenBase64R} alt="Imagen subida" />
+                      <img src={imagenBase64R} alt="Imagen subida" />
                     </div>
                   )}
                    {pdf && (
