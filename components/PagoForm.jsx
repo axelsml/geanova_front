@@ -29,12 +29,16 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
   const { Option } = Select;
 
   const [valoresIniciales, setValoresIniciales] = useState({
-    monto_pago: 0,
+    monto_pago: lote.monto_pago_requerido,
   });
+  const [valor, setValor] = useState(lote.monto_pago_requerido);
 
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
     pagosService.getTipoPagos(setTipoPagos, onError);
+    if (lote != null || lote != undefined) {
+      setValor(parseFloat(lote.monto_pago_requerido));
+    }
   }, []);
 
   const onGuardarPago = (values) => {
@@ -159,6 +163,7 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
                 name={"monto_pagado"}
                 label={"Monto de Pago"}
                 style={{ width: "100%" }}
+                initialValue={valor}
                 rules={[{ required: true }, { type: "number", min: 1 }]}
               >
                 <InputNumber
@@ -293,12 +298,12 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
                   />
                   <Form.Item
                     name={"numeroMoviento"}
-                    label={"Folio de Pago"}
+                    label={"Movimiento de Estado Cuenta"}
                     style={{ width: "100%" }}
                     rules={[
                       {
                         required: true,
-                        message: "Folio de Pago es requerido",
+                        message: "Movimiento de Estado Cuenta es requerido",
                       },
                     ]}
                   >

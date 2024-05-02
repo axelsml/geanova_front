@@ -7,7 +7,7 @@ import { Button, Col, Collapse, Row, Typography,Form,Select  } from "antd";
 import { useContext, useEffect, useState } from "react";
 import {FaArrowCircleLeft } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
-import {FaPrint } from "react-icons/fa";
+import {FaFilePdf  } from "react-icons/fa6";
 
 import {
   Paper,
@@ -388,38 +388,21 @@ export default function ClientesInfo() {
           >
                Estado De Cuenta
           </Button>
-          <Button
-               size="large"
-               onClick={() => {
-                verImagenes(true)
-               }}
-          >
+          </Col>
+          <Col>
+          <Button onClick={() => {
+                       window.open(
+                         // https://api.santamariadelaluz.com
+                            `https://api.santamariadelaluz.com/mostrar_imagen/${info_cliente.id}.pdf`
+                       );
+                     }} size="large">
                Ver Imagenes
           </Button>
-
           </Col>
         </Row>
         
       )} 
-      {imagenes &&(<>
-      <b>imagenes</b>
-      <div>
-        {info_cliente.imagenes.map(file => (
-          <div key={file.id}>
-              <b>imagenes1: {file.img_doc_content_type}</b>
-
-            {file.tipo === 'imagen' && (<>
-              <b>imagenes2: {file.img_doc_content_type}</b>
-              <img src={"localhost:3000"+file.url} alt={file.img_doc_file_name} />
-            </>
-            )}
-            {file.tipo === 'pdf' && (
-              <embed src={"localhost:3000"+file.url} type="application/pdf" width="600" height="400" />
-            )}
-          </div>
-        ))}
-      </div>
-        </>)}
+     
 
       <Row justify={"center"}>
         <Col span={24}>
