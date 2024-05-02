@@ -5,7 +5,7 @@ import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
 import { Button, Col, Collapse, Row, Typography,Form,Select  } from "antd";
 import { useContext, useEffect, useState } from "react";
-import {FaArrowCircleLeft } from "react-icons/fa";
+import {FaArrowCircleLeft, FaPrint } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
 import {FaFilePdf  } from "react-icons/fa6";
 

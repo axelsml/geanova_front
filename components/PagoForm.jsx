@@ -36,9 +36,6 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
     pagosService.getTipoPagos(setTipoPagos, onError);
-    if (lote != null || lote != undefined) {
-      setValor(parseFloat(lote.monto_pago_requerido));
-    }
   }, []);
 
   const onGuardarPago = (values) => {
