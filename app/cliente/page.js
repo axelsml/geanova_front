@@ -5,9 +5,9 @@ import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
 import { Button, Col, Collapse, Row, Typography,Form,Select  } from "antd";
 import { useContext, useEffect, useState } from "react";
-import {FaArrowCircleLeft } from "react-icons/fa";
+import {FaArrowCircleLeft, FaPrint } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
-import {FaPrint } from "react-icons/fa";
+import {FaFilePdf  } from "react-icons/fa6";
 
 import {
   Paper,
@@ -40,6 +40,8 @@ export default function ClientesInfo() {
 
   const [info_lote, setInfoLote] = useState(null);
   const [info_cliente, setInfoCliente] = useState(null);
+  const [imagenes, verImagenes] = useState(false);
+  
   const { Option } = Select;
 
   const handleChangePage = (event, newPage) => {
@@ -68,6 +70,7 @@ export default function ClientesInfo() {
   const BuscarInfoLote = () => {
      // console.log(terrenoSelected)
      // console.log(loteSelected)
+     verImagenes(false)
      setInfoCliente(null)
      setInfoLote(null)
      setIsLoading(true)
@@ -385,12 +388,21 @@ export default function ClientesInfo() {
           >
                Estado De Cuenta
           </Button>
-
+          </Col>
+          <Col>
+          <Button onClick={() => {
+                       window.open(
+                         // https://api.santamariadelaluz.com
+                            `https://api.santamariadelaluz.com/mostrar_imagen/${info_cliente.id}.pdf`
+                       );
+                     }} size="large">
+               Ver Imagenes
+          </Button>
           </Col>
         </Row>
         
       )} 
-
+     
 
       <Row justify={"center"}>
         <Col span={24}>
