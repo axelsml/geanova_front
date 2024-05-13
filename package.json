@@ -18,7 +18,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.0.1",
-    "sweetalert2": "^11.10.7"
+    "sweetalert2": "^11.10.7",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",

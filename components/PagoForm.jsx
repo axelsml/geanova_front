@@ -8,6 +8,7 @@ import {
   DatePicker,
   Select,
   InputNumber,
+  Row
 } from "antd";
 import Swal from "sweetalert2";
 import { useState, useContext, useEffect } from "react";
@@ -17,6 +18,17 @@ import { LoadingContext } from "@/contexts/loading";
 import pagosService from "@/services/pagosService";
 import { usuario_id } from "@/helpers/user";
 import InputIn from "./Input";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  TableFooter,
+} from "@mui/material";
 
 export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext);
@@ -27,17 +39,30 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
   // const [cliente, setCliente] = useState(null);
   const [form] = Form.useForm();
   const { Option } = Select;
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [valoresIniciales, setValoresIniciales] = useState({
     monto_pago: lote.monto_pago_requerido,
   });
   const [valor, setValor] = useState(lote.monto_pago_requerido);
 
+  const [fecha_movimiento, setFechaMovimiento] = useState("");
+  const [movimientos_pendientes, setPendientes] = useState([]);
+  const [movimiento_id_conciliar, setMovimientoIdConciliar] = useState(0);
+
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
     pagosService.getTipoPagos(setTipoPagos, onError);
   }, []);
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   const onGuardarPago = (values) => {
     values["fecha"] = formatDate(values.fecha);
     Swal.fire({
@@ -61,6 +86,7 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
           ...values,
           usuario_id: usuario_id,
           solicitud_id: lote.solicitud_id,
+          conciliacion:movimiento_id_conciliar
         };
         debugger
         pagosService.createPago({ pago: params }, onPagoGuardado, onError);
@@ -133,6 +159,35 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
     },
   };
 
+  function buscarMovimientosBanco(){
+    setIsLoading(true)
+    setPendientes([])
+    var params ={
+      fecha_operacion:fecha_movimiento,
+      monto_pago:valor,
+    }
+    debugger
+    pagosService.BuscarMovimientoBanco(params,onMovimientosCoinciden,onError)
+  }
+
+  async function onMovimientosCoinciden(data){
+    setIsLoading(false)
+    setPendientes(data.pendientes)
+    if(data.pendientes.length == 0){
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No Se Encontro Movimiento",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }else{
+      setPendientes(data.pendientes)
+    }
+  }
+
   return (
     <div className="w-3/4 mx-auto p-6 m-7 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-semibold mb-4 text-center">Datos de Pago</h1>
@@ -166,6 +221,9 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
                 <InputNumber
                   style={{
                     width: "100%",
+                  }}
+                  onChange={(value) => {
+                    setValor(value)
                   }}
                   placeholder="Ingrese el Monto de Pago"
                   formatter={formatPrecio}
@@ -277,40 +335,82 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
                     ]}
                   >
                     <DatePicker
+                    onChange={(value) => {
+                      setFechaMovimiento(formatDate(value))
+                    }}
                       style={{ width: "100%" }}
                       placeholder="Ingrese la Fecha en la que se Realizó la Transferencia"
                     />
                   </Form.Item>
+                  <Button onClick={() =>{buscarMovimientosBanco()}}>
+                    Buscar
+                  </Button>
+                  {movimientos_pendientes.length != 0 &&(<>
+                  <Row justify={"center"} className="m-auto">
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                        <TableRow>
+                          <TableCell>Fecha Operacion</TableCell>
+                          <TableCell>Descripcion</TableCell>
+                          <TableCell>Cantidad</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                        </TableHead>
 
-                  <InputIn
-                    placeholder="Ingrese la Cuenta"
-                    name="comentario"
-                    label="Cuenta a la que se Depositó"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Cuenta es requerida",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    name={"numeroMoviento"}
-                    label={"Movimiento de Estado Cuenta"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Movimiento de Estado Cuenta es requerido",
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
+                        <TableBody>
+                          {movimientos_pendientes.slice(
+                              page * rowsPerPage,
+                              page * rowsPerPage + rowsPerPage
+                            )
+                            .map((movimiento, index) => (
+                              <TableRow key={index}>
+                          <TableCell>
+                            {movimiento.fecha_operacion}
+                          </TableCell>
+                          <TableCell>
+                            {movimiento.concepto}
+                          </TableCell>
+                          <TableCell>
+                            ${formatPrecio(movimiento.abono)}
+                          </TableCell>
+                          <TableCell>
+                          <Button key={movimiento} onClick={() => {
+                              setMovimientoIdConciliar(movimiento.id);
+                              setPendientes([])
+                            }}
+                            size="large"
+                          >
+                            Seleccionar
+                          </Button>
+                          
+                          </TableCell>
+                          
+
+                        </TableRow>
+                            ))}
+                        </TableBody>
+                        <TableFooter>
+                          <TableRow>
+                            <TablePagination
+                              rowsPerPageOptions={[5, 10, 25]}
+                              count={movimientos_pendientes.length}
+                              rowsPerPage={rowsPerPage}
+                              page={page}
+                              onPageChange={handleChangePage}
+                              onRowsPerPageChange={handleChangeRowsPerPage}
+                              labelRowsPerPage="Amortizaciones por Página"
+                            />
+                          </TableRow>
+                        </TableFooter>
+                      </Table>
+                    </TableContainer>
+                  </Row>
+                  </>)}
+
                 </div>
+
+                
               )}
             </Col>
 
