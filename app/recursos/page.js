@@ -2,7 +2,7 @@
 import usuariosService from "@/services/usuariosService";
 import { redirect, useRouter } from "next/navigation";
 import InputIn from "@/components/Input";
-import { Form, Button, Row ,Col,Upload,message,Tabs  } from "antd";
+import { Form, Button, Row ,Col,Upload,message,Tabs,Modal  } from "antd";
 import {Table as TablaExcel } from "antd";
 const { TabPane } = Tabs;
 import { useContext, useEffect, useState } from "react";
@@ -37,6 +37,10 @@ const [excelData, setExcelData] = useState([]);
 const [pendientes, setMovimientosPendientes] = useState([]);
 const [recibidos, setMovimientosRecibidos] = useState([]);
 const [por_conciliar, setMovimientoBanco] = useState([]);
+const [movimientos_pendientes, setPendientes] = useState([]);
+const [pago_seleccionado, setPagoSeleccionado] = useState({});
+
+const [visible, setVisible] = useState(false);
 
 const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -163,6 +167,65 @@ function cambiar_a_recibido(movimiento){
      
 
 }
+
+function buscarMovimientosBanco(pago){
+     setIsLoading(true)
+     setPendientes([])
+     setPagoSeleccionado(pago)
+     var params ={
+       fecha_operacion:pago.fecha_transferencia,
+       monto_pago:pago.monto_pagado,
+     }
+     debugger
+     pagosService.BuscarMovimientoBanco(params,onMovimientosCoinciden,onError)
+   }
+
+   async function onMovimientosCoinciden(data){
+     setIsLoading(false)
+     if(data.pendientes.length == 0){
+       Swal.fire({
+         title: "Error",
+         icon: "error",
+         text: "No Se Encontro Movimiento",
+         confirmButtonColor: "#4096ff",
+         cancelButtonColor: "#ff4d4f",
+         showDenyButton: false,
+         confirmButtonText: "Aceptar",
+       });
+     }else{
+       setPendientes(data.pendientes)
+       setVisible(true)
+     }
+   }
+
+   function conciliarPago(movimiento){
+     setIsLoading(true)
+     var params = {
+          pago_id:pago_seleccionado.id,
+          movimiento_id:movimiento.id,
+          usuario_id:usuario_id
+     }
+     debugger
+     pagosService.conciliarPagoCreado(params,onPagoConciliado,onError)
+   }
+
+   async function onPagoConciliado(data){
+     setIsLoading(false)
+     setVisible(false)
+     if(data.success){
+          cargarMovimientosPendientesConciliar()
+     }else{
+          Swal.fire({
+               title: "Error",
+               icon: "error",
+               text: "No Se Pudo Conciliar Pago",
+               confirmButtonColor: "#4096ff",
+               cancelButtonColor: "#ff4d4f",
+               showDenyButton: false,
+               confirmButtonText: "Aceptar",
+             });
+     }
+   }
 async function onMovimientoRecibido(data){
      setIsLoading(false)
      if(data.success){
@@ -379,6 +442,7 @@ async function onMovimientoRecibido(data){
                          <TableCell>Folio Pago</TableCell>
                          <TableCell>Monto Pagado</TableCell>
                          <TableCell>Fecha Operacion</TableCell>
+                         <TableCell>Fecha Transferencia</TableCell>
                          <TableCell>Ingreso</TableCell>
                          <TableCell></TableCell>
                     </TableRow>
@@ -404,14 +468,16 @@ async function onMovimientoRecibido(data){
                          {pago.fecha_operacion}
                          </TableCell>
                          <TableCell>
+                         {pago.fecha_transferencia}
+                         </TableCell>
+                         <TableCell>
                          {pago.usuario_ingreso}
                          </TableCell>
                          <TableCell>
                          <Button key={pago} onClick={() => {
-                         setPagoConciliarId(pago.id);
-                         setShow(true)
+                         buscarMovimientosBanco(pago)
                     }}  size="large">
-                         Recibir
+                         Conciliar
                          </Button>
                          </TableCell>
 
@@ -435,7 +501,63 @@ async function onMovimientoRecibido(data){
                </TableContainer>
           </Row>
           </>)}
+          <Modal
+          title="Estado De Cuenta Conciden"
+          visible={visible}
+          onCancel={()=>setVisible(false)}
+          cancelText="Cancelar"
+          >
+          {movimientos_pendientes.length != 0 &&(<>
+                  <Row justify={"center"} className="m-auto">
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                        <TableRow>
+                          <TableCell>Fecha Operacion</TableCell>
+                          <TableCell>Descripcion</TableCell>
+                          <TableCell>Cantidad</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                        </TableHead>
 
+                        <TableBody>
+                          {movimientos_pendientes.slice(
+                              page * rowsPerPage,
+                              page * rowsPerPage + rowsPerPage
+                            )
+                            .map((movimiento, index) => (
+                              <TableRow key={index}>
+                          <TableCell>
+                            {movimiento.fecha_operacion}
+                          </TableCell>
+                          <TableCell>
+                            {movimiento.concepto}
+                          </TableCell>
+                          <TableCell>
+                            ${formatPrecio(movimiento.abono)}
+                          </TableCell>
+                          <TableCell>
+                          <Button key={movimiento} onClick={() => {
+                              conciliarPago(movimiento);
+                              setPendientes([])
+                            }}
+                            size="large"
+                          >
+                            Seleccionar
+                          </Button>
+                          
+                          </TableCell>
+                          
+
+                        </TableRow>
+                            ))}
+                        </TableBody>
+                       
+                      </Table>
+                    </TableContainer>
+                  </Row>
+                  </>)}
+          </Modal>                
       </TabPane>
      
     </Tabs>

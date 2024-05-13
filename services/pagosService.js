@@ -185,6 +185,32 @@ class pagosService {
         }
       });
   }
+  conciliarPagoCreado(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("conciliar_pago", params, {
+        cancelToken: call.token,
+      })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
   BuscarMovimientoBanco(params,callback, error) {
     var call;
     if (call) {
