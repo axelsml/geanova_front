@@ -10,7 +10,7 @@ export default function TerrenoEdit({ terrenoId, terreno }) {
 
   return (
     <div className="p-8 grid gap-4">
-      {!terrenoEditado && (
+      {terreno && (
         <Row justify={"center"}>
           <Col span={24}>
             <TerrenoEditForm
