@@ -3,19 +3,26 @@
 import { Card,Row,Col } from "antd";
 import { BiBuildings, BiCart, BiMoneyWithdraw, BiUser } from "react-icons/bi";
 import {TbReport  } from "react-icons/tb";
-
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div>
+    <div className="menu">
+      <Row justify={"center"}>
+      <Image src={"/geanova.svg"} width={500} height={100} priority alt="Logo Geanova"/>
+      </Row>
       <Row gutter={[16, 16]} wrap>
         <Col span={8}>
           <Link key={"TerrenosCrear"} href={"/terrenos/crear"}>
             <Card hoverable>
               <div>
-                <BiBuildings className="m-auto" size={"20px"} />
+              <Row justify={"center"}>
+                <Image src={"/icono terreno.svg"} width={200} height={200} priority alt="Logo Terreno"/>
+                </Row>
+                <Row justify={"center"}>
                 <p className="text-lg text-center">Terreno</p>
+                </Row>
               </div>
             </Card>
           </Link>
@@ -24,8 +31,13 @@ export default function Home() {
           <Link key={"Ventas"} href={"/ventas"}>
             <Card hoverable>
               <div>
-                <BiCart className="m-auto" size={"20px"} />
+                <Row justify={"center"}>
+                <Image src={"/icono ventas.svg"} width={200} height={200} priority alt="Logo Ventas"/>
+                </Row>
+                <Row justify={"center"}>
                 <p className="text-lg text-center">Ventas</p>
+                </Row>
+
               </div>
             </Card>
           </Link>
@@ -34,8 +46,12 @@ export default function Home() {
           <Link key={"clientes"} href={"/cliente"}>
             <Card hoverable>
               <div>
-                <BiUser className="m-auto" size={"20px"} />
+              <Row justify={"center"}>
+                <Image src={"/icono usuario.svg"} width={200} height={200} priority alt="Logo Usuario"/>
+                </Row>
+                <Row justify={"center"}>
                 <p className="text-lg text-center">Clientes</p>
+                </Row>
               </div>
             </Card>
           </Link>
@@ -44,13 +60,17 @@ export default function Home() {
      
       </Row>
       
-      <Row gutter={[16, 16]} wrap>
+      <Row gutter={[16, 16]} wrap style={{marginTop:"10px"}}>
         <Col span={8}>
           <Link key={"ReporteIngresos"} href={"/ingresos"}>
             <Card hoverable>
               <div>
-                <TbReport className="m-auto" size={"20px"} />
+              <Row justify={"center"}>
+                <Image src={"/icono ingreso.svg"} width={200} height={200} priority alt="Logo Ingresos"/>
+                </Row>
+                <Row justify={"center"}>
                 <p className="text-lg text-center">Ingresos</p>
+                </Row>
               </div>
             </Card>
           </Link>
@@ -59,8 +79,12 @@ export default function Home() {
           <Link key={"recursos"} href={"/recursos"}>
             <Card hoverable>
               <div>
-                <BiMoneyWithdraw className="m-auto" size={"20px"} />
+              <Row justify={"center"}>
+                <Image src={"/icono recursos.svg"} width={200} height={200} priority alt="Logo Recursos"/>
+                </Row>
+                <Row justify={"center"}>
                 <p className="text-lg text-center">Recursos</p>
+                </Row>
               </div>
             </Card>
           </Link>

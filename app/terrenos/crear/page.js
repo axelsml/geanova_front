@@ -72,23 +72,31 @@ export default function TerrenosCrear() {
     <div className="p-8 grid gap-4">
       {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
         <>
-          <Row justify={"center"}>
+         <Row justify={"center"}>
+            <Col xs={24} sm={20} md={16} lg={12} xl={8} xxl={4} className="titulo_pantallas">
+            <b>LISTA DE TERRENOS</b>
+            </Col>
+          </Row>
+                   
+        </>
+      )}
+  {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
+        <>
+          <Row style={{marginTop:"100px",marginRight:"12%"}} justify={"end"}>
             <Col>
-              <Button size={"large"} onClick={CreateNuevoTerreno}>
+              <Button className="boton" size={"large"} onClick={CreateNuevoTerreno}>
                 Crear Nuevo Terreno
               </Button>
             </Col>
-          </Row>
-          <Row justify={"center"}>
             <Col>
-              <Button size={"large"} onClick={CreateReporteProyecto}>
+              <Button className="boton" size={"large"} onClick={CreateReporteProyecto}>
                 Reporte general proyecto
               </Button>
             </Col>
           </Row>
+         
         </>
       )}
-
       <Row justify={"center"}>
         <Col span={24}>
           {nuevoTerreno && (
@@ -131,22 +139,22 @@ export default function TerrenosCrear() {
         terrenos?.length > 0 &&
         !reporteProyecto && (
           <Row justify={"center"}>
-            <Col span={21}>
+            {/* <Col span={21}>
               <Typography>Lista de Terrenos</Typography>
               <br />
-            </Col>
+            </Col> */}
             <Row justify={"center"} className="w-3/4 m-auto">
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} className="tabla">
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Proyecto</TableCell>
-                      <TableCell>Propietario</TableCell>
-                      <TableCell>Domicilio</TableCell>
-                      <TableCell>Colonia/Localidad</TableCell>
-                      <TableCell>Ciudad</TableCell>
-                      <TableCell>Superficie</TableCell>
-                      <TableCell></TableCell>
+                      <TableCell className="tabla_encabezado"><p>Proyecto</p></TableCell>
+                      <TableCell className="tabla_encabezado"><p>Propietario</p></TableCell>
+                      <TableCell className="tabla_encabezado"><p>Domicilio</p></TableCell>
+                      <TableCell className="tabla_encabezado"><p>Colonia/Localidad</p></TableCell>
+                      <TableCell className="tabla_encabezado"><p>Ciudad</p></TableCell>
+                      <TableCell className="tabla_encabezado"><p>Superficie</p></TableCell>
+                      <TableCell className="tabla_encabezado"></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -161,7 +169,7 @@ export default function TerrenosCrear() {
                           {formatPrecio(terreno.superficie_total)}
                         </TableCell>
                         <TableCell>
-                          <Button
+                          <Button className="boton"
                             onClick={() => {
                               setTerreno(terreno);
                               setInfoTerreno(true);

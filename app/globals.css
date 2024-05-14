@@ -128,3 +128,35 @@
   margin-top: 20px;
   margin-bottom: -20px;
 }
+
+.menu p{
+  color: rgb(67, 141, 204);
+}
+
+.titulo_pantallas{
+  background-color: rgb(67, 141, 204);
+  height: 50px;
+  border-radius: 30px;
+  color: white;
+  text-align: center;
+  align-content: center;
+  font-size: 18px;
+
+}
+
+.boton{
+  background-color: rgb(67, 141, 204);
+  color: white;
+}
+
+.tabla{
+  border: 2px solid rgb(66, 142, 202);
+}
+.tabla tbody tr {
+  border-top: 2px solid rgb(66, 142, 202);; /* Define el borde para todas las filas */
+}
+
+.tabla_encabezado p{
+  color: rgb(67, 141, 204);
+  font-size: 18px;
+}
