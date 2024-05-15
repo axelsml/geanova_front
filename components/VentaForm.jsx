@@ -624,6 +624,16 @@ debugger
                           </TableCell>
                           <TableCell>
                           <Button key={lote} onClick={() => {
+                            Swal.fire({
+                              title: "Info",
+                              icon: "info",
+                              text: "Lote Seleccionado "+lote.numero,
+                              confirmButtonColor: "#4096ff",
+                              cancelButtonColor: "#ff4d4f",
+                              showDenyButton: false,
+                              confirmButtonText: "Aceptar",
+                            });
+                          
                              setLoteSelected(lote);
                                                       
                              setUsuario({
@@ -664,7 +674,10 @@ debugger
               style={{ width: "100%" }}
             >
               <InputNumber
-                disabled
+                onChange={(value) => { setSolicitud({
+                  ...solicitud,
+                  monto_contrato: value,
+                });}}
                 style={{
                   width: "100%",
                 }}
@@ -941,7 +954,7 @@ debugger
               })}
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Calle del Cliente es requerida",
                 },
               ]}
@@ -957,7 +970,7 @@ debugger
               })}
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Colonia del Cliente es requerida",
                 },
               ]}
@@ -973,10 +986,9 @@ debugger
               style={{ width: "100%" }}
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Número Exterior es requerido",
                 },
-                { type: "number", min: 1 },
               ]}
             >
               <InputNumber
@@ -1017,7 +1029,7 @@ debugger
               style={{ width: "100%" }}
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Código Postal del Cliente es requerida",
                 },
                 { type: "number", min: 1 },
