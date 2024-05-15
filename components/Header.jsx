@@ -22,8 +22,7 @@ export default function Header() {
   const onCerrarSesion = async () => {
     await localStorage.clear()
     await removeCookies('usuario')
-
-    window.location.reload()
+    window.location.href = '/login';
   }
 
   const items = [

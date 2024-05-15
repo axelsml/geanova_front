@@ -1,11 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: content-box;
+  font-family: 'Montserrat';
 }
 
 *:focus {
@@ -140,7 +142,7 @@
   color: white;
   text-align: center;
   align-content: center;
-  font-size: 18px;
+  font-size: 20px;
 
 }
 
@@ -160,3 +162,18 @@
   color: rgb(67, 141, 204);
   font-size: 18px;
 }
+
+.formulario{
+  color: white;
+  background-color: rgb(29,105 ,155 );
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 18px;
+
+}
+.input_formulario {
+  /* background-color: rgb(66,142 ,204 ); */
+  border: none;
+}
+
+
