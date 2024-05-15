@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { Menu } from "antd";
 import  * as Ant from "antd/es/layout/layout";
 import { BiHomeAlt2, BiExit  } from "react-icons/bi";
+import { ImExit  } from "react-icons/im";
+
 import { useEffect, useState } from "react";
 import { removeCookies } from "@/app/login/Cookie";
 
@@ -27,13 +29,13 @@ export default function Header() {
 
   const items = [
     {
-      label: <Link href={"/"}>Inicio</Link>,
-      icon: <BiHomeAlt2 />,
+      label: <Link style={{color:"rgb(67, 141, 204)",fontSize:"12px"}} href={"/"}>Inicio</Link>,
+      icon: <BiHomeAlt2 style={{color:"rgb(67, 141, 204)",fontSize:"20px"}}/>,
     },
 
     {
-      label:"Cerrar Sesión",
-      icon: <BiExit  />,
+      label:<a style={{color:"rgb(67, 141, 204)",fontSize:"12px"}}>Cerrar Sesión</a>,
+      icon: <ImExit  style={{color:"rgb(67, 141, 204)",fontSize:"20px"}}/>,
       onClick: onCerrarSesion
     },
   ];
@@ -59,7 +61,7 @@ export default function Header() {
             onClick={onClick}
             selectedKeys={[current]}
             mode="horizontal"
-            className="flex-1 justify-end border-0"
+            className="flex-1 justify-end border-0 menu"
             items={items}
             style={{ background: 'transparent', border: 'none' }}
           >
