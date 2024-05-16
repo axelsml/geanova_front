@@ -492,6 +492,7 @@ debugger
             handleClick(option);
           }}
           size="large"
+          className="boton"
         >
           Siguiente
         </Button>
@@ -517,10 +518,12 @@ debugger
   }
 
   return (
-    <div className="w-1/2 max-w-md mx-auto p-6 m-7 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-semibold mb-4 text-center">
-        Nueva Venta
-      </h1>
+    <div className="w-1/2 max-w-md mx-auto p-6 m-7 bg-white">
+      <Row justify={"center"}>
+        <Col xs={24} sm={24} md={16} lg={16} xl={8} xxl={8} className="titulo_pantallas">
+          <b>Nueva Venta</b>
+        </Col>
+      </Row>
       <Form
         form={form}
         name="basic"
@@ -530,6 +533,8 @@ debugger
         layout="vertical"
         initialValues={usuario}
       >
+        <Row justify={"center"} gutter={[24]} style={{marginTop:"30px"}}>
+        <div className="formulario">
          <Form.Item
               label={"Proyecto"}
               name={"terreno"}
@@ -595,13 +600,13 @@ debugger
             
           {lotes != null &&(<>
           <Row justify={"center"} className="m-auto">
-                    <TableContainer component={Paper}>
+                    <TableContainer component={Paper} className="tabla">
                       <Table>
                         <TableHead>
-                        <TableRow>
-                          <TableCell>No. Lote</TableCell>
-                          <TableCell>SuPerficie</TableCell>
-                          <TableCell>Precio</TableCell>
+                        <TableRow className="tabla_encabezado">
+                          <TableCell><p>No. Lote</p></TableCell>
+                          <TableCell><p>SuPerficie</p></TableCell>
+                          <TableCell><p>Precio</p></TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                         </TableHead>
@@ -718,6 +723,8 @@ debugger
                 suffix={"Semanas"}
                 style={{
                   width: "100%",
+                  backgroundColor:"whitesmoke",
+                  color:"black"
                 }}
               />
             </Form.Item>
@@ -772,9 +779,13 @@ debugger
                 placeholder="Ingrese la Fecha de Inicio de Contrato"
               />
             </Form.Item>
+        
+
+            </div>
+          </Row>
         <div>
-          <Row justify={"center"} align={"middle"} className="gap-10">
-            <Col>
+          <Row justify={"center"} className="gap-10" style={{marginBottom:"20px",marginTop:"20px"}}>
+            <Col xs={24} sm={24} md={16} lg={16} xl={4} xxl={6}>
               <Button
                 disabled={solicitud.monto_contrato == ""}
                 onClick={() => {
@@ -783,20 +794,26 @@ debugger
                   
                 }}
                 size="large"
+                className="boton"
               >
                 Nuevo Cliente
               </Button>
             </Col>
+            <Col xs={24} sm={24} md={16} lg={16} xl={8} xxl={6}>
               <Button
               disabled={solicitud.monto_contrato == ""}
                 onClick={() => {
                   setOpcionUsuario(2);
                   BuscarClientesExistentes();
                 }}
+                className="boton"
+
                 size="large"
               >
                 Cliente Existente
               </Button>
+            </Col>
+
             <Col>
             </Col>
           </Row>
@@ -871,17 +888,18 @@ debugger
             value={buttonSelected}
           >
             {/* <Radio.Button value={1}>Lote</Radio.Button> */}
-            <Radio.Button value={1}>Cliente</Radio.Button>
-            <Radio.Button value={2}>Domicilio</Radio.Button>
-            <Radio.Button value={3}>Contacto</Radio.Button>
-            <Radio.Button value={4}>INE</Radio.Button>
+            <Radio.Button className="renglon_color" value={1}>Cliente</Radio.Button>
+            <Radio.Button className="renglon_color" value={2}>Domicilio</Radio.Button>
+            <Radio.Button className="renglon_color" value={3}>Contacto</Radio.Button>
+            <Radio.Button className="renglon_color" value={4}>INE</Radio.Button>
           </Radio.Group>
         </Row>
+        
          <br></br>   
         {buttonSelected === 1 && (
           <>
             
-            
+            <div className="formulario">
             <InputIn
               placeholder="Ingrese el Primer Nombre del Cliente"
               name="primer_nombre"
@@ -939,11 +957,13 @@ debugger
               </Button>
             <BotonesSiguiente option={2} />
             </span>
+            </div>
           </>
         )}
 
         {buttonSelected === 2 && (
           <>
+           <div className="formulario">
             <InputIn
               placeholder="Ingrese la Calle del Cliente"
               name="calle"
@@ -1047,12 +1067,14 @@ debugger
                 Cancelar
               </Button>
             <BotonesSiguiente option={3} />
-            </span>        
+            </span> 
+            </div>       
           </>
         )}
 
         {buttonSelected === 3 && (
           <>
+          <div className="formulario">
             <InputIn
               name="celular_cliente"
               label="Celular de Contacto"
@@ -1094,28 +1116,30 @@ debugger
               </Button>
             <BotonesSiguiente option={4} />
             </span>
-           
+            </div>
           </>
         )}
         
 {buttonSelected === 4 && (
           <>
-                 <div>
+                 <div className="formulario">
+                 {/* <Row justify={"center"} className="gap-10" style={{marginBottom:"20px",marginTop:"20px"}}> */}
+           
                  <Form.Item >
-                    <Row>
-                      <Col>
+                  <Row justify={"center"} className="gap-10" style={{marginBottom:"20px",marginTop:"20px"}}>
+                      <Col xs={24} sm={24} md={16} lg={16} xl={8} xxl={8}>
                         <Upload {...uploadProps}>
-                          <Button icon={<UploadOutlined />}>INE FRENTE</Button>
+                          <Button className="boton" icon={<UploadOutlined />}>INE FRENTE</Button>
                         </Upload>
                       </Col>
-                      <Col>
+                      <Col xs={24} sm={24} md={16} lg={16} xl={8} xxl={8}>
                         <Upload {...uploadProps2}>
-                          <Button icon={<UploadOutlined />}>INE REVERSO</Button>
+                          <Button className="boton" icon={<UploadOutlined />}>INE REVERSO</Button>
                         </Upload>
                       </Col>
-                      <Col>
+                      <Col xs={24} sm={24} md={16} lg={16} xl={8} xxl={8}>
                       <Upload {...props} accept=".pdf">
-                        <Button icon={<UploadOutlined />}>Click to Upload PDF</Button>
+                        <Button className="boton" icon={<UploadOutlined />}>ADJUNTAR PDF</Button>
                       </Upload>
                       </Col>
                       
@@ -1134,14 +1158,7 @@ debugger
                       <img src={imagenBase64R} alt="Imagen subida" />
                     </div>
                   )}
-                   {pdf && (
-                    <div>
-                      <h2>Archivo PDF Cargado:</h2>
-                      <p>Nombre: {pdf.name}</p>
-                      <p>Tipo: {pdf.type}</p>
-                      <p>Tamaño: {pdf.size} bytes</p>
-                    </div>
-                  )}
+                  
                   <span className="flex gap-2 justify-end">
                     <Button  onClick={()=>guardarCliente()} size="large">
                       Guardar

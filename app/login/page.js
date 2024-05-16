@@ -18,7 +18,7 @@ export default function LoginPage() {
     debugger
     console.log("usuario_id != null = "+usuario_id != null);
     if (usuario_id != null) {
-      router.push("/");
+      window.location.href = '/';
     }
   }, []);
 

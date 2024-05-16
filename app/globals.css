@@ -156,7 +156,9 @@
 }
 .tabla tbody tr {
   border-top: 2px solid rgb(66, 142, 202);; /* Define el borde para todas las filas */
+  border-bottom: 2px solid rgb(66, 142, 202);; /* Define el borde para todas las filas */
 }
+
 
 .tabla_encabezado p{
   color: rgb(67, 141, 204);
@@ -171,9 +173,31 @@
   font-size: 18px;
 
 }
+
+.formulario_alterno{
+  background-color: rgb(66,142 ,204 );
+  color: white;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 18px;
+
+}
 .input_formulario {
   /* background-color: rgb(66,142 ,204 ); */
   border: none;
 }
+.informacion_col{
+  font-size: 18px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.renglon_otro_color{
+  background-color: rgb(29,105 ,155 );
+  
 
+}
 
+.renglon_color{
+  background-color: rgb(66,142 ,204 );
+  color: white;
+}

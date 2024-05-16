@@ -57,6 +57,7 @@ export default function TerrenoEditForm({
     }).then((result) => {
       if (result.isConfirmed) {
         setTerrenoEditado(false);
+        setWatch(false)
       }
     });
   };
@@ -111,20 +112,17 @@ export default function TerrenoEditForm({
         validateMessages={validacionMensajes}
         layout="vertical"
       >
-        <Row justify={"center"} gutter={[16]}>
-          <Col xs={24} sm={100}>
-            <Paper style={{ backgroundColor: "#6B99CA" }}>
-              <h1
-                className="text-2xl font-semibold mb-4 text-center"
-                style={{ color: "white" }}
-              >
-                Datos del Terreno
-              </h1>
-            </Paper>
+       
+        <Row justify={"center"}>
+          <Col xs={24} sm={20} md={16} lg={16} xl={8} xxl={8} className="titulo_pantallas">
+            <b> EDITAR DATOS DEL TERRENO</b>
           </Col>
         </Row>
-        <Row gutter={[16, 16]}>
+        <Row gutter={[16, 16]} style={{marginTop:"25px"}}>
           <Col xs={24} sm={12} lg={12}>
+            <div className="formulario">
+
+            
             <Form.Item
               className="terreno-edit__form-item"
               name={"nombre_proyecto"}
@@ -216,8 +214,9 @@ export default function TerrenoEditForm({
                 placeholder={terreno.colonia || "Ingrese la Colonia"}
               />
             </Form.Item>
+            </div>
           </Col>
-          <Col xs={24} sm={12} lg={12}>
+          <Col xs={24} sm={12} lg={12} className="formulario">
             <Form.Item
               className="terreno-edit__form-item"
               name={"cantidad_lotes"}
@@ -414,13 +413,13 @@ export default function TerrenoEditForm({
         </Row>
         <div className="terreno-edit__botones-footer">
           <span className="flex gap-2 justify-end">
-            <Button htmlType="submit" size="large">
+            <Button className="boton" htmlType="submit" size="large">
               Guardar
             </Button>
 
-            <Button onClick={handleCancel} danger size="large">
+            {/* <Button onClick={handleCancel} danger size="large">
               Cancelar
-            </Button>
+            </Button> */}
           </span>
         </div>
       </Form>

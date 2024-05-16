@@ -62,9 +62,11 @@ export default function TerrenoInfoForm({
 
   const verTerrenos = () => {
     setAsignarLotes(!lotes);
+    setPlazos(false);
   };
 
   const verPlazos = () => {
+    setAsignarLotes(false);
     setPlazos(!plazos);
   };
 
@@ -79,102 +81,105 @@ export default function TerrenoInfoForm({
 
   return (
     <div>
-      <Row justify={"center"} gutter={[16]}>
-        <Col xs={24} sm={12} lg={12}>
-          <Paper style={{ backgroundColor: "lightgrey" }}>
-            <Row justify={"center"} gutter={[16]}>
-              <Col>
-                <Button
-                  style={{ backgroundColor: "lightgrey" }}
-                  href={"/terrenos/crear"}
-                  size="large"
-                >
-                  <FaArrowCircleLeft className="m-auto" size={"20px"} />
-                </Button>
-              </Col>
-              <Col>
-                <h1 className="text-2xl font-semibold mb-4 text-center">
-                  Datos del Terreno seleccionado
-                </h1>
-              </Col>
-            </Row>
-          </Paper>
+      
+      <Row justify={"center"}>
+      {/* <Col>
+            <Button
+              style={{ backgroundColor: "lightgrey" }}
+              href={"/terrenos/crear"}
+              size="large"
+            >
+              <FaArrowCircleLeft className="m-auto" size={"20px"} />
+            </Button>
+          </Col> */}
+        <Col xs={24} sm={20} md={16} lg={12} xl={8} xxl={4} className="titulo_pantallas">
+                <b> DATOS DEL TERRENO SELECCIONADO</b>
         </Col>
       </Row>
-      <Row justify={"center"} gutter={[16]}>
-        <Col xs={24} sm={12} lg={12}>
-          <Paper style={{ backgroundColor: "lightgrey" }}>
-            <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12}>
-                Nombre Proyecto: {terrenoSeleccionado.nombre}
+
+      <Row justify={"center"} gutter={[16]} style={{marginTop:"80px"}}>
+        <Col xs={24} sm={12} lg={12} className="formulario_alterno">
+            <Row gutter={[16]} >
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Nombre Proyecto:</b> <a>{terrenoSeleccionado.nombre}</a>
               </Col>
-              <Col xs={24} sm={12} lg={12}>
-                Nombre Propietario: {terrenoSeleccionado.propietario}
-              </Col>
-            </Row>
-            <Row>
-              <Col>Domicilio: {terrenoSeleccionado.domicilio}</Col>
-            </Row>
-            <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12}>
-                Colonia/Localidad: {terrenoSeleccionado.colonia}
-              </Col>
-              <Col xs={24} sm={12} lg={12}>
-                Ciudad: {terrenoSeleccionado.ciudad}
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Nombre Propietario:</b> <a>{terrenoSeleccionado.propietario}</a>
               </Col>
             </Row>
-            <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12}>
-                Cantidad De Lotes: {terrenoSeleccionado.cantidad_lotes}
+            <Row gutter={[16]} className="renglon_otro_color">
+              <Col xs={24} sm={24} lg={24} className="informacion_col">
+                <b>Domicilio:</b> <a>{terrenoSeleccionado.domicilio}</a>
               </Col>
-              <Col xs={24} sm={12} lg={12}>
-                Precio Venta Proyectado de contado:{" "}
-                {terrenoSeleccionado.precio_proyectado_contado}
+            </Row>
+            <Row gutter={[16]} >
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Colonia/Localidad:</b> <a>{terrenoSeleccionado.colonia}</a>
+
+              </Col>
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Ciudad:</b> <a>{terrenoSeleccionado.ciudad}</a>
+
+              </Col>
+            </Row>
+            <Row gutter={[16]} className="renglon_otro_color">
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Cantidad De Lotes:</b> <a>{terrenoSeleccionado.cantidad_lotes}</a>
+
+              </Col>
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                
+                <b>Precio Venta Proyectado de contado: </b> <a>{terrenoSeleccionado.precio_proyectado_contado}</a>
+
               </Col>
             </Row>
             <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12}>
-                Superficie Total: {terrenoSeleccionado.superficie_total}
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Superficie Total: </b> <a>{terrenoSeleccionado.superficie_total}</a>
+
               </Col>
-              <Col xs={24} sm={12} lg={12}>
-                Area Reserva: {terrenoSeleccionado.area_reserva}
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Area Reserva: </b> <a>{terrenoSeleccionado.area_reserva}</a>
               </Col>
             </Row>
 
-            <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12}>
-                Area Vendible: {terrenoSeleccionado.area_vendible}
+            <Row gutter={[16]} className="renglon_otro_color">
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Area Vendible: </b> <a>{terrenoSeleccionado.area_vendible}</a>
+
               </Col>
-              <Col xs={24} sm={12} lg={12}>
-                Area Vialidad: {terrenoSeleccionado.area_vialidad}
-              </Col>
-            </Row>
-            <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12}>
-                Precio De Compra: {terrenoSeleccionado.precio_compra}
-              </Col>
-              <Col xs={24} sm={12} lg={12}>
-                Precio M2: {terrenoSeleccionado.precio_m2}
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Area Vialidad: </b> <a>{terrenoSeleccionado.area_vialidad}</a>
+
               </Col>
             </Row>
-          </Paper>
+            <Row gutter={[16]} >
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Precio De Compra: </b> <a>{terrenoSeleccionado.precio_compra}</a>
+
+              </Col>
+              <Col xs={24} sm={12} lg={12} className="informacion_col">
+                <b>Precio M2: </b> <a>{terrenoSeleccionado.precio_m2}</a>
+
+              </Col>
+            </Row>
         </Col>
       </Row>
 
       <Row style={{ paddingTop: "30px" }} justify={"center"} gutter={[16]}>
-        <Row gutter={[16]}>
+        <Row gutter={[16]} >
           <Col>
-            <Button onClick={verTerrenos} size="large">
+            <Button className="boton" onClick={verTerrenos} size="large">
               Superficie
             </Button>
           </Col>
           <Col>
-            <Button onClick={verPlazos} size="large">
+            <Button className="boton" onClick={verPlazos} size="large">
               Plazos
             </Button>
           </Col>
           <Col>
-            <Button onClick={editarTerreno} size="large">
+            <Button className="boton" onClick={editarTerreno} size="large">
               Editar
             </Button>
           </Col>

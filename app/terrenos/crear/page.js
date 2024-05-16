@@ -147,14 +147,14 @@ export default function TerrenosCrear() {
               <TableContainer component={Paper} className="tabla">
                 <Table>
                   <TableHead>
-                    <TableRow>
-                      <TableCell className="tabla_encabezado"><p>Proyecto</p></TableCell>
-                      <TableCell className="tabla_encabezado"><p>Propietario</p></TableCell>
-                      <TableCell className="tabla_encabezado"><p>Domicilio</p></TableCell>
-                      <TableCell className="tabla_encabezado"><p>Colonia/Localidad</p></TableCell>
-                      <TableCell className="tabla_encabezado"><p>Ciudad</p></TableCell>
-                      <TableCell className="tabla_encabezado"><p>Superficie</p></TableCell>
-                      <TableCell className="tabla_encabezado"></TableCell>
+                    <TableRow className="tabla_encabezado">
+                      <TableCell><p>Proyecto</p></TableCell>
+                      <TableCell><p>Propietario</p></TableCell>
+                      <TableCell><p>Domicilio</p></TableCell>
+                      <TableCell><p>Colonia/Localidad</p></TableCell>
+                      <TableCell><p>Ciudad</p></TableCell>
+                      <TableCell><p>Superficie</p></TableCell>
+                      <TableCell></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

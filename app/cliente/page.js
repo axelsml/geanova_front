@@ -8,6 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import {FaArrowCircleLeft, FaPrint } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
 import {FaFilePdf  } from "react-icons/fa6";
+import { SiOpslevel } from "react-icons/si";
 
 import {
   Paper,
@@ -162,8 +163,12 @@ export default function ClientesInfo() {
 
   return (
     <div className="p-8 grid gap-4">
-
-     <Row justify={"center"} className="gap-10">
+      <Row justify={"center"}>
+        <Col xs={24} sm={20} md={16} lg={12} xl={8} xxl={4} className="titulo_pantallas">
+                <b>INFORMACION DEL CLIENTE</b>
+        </Col>
+      </Row>
+     <Row justify={"center"} style={{marginTop:"15px"}}>
           <Col>
           <Form.Item
               label={"Proyecto"}
@@ -211,160 +216,166 @@ export default function ClientesInfo() {
             </Form.Item>
           </Col>
           <Col>
-            <Button onClick={BuscarInfoLote}>
+            <Button className="boton" onClick={BuscarInfoLote}>
               Buscar
             </Button>
           </Col>
      </Row>
     {info_cliente != null &&(<>
-          
-     <Row justify={"center"} gutter={[16]}>
-        <Col xs={24} sm={12} lg={12}>
-          <Paper style={{ backgroundColor:"lightgrey"}}>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Nombre Cliente: {info_cliente.nombre_completo}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Cliente Desde: {info_cliente.cliente_desde}
-                    </Col>
-               </Row>
-               <Row>
-                    <Col>
-                         Domicilio: {info_cliente.domicilio}
-                    </Col>
-               </Row>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Telefono 1: {info_cliente.telefono_celular}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Telefono 2: {info_cliente.telefono_celular_2}
-                    </Col>
-               </Row>
-               
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Fecha Nacimiento: {info_cliente.fecha_nacimiento}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Lotes Adquiridos: {info_cliente.lotes_adquiridos}
-                    </Col>
-               </Row>
-               
-               
-          </Paper>
-        </Col> 
-      </Row>
-      <Row justify={"center"} gutter={[16]}>
-        <Col xs={24} sm={12} lg={12}>
-          <Paper style={{ backgroundColor:"lightgrey"}}>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         No. Lote: {info_lote.lote}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Superficie(M2): {info_lote.superficie}
-                    </Col>
-               </Row>
-          
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Proyecto: {info_lote.terreno}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Fecha De Solicitud: {info_lote.fecha_solicitud}
-                    </Col>
-               </Row>
-               
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Monto Contrato: ${formatPrecio(info_lote.monto_contrato)}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Cantidad Pagos: {info_lote.cantidad_pagos}
-                    </Col>
-               </Row>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Anticipo: ${formatPrecio(info_lote.anticipo)}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Sistema De Pago: {info_lote.sistema_pago}
-                    </Col>
-               </Row>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Plazo: {info_lote.plazo}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Monto Requerido: ${formatPrecio(info_lote.monto_pago_requerido)}
-                    </Col>
-                   
-               </Row>
-               
-          </Paper>
-        </Col> 
-      </Row>
-      <Row justify={"center"} gutter={[16]}>
-        <Col xs={24} sm={12} lg={12}>
-          <Paper style={{ backgroundColor:"lightgrey"}}>
-               <Row>
+    <Row justify={"center"} gutter={[16]}>
+      <Col className="formulario_alterno" xs={24} sm={12} lg={12}>
+      <Row justify={"center"} gutter={[16]} style={{marginTop:"5px"}}>
+          <Col xs={24} sm={24} lg={24}>
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Nombre Cliente: {info_cliente.nombre_completo}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Cliente Desde: {info_cliente.cliente_desde}
+                      </Col>
+                </Row>
+                <Row gutter={[16]} className="renglon_otro_color">
+                      <Col>
+                          Domicilio: {info_cliente.domicilio}
+                      </Col>
+                </Row>
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Telefono 1: {info_cliente.telefono_celular}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Telefono 2: {info_cliente.telefono_celular_2}
+                      </Col>
+                </Row>
+                
+                <Row gutter={[16]} className="renglon_otro_color">
+                      <Col xs={24} sm={12} lg={12}>
+                          Fecha Nacimiento: {info_cliente.fecha_nacimiento}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Lotes Adquiridos: {info_cliente.lotes_adquiridos}
+                      </Col>
+                </Row>
+                
+                
+          </Col> 
+        </Row>
+        <Row justify={"center"} gutter={[16]}>
+          <Col xs={24} sm={24} lg={24}>
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          No. Lote: {info_lote.lote}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Superficie(M2): {info_lote.superficie}
+                      </Col>
+                </Row>
+            
+                <Row gutter={[16]} className="renglon_otro_color">
+                      <Col xs={24} sm={12} lg={12}>
+                          Proyecto: {info_lote.terreno}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Fecha De Solicitud: {info_lote.fecha_solicitud}
+                      </Col>
+                </Row>
+                
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Monto Contrato: ${formatPrecio(info_lote.monto_contrato)}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Cantidad Pagos: {info_lote.cantidad_pagos}
+                      </Col>
+                </Row>
+                <Row gutter={[16]} className="renglon_otro_color">
+                      <Col xs={24} sm={12} lg={12}>
+                          Anticipo: ${formatPrecio(info_lote.anticipo)}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Sistema De Pago: {info_lote.sistema_pago}
+                      </Col>
+                </Row>
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Plazo: {info_lote.plazo}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Monto Requerido: ${formatPrecio(info_lote.monto_pago_requerido)}
+                      </Col>
+                    
+                </Row>
+                
+          </Col> 
+        </Row>
+        <Row justify={"center"} gutter={[16]}>
+          <Col xs={24} sm={24} lg={24}> 
+                <Row gutter={[16]} className="renglon_otro_color">
+                  <Col xs={4} sm={4} lg={2}>
                     Estado:
-                    <Button disabled size={"small"} shape="round" style={{backgroundColor:info_lote.situacion_solicitud_color}}>
+                    </Col>
+
+                  <Col xs={4} sm={4} lg={2}>
+
+                    <Button disabled size={"small"} shape="round"  style={{backgroundColor:info_lote.situacion_solicitud_color,border:"none"}} >
+                    <SiOpslevel style={{backgroundColor:info_lote.situacion_solicitud_color}} />
                     </Button>
-               </Row>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Monto Pagado: ${formatPrecio(info_lote.monto_pagado)}
                     </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Monto Vencido: ${formatPrecio(info_lote.monto_vencido)}
-                    </Col>
-               </Row>
-          
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Pagos Vencidos: {info_lote.cantidad_vencidos}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Pagos Adelantados: {info_lote.cantidad_adelantados}
-                    </Col>
-               </Row>
+                </Row>
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Monto Pagado: ${formatPrecio(info_lote.monto_pagado)}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Monto Vencido: ${formatPrecio(info_lote.monto_vencido)}
+                      </Col>
+                </Row>
+            
+                <Row gutter={[16]} className="renglon_otro_color">
+                      <Col xs={24} sm={12} lg={12}>
+                          Pagos Vencidos: {info_lote.cantidad_vencidos}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Pagos Adelantados: {info_lote.cantidad_adelantados}
+                      </Col>
+                </Row>
+                
+                <Row gutter={[16]}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Pagos Completados: {(info_lote.pagos_completados)}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Pagos Realizados: {info_lote.pagos_dados}
+                      </Col>
+                </Row>
+                <Row gutter={[16]} className="renglon_otro_color" style={{marginBottom:"18px"}}>
+                      <Col xs={24} sm={12} lg={12}>
+                          Pagos Transcurridos: {(info_lote.pagos_esperados)}
+                      </Col>
+                      <Col xs={24} sm={12} lg={12}>
+                          Saldo: ${formatPrecio(info_lote.saldo)}
+                      </Col>
+                </Row>
                
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Pagos Completados: {(info_lote.pagos_completados)}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Pagos Realizados: {info_lote.pagos_dados}
-                    </Col>
-               </Row>
-               <Row gutter={[16]}>
-                    <Col xs={24} sm={12} lg={12}>
-                         Pagos Transcurridos: {(info_lote.pagos_esperados)}
-                    </Col>
-                    <Col xs={24} sm={12} lg={12}>
-                         Saldo: ${formatPrecio(info_lote.saldo)}
-                    </Col>
-               </Row>
-              
-               
-          </Paper>
-        </Col> 
-      </Row>
+                
+                
+          </Col> 
+        </Row>
+      </Col> 
+    </Row>
     </>)}
 
 
        {info_cliente != null && info_lote != null && (
         <Row justify={"center"} className="gap-10">
           <Col>
-            <Button size={"large"} onClick={CreateNuevoPago}>
+            <Button className="boton" size={"large"} onClick={CreateNuevoPago}>
               Nuevo Pago
             </Button>
           </Col>
           <Col>
           <Button
+          className="boton"
                size="large"
                onClick={() => {
                window.open(
@@ -378,6 +389,7 @@ export default function ClientesInfo() {
           </Col>
           <Col>
           <Button
+          className="boton"
                size="large"
                onClick={() => {
                     // terrenoSelected.id,loteSelected.id
@@ -390,7 +402,7 @@ export default function ClientesInfo() {
           </Button>
           </Col>
           <Col>
-          <Button onClick={() => {
+          <Button className="boton" onClick={() => {
                        window.open(
                          // https://api.santamariadelaluz.com
                             `https://api.santamariadelaluz.com/mostrar_imagen/${info_cliente.id}.pdf`
@@ -419,19 +431,19 @@ export default function ClientesInfo() {
       </Row>
 
       {info_lote != null &&(<>
-          <Row justify={"center"} className="w-3/4 m-auto">
+          <Row justify={"center"} className="w-3/4 m-auto tabla">
                     <TableContainer component={Paper}>
                       <Table>
                         <TableHead>
-                          <TableRow>
-                            <TableCell>#</TableCell>
-                            <TableCell>Folio</TableCell>
-                            <TableCell>Fecha Operacion</TableCell>
-                            <TableCell>Fecha</TableCell>
-                            <TableCell>Requerido</TableCell>
-                            <TableCell>Realizado</TableCell>
-                            <TableCell>Saldo Pendiente</TableCell>
-                            <TableCell>Sistema Pago</TableCell>
+                          <TableRow className="tabla_encabezado">
+                            <TableCell><p>#</p></TableCell>
+                            <TableCell><p>Folio</p></TableCell>
+                            <TableCell><p>Fecha Operacion</p></TableCell>
+                            <TableCell><p>Fecha</p></TableCell>
+                            <TableCell><p>Requerido</p></TableCell>
+                            <TableCell><p>Realizado</p></TableCell>
+                            <TableCell><p>Saldo Pendiente</p></TableCell>
+                            <TableCell><p>Sistema Pago</p></TableCell>
                             <TableCell></TableCell>
                           </TableRow>
                         </TableHead>
@@ -469,7 +481,7 @@ export default function ClientesInfo() {
 
                                 </TableCell>
                               <TableCell>
-                              <Button key={pago} onClick={() => {
+                              <Button className="boton" key={pago} onClick={() => {
                         window.open(
                          `https://api.santamariadelaluz.com/iPagos/recibo/${pago.pago_id}.pdf`
                         );
