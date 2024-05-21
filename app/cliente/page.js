@@ -160,7 +160,29 @@ export default function ClientesInfo() {
      );
      
    };
-
+   function borrarAmortizacion(){
+    var params = {
+      solicitud_id:info_lote.solicitud_id
+    };
+    ventasService.borrarAmortizacion(params,onAmortizacionBorrada,onError)
+   }
+   async function onAmortizacionBorrada(data){
+    if(data.success){
+      window.open(
+        `https://api.santamariadelaluz.com/iUsuarios/${info_lote.solicitud_id}.pdf`
+      );
+    }else{
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No Se Pudo Borrar Amortizacion",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+        });
+    }
+   }
   return (
     <div className="p-8 grid gap-4">
       <Row justify={"center"}>
@@ -371,6 +393,11 @@ export default function ClientesInfo() {
           <Col>
             <Button className="boton" size={"large"} onClick={CreateNuevoPago}>
               Nuevo Pago
+            </Button>
+          </Col>
+          <Col>
+            <Button className="boton" size={"large"} onClick={()=>{borrarAmortizacion()}}>
+              Borrar Amortizacion
             </Button>
           </Col>
           <Col>

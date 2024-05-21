@@ -263,7 +263,30 @@ class pagosService {
         }
       });
   }
-
+  ultimoMovimientoBanco(callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("ultimosMovimientoPorCuenta", { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
 }
 
 export default new pagosService();

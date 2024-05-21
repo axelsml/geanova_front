@@ -39,6 +39,7 @@ const [recibidos, setMovimientosRecibidos] = useState([]);
 const [por_conciliar, setMovimientoBanco] = useState([]);
 const [movimientos_pendientes, setPendientes] = useState([]);
 const [pago_seleccionado, setPagoSeleccionado] = useState({});
+const [ultimos_movimientos, setUltimosMovimientos] = useState([]);
 
 const [visible, setVisible] = useState(false);
 
@@ -78,15 +79,28 @@ const handleUpload = (file) => {
     const worksheet = workbook.Sheets[sheetName];
     const dataArr = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     setExcelData(dataArr);
-    message.success(`${file.name} file uploaded successfully`);
+    message.success(`${file.name} Adjuntado`);
+    guardarEstadoCuenta(dataArr)
   };
   reader.readAsArrayBuffer(file);
 };
 
 const columns = excelData.length > 0 ? excelData[0].map((header, index) => ({ title: header, dataIndex: index.toString() })) : [];
 
+const handleTabChange = (key) => {
+    
+   if (key === "2") {
+     buscarUltimoRegistroBancos()
+     } 
+   };
 
-
+function buscarUltimoRegistroBancos(){
+     debugger
+     pagosService.ultimoMovimientoBanco(onUltimosMovimientosEncontrados,onError)
+}
+async function onUltimosMovimientosEncontrados(data){
+     setUltimosMovimientos(data.respuesta)
+}
   const onError = () => {
     setIsLoading(false);
     Swal.fire({
@@ -100,17 +114,49 @@ const columns = excelData.length > 0 ? excelData[0].map((header, index) => ({ ti
     });
   };
 
-  function guardarEstadoCuenta(){
-    var datos =  excelData.slice(1)
+  function guardarEstadoCuenta(excel_data){
+     debugger
+     const columns_aux = excel_data.length > 0 ? excel_data[0].map((header, index) => ({ title: header, dataIndex: index.toString() })) : [];
+
+     setIsLoading(true)
+    var datos =  excel_data.slice(1)
     var datos_formateados = []
+    console.log(columns_aux)
+    debugger
+
     for (let i = 0; i < datos.length; i++) {
-     var info = {
-     fecha_operacion:XLSX.SSF.format('YYYY-MM-DD', datos[i][0]),
-     descripcion:datos[i][1],
-     cargo:datos[i][2],
-     abono:datos[i][3],
-     saldo:datos[i][4],
+     
+         if(columns_aux[0].title == "CUENTA"){
+          let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          let fecha_ingreso = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          var info = {
+          fecha_operacion:fecha,
+          fecha_ingreso:fecha_ingreso,
+          cuenta: datos[i][0],
+          cuenta_id:2,
+          descripcion:datos[i][11],
+          cargo:parseFloat(datos[i][8]),
+          abono:parseFloat(datos[i][7]),
+          saldo:parseFloat(datos[i][9]),
+          movimiento:(datos[i][10]),
+          descripcion_corta:datos[i][4],
+          cod_transaccion:parseInt(datos[i][5]),
+          cheque:(datos[i][12]),
+
+          }
+     }else{
+          let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+          var info = {
+          cuenta_id:1,     
+          fecha_operacion:fecha,
+          descripcion:datos[i][1],
+          cargo:parseFloat(datos[i][2]),
+          abono:parseFloat(datos[i][3]),
+          saldo:parseFloat(datos[i][4]),
+          }
+
      }
+    
      datos_formateados.push(info);
    }
      console.log(datos)
@@ -131,7 +177,17 @@ const columns = excelData.length > 0 ? excelData[0].map((header, index) => ({ ti
      setMovimientoBanco(data.pendientes)
   }
   async function onMovimientosGuardados(data){
-     debugger
+     setIsLoading(false)
+     Swal.fire({
+          title: "Info",
+          icon: "info",
+          text: "Cantidad De Registros Nuevos Guardados: "+data.movimientos_guardados,
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: false,
+          confirmButtonText: "Aceptar",
+        });
+     
   }
 function cargarMovimientosEfectivo(){
      setIsLoading(true)
@@ -254,7 +310,7 @@ async function onMovimientoRecibido(data){
 }
   return (
     <div>
-     <Tabs defaultActiveKey="1">
+     <Tabs defaultActiveKey="1" onChange={handleTabChange}>
       <TabPane tab="Efectivo" key="1">
           <Row justify={"center"} className="m-auto">
                <Button onClick={() =>{cargarMovimientosEfectivo()}}>
@@ -413,26 +469,53 @@ async function onMovimientoRecibido(data){
                     <Button icon={<UploadOutlined />}>Adjuntar Archivo</Button>
                     </Upload>
                </Col>
-               <Col>
+               {/* <Col>
                <Button disabled={excelData.slice(1).length == 0} onClick={() =>{guardarEstadoCuenta()}}>
                     Guardar Estado De Cuenta
                </Button>
-               </Col>
+               </Col> */}
                <Col>
                <Button onClick={() =>{cargarMovimientosPendientesConciliar()}}>
                     Movimientos Pendientes Conciliar
                </Button>
                </Col>
           </Row>
-          {excelData.slice(1).length != 0 &&(<>
-          <Row>
-               <Col>
-                    <TablaExcel dataSource={excelData.slice(1)} columns={columns} />
+          {ultimos_movimientos.length != 0 && (<>
+               <Row justify={"center"} className="m-auto">
+                    <Col>
+                    <TableContainer component={Paper}>
+                         <Table>
+                         <TableHead>
+                         <TableRow>
+                              <TableCell>Cuenta</TableCell>
+                              <TableCell>Fecha Ultimo Registro</TableCell>
+                              <TableCell>Ultima Actualizacion</TableCell>
+                         </TableRow>
+                         </TableHead>
+                         <TableBody>
+                              {ultimos_movimientos.map((mov, index) => (
+                              <TableRow key={index}>
+                                   <TableCell>
+                                   {mov.cuenta}
+                                   </TableCell>
+                                   <TableCell>
+                                   {mov.fecha}
+                                   </TableCell>
+                                   <TableCell>
+                                   {mov.ultima_actualizacion}
+                                   </TableCell>
+                              </TableRow>
+                              ))}
+                         </TableBody>
+                         </Table>
+                    </TableContainer>
                </Col>
           </Row>
           </>)}
+          
           {por_conciliar.length != 0 && (<>
           <Row justify={"center"} className="m-auto">
+               <Col>
                <TableContainer component={Paper}>
                     <Table>
                     <TableHead>
@@ -499,6 +582,14 @@ async function onMovimientoRecibido(data){
                     </TableFooter>
                     </Table>
                </TableContainer>
+               </Col>
+          </Row>
+          </>)}
+          {excelData.slice(1).length != 0 &&(<>
+          <Row justify={"center"} className="m-auto">
+               <Col>
+                    <TablaExcel dataSource={excelData.slice(1)} columns={columns} />
+               </Col>
           </Row>
           </>)}
           <Modal
