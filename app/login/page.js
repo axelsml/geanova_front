@@ -13,14 +13,21 @@ import { usuario_id } from "@/helpers/user";
 export default function LoginPage() {
   const router = useRouter();
 
+  const [usuario_id, setUsuarioId] = useState(null);
+
   useEffect(() => {
-    console.log("usuario "+usuario_id);
-    debugger
-    console.log("usuario_id != null = "+usuario_id != null);
-    if (usuario_id != null) {
-      window.location.href = '/';
+    // Solo accedemos a localStorage si estamos en el navegador
+    if (typeof window !== 'undefined') {
+      const storedUsuario = window.localStorage.getItem('usuario');
+      if (storedUsuario) {
+        const usuarioId = JSON.parse(storedUsuario).id;
+        if (usuarioId !== null) {
+          router.push("/");
+        }
+      }
     }
   }, []);
+ 
 
 
   const { setIsLoading } = useContext(LoadingContext);
