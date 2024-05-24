@@ -646,11 +646,7 @@ async function onMovimientoRecibido(data){
                          </TableHead>
 
                          <TableBody>
-                              {movimientos_pendientes.slice(
-                                   page * rowsPerPage,
-                                   page * rowsPerPage + rowsPerPage
-                              )
-                              .map((movimiento, index) => (
+                              {movimientos_pendientes.map((movimiento, index) => (
                                    <TableRow key={index}>
                               <TableCell>
                               {movimiento.fecha_operacion}
