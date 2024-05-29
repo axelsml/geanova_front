@@ -2,7 +2,7 @@
 import usuariosService from "@/services/usuariosService";
 import { redirect, useRouter } from "next/navigation";
 import InputIn from "@/components/Input";
-import { Form, Button, Row ,Col,Upload,message,Tabs,Modal  } from "antd";
+import { Form, Button, Row ,Col,Upload,message,Tabs,Modal, Select  } from "antd";
 import {Table as TablaExcel } from "antd";
 const { TabPane } = Tabs;
 import { useContext, useEffect, useState } from "react";
@@ -17,6 +17,7 @@ import {
    } from "@/helpers/formatters";
 import pagosService from "@/services/pagosService";
 import {
+     Input,
      Paper,
      Table,
      TableBody,
@@ -24,9 +25,12 @@ import {
      TableContainer,
      TableHead,
      TableRow,
+     TableSortLabel ,
      TablePagination,
      TableFooter,
    } from "@mui/material";
+import terrenosService from "@/services/terrenosService";
+import lotesService from "@/services/lotesService";
 export default function Recursos() {
 
 //   useEffect(() => {
@@ -35,6 +39,9 @@ export default function Recursos() {
 const { setIsLoading } = useContext(LoadingContext);
 const [excelData, setExcelData] = useState([]);
 const [pendientes, setMovimientosPendientes] = useState([]);
+const [monto_pendientes, setMovimientosPendientesMonto] = useState(0);
+const [monto_pendientes2, setMovimientosPendientesMonto2] = useState(0);
+
 const [recibidos, setMovimientosRecibidos] = useState([]);
 const [por_conciliar, setMovimientoBanco] = useState([]);
 const [movimientos_pendientes, setPendientes] = useState([]);
@@ -42,6 +49,15 @@ const [pago_seleccionado, setPagoSeleccionado] = useState({});
 const [ultimos_movimientos, setUltimosMovimientos] = useState([]);
 
 const [visible, setVisible] = useState(false);
+const [order, setOrder] = useState('asc');
+const [orderBy, setOrderBy] = useState('fecha_operacion');
+
+const [terrenos, setTerrenos] = useState([]);
+  const [terrenoSelected, setTerrenoSelected] = useState(null);
+  const [terrenoSelected2, setTerrenoSelected2] = useState(null);
+
+  const [cuentas, setCuentas] = useState([]);
+  const [cuentaSelected, setCuentaSelected] = useState(null);
 
 const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -69,6 +85,12 @@ const [show, setShow] = useState(false);
      setPage2(0);
    };
 
+   useEffect(() => {
+     //     ventasService.getVentas(setVentas, Error);
+          terrenosService.getTerrenos(setTerrenos, Error);
+          lotesService.getCuentas(setCuentas, Error);
+          //     BuscarInfoLote()
+       }, []);
    
 const handleUpload = (file) => {
   const reader = new FileReader();
@@ -170,11 +192,15 @@ async function onUltimosMovimientosEncontrados(data){
 
   function cargarMovimientosPendientesConciliar(){
      setIsLoading(true)
-     pagosService.BuscarMovimientoBancoPendientesConciliar(onMovimientosEncontrados,onError)
+     var params ={
+          terreno_id:terrenoSelected2
+     }
+     pagosService.BuscarMovimientoBancoPendientesConciliar(params,onMovimientosEncontrados,onError)
   }
   async function onMovimientosEncontrados(data){
      setIsLoading(false)
      setMovimientoBanco(data.pendientes)
+     setMovimientosPendientesMonto2(data.monto_pendiente)
   }
   async function onMovimientosGuardados(data){
      setIsLoading(false)
@@ -193,11 +219,15 @@ async function onUltimosMovimientosEncontrados(data){
   }
 function cargarMovimientosEfectivo(){
      setIsLoading(true)
-     pagosService.getMovimientosEfectivo(onMovimientosEfectivoCargados,onError)
+     var params = {
+          terreno_id:terrenoSelected
+     }
+     pagosService.getMovimientosEfectivo(params,onMovimientosEfectivoCargados,onError)
 }
 async function onMovimientosEfectivoCargados(data){
      setIsLoading(false)
      setMovimientosPendientes(data.pendientes)
+     setMovimientosPendientesMonto(data.monto_pendiente)
      setMovimientosRecibidos(data.recibidos)
 }
 
@@ -310,6 +340,46 @@ async function onMovimientoRecibido(data){
              });
      }
 }
+const descendingComparator = (a, b, orderBy) => {
+     if (b[orderBy] < a[orderBy]) {
+       return -1;
+     }
+     if (b[orderBy] > a[orderBy]) {
+       return 1;
+     }
+     return 0;
+   };
+   
+   const getComparator = (order, orderBy) => {
+     return order === 'desc'
+       ? (a, b) => descendingComparator(a, b, orderBy)
+       : (a, b) => -descendingComparator(a, b, orderBy);
+   };
+   
+   const stableSort = (array, comparator) => {
+     const stabilizedThis = array.map((el, index) => [el, index]);
+     stabilizedThis.sort((a, b) => {
+       const order = comparator(a[0], b[0]);
+       if (order !== 0) return order;
+       return a[1] - b[1];
+     });
+     return stabilizedThis.map((el) => el[0]);
+   };
+
+   const handleRequestSort = (event, property) => {
+     const isAsc = orderBy === property && order === 'asc';
+     setOrder(isAsc ? 'desc' : 'asc');
+     setOrderBy(property);
+   };
+
+   const handleSelectChange = (value) => {
+     setTerrenoSelected(value);
+   };
+
+   const handleSelectChange2 = (value) => {
+     setTerrenoSelected2(value);
+   };
+   
   return (
     <div>
      <Row justify={"center"}>
@@ -322,14 +392,41 @@ async function onMovimientoRecibido(data){
                </Col>
                </Row> */}
                <Row justify={"center"} className="m-auto">
+                    <Col>
+                    <Select
+                         showSearch
+                         placeholder="Seleccione un Proyecto"
+                         optionLabelProp="label"
+                         onChange={handleSelectChange}
+                    >
+                         <Option key="todos" value="0" label="Todos">
+                         Todos
+                         </Option>
+                         {terrenos?.map((item,index) => (
+                         <Option key={index} value={item.id} label={item.nombre}>
+                              {item?.nombre}
+                         </Option>
+                         ))}
+                    </Select>
+                    </Col>
+                    <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosEfectivo()}}>
                          Cargar Efectivo
                     </Button>
+                    </Col>
+                    
                </Row>
+              
                <Row style={{paddingTop:"20px",paddingBottom:"10px"}} justify={"center"} className="m-auto">
                     <Col className="formulario">
                     <b>Movimientos Pendientes</b>
                     </Col>
+               </Row>
+               <Row justify={"center"} className="m-auto">
+                   <b>Cantidad Pendiente:</b> 
+                   <a>
+                    ${formatPrecio(parseFloat(monto_pendientes))}
+                   </a>
                </Row>
                <Row justify={"center"} className="m-auto">
                     <Col xs={24} sm={20} md={16} lg={16} xl={16} xxl={16}>
@@ -339,7 +436,13 @@ async function onMovimientoRecibido(data){
                          <TableRow>
                               <TableCell><p>Concepto</p></TableCell>
                               <TableCell><p>Detalle</p></TableCell>
-                              <TableCell><p>Fecha Operacion</p></TableCell>
+                              <TableCell>
+                              <p><TableSortLabel
+                                   active={orderBy === 'fecha_operacion'}
+                                   direction={orderBy === 'fecha_operacion' ? order : 'asc'}
+                                   onClick={(event) => handleRequestSort(event, 'fecha_operacion')}
+                              >
+                              </TableSortLabel>Fecha Operacion</p></TableCell>
                               <TableCell><p>Importe</p></TableCell>
                               <TableCell><p>Usuario</p></TableCell>
                               <TableCell><p></p></TableCell>
@@ -347,7 +450,7 @@ async function onMovimientoRecibido(data){
                          </TableHead>
 
                          <TableBody>
-                              {pendientes.slice(
+                              {stableSort(pendientes, getComparator(order, orderBy)).slice(
                               page * rowsPerPage,
                               page * rowsPerPage + rowsPerPage
                               )
@@ -486,11 +589,26 @@ async function onMovimientoRecibido(data){
                          <Button className="boton" icon={<UploadOutlined />}>Adjuntar Archivo</Button>
                          </Upload>
                     </Col>
-                    {/* <Col>
-                    <Button disabled={excelData.slice(1).length == 0} onClick={() =>{guardarEstadoCuenta()}}>
-                         Guardar Estado De Cuenta
-                    </Button>
-                    </Col> */}
+                    
+               </Row>
+               <Row justify={"center"} className="m-auto">
+                    <Col>
+                    <Select
+                         showSearch
+                         placeholder="Seleccione un Proyecto"
+                         optionLabelProp="label"
+                         onChange={handleSelectChange2}
+                    >
+                         <Option key="todos" value="0" label="Todos">
+                         Todos
+                         </Option>
+                         {terrenos?.map((item,index) => (
+                         <Option key={index} value={item.id} label={item.nombre}>
+                              {item?.nombre}
+                         </Option>
+                         ))}
+                    </Select>
+                    </Col>
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosPendientesConciliar()}}>
                          Movimientos Pendientes Conciliar
@@ -545,6 +663,12 @@ async function onMovimientoRecibido(data){
                          <b>Movimientos Pendientes</b>
                          </Col>
                     </Row>
+                    <Row justify={"center"} className="m-auto">
+                    <b>Cantidad Pendiente:</b> 
+                    <a>
+                         ${formatPrecio(parseFloat(monto_pendientes2))}
+                    </a>
+                    </Row>
                <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
                     <Col xs={24} sm={20} md={14} lg={14} xl={14} xxl={14}>
                     <TableContainer className="tabla">
@@ -555,7 +679,13 @@ async function onMovimientoRecibido(data){
                               <TableCell><p>Nombre Cliente</p></TableCell>
                               <TableCell><p>Folio Pago</p></TableCell>
                               <TableCell><p>Monto Pagado</p></TableCell>
-                              <TableCell><p>Fecha Operacion</p></TableCell>
+                              <TableCell>
+                              <p><TableSortLabel
+                                   active={orderBy === 'fecha_operacion'}
+                                   direction={orderBy === 'fecha_operacion' ? order : 'asc'}
+                                   onClick={(event) => handleRequestSort(event, 'fecha_operacion')}
+                              >
+                              </TableSortLabel>Fecha Operacion</p></TableCell>
                               <TableCell><p>Fecha Transferencia</p></TableCell>
                               <TableCell><p>Ingreso</p></TableCell>
                               <TableCell><p></p></TableCell>
@@ -563,7 +693,7 @@ async function onMovimientoRecibido(data){
                          </TableHead>
 
                          <TableBody>
-                              {por_conciliar.slice(
+                              {stableSort(por_conciliar, getComparator(order, orderBy)).slice(
                               page * rowsPerPage,
                               page * rowsPerPage + rowsPerPage
                               )
@@ -638,7 +768,8 @@ async function onMovimientoRecibido(data){
                          <Table>
                          <TableHead>
                          <TableRow>
-                              <TableCell>Fecha Operacion</TableCell>
+                              <TableCell>
+                              Fecha Operacion</TableCell>
                               <TableCell>Descripcion</TableCell>
                               <TableCell>Cantidad</TableCell>
                               <TableCell></TableCell>
@@ -646,7 +777,7 @@ async function onMovimientoRecibido(data){
                          </TableHead>
 
                          <TableBody>
-                              {movimientos_pendientes.map((movimiento, index) => (
+                              {stableSort(movimientos_pendientes, getComparator(order, orderBy)).map((movimiento, index) => (
                                    <TableRow key={index}>
                               <TableCell>
                               {movimiento.fecha_operacion}

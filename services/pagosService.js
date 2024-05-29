@@ -108,7 +108,7 @@ class pagosService {
       });
   }
 
-  getMovimientosEfectivo(callback, error) {
+  getMovimientosEfectivo(params,callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -116,7 +116,7 @@ class pagosService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get("ManejoEfectivo", { cancelToken: call.token })
+      .get("ManejoEfectivo",{params}, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -236,7 +236,7 @@ class pagosService {
       });
   }
 
-  BuscarMovimientoBancoPendientesConciliar( callback, error) {
+  BuscarMovimientoBancoPendientesConciliar(params, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -246,6 +246,7 @@ class pagosService {
     return http
       .get(
         "pagos_ingresados_por_conciliar",
+        {params},
         { cancelToken: call.token }
       )
       .then((response) => {
