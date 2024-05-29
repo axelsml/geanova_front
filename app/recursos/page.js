@@ -5,6 +5,8 @@ import InputIn from "@/components/Input";
 import { Form, Button, Row ,Col,Upload,message,Tabs,Modal, Select  } from "antd";
 import {Table as TablaExcel } from "antd";
 const { TabPane } = Tabs;
+const { Option } = Select;
+
 import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { LoadingContext } from "@/contexts/loading";
@@ -391,7 +393,7 @@ const descendingComparator = (a, b, orderBy) => {
                </Col>
                </Row> */}
                <Row justify={"center"} className="m-auto">
-                    {/* <Col>
+                    <Col>
                     <Select
                          showSearch
                          placeholder="Seleccione un Proyecto"
@@ -405,7 +407,7 @@ const descendingComparator = (a, b, orderBy) => {
                          </Option>
                          ))}
                     </Select>
-                    </Col> */}
+                    </Col>
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosEfectivo()}}>
                          Cargar Efectivo
@@ -590,7 +592,7 @@ const descendingComparator = (a, b, orderBy) => {
                </Row>
                <Row justify={"center"} className="m-auto">
                     <Col>
-                    {/* <Select
+                    <Select
                          showSearch
                          placeholder="Seleccione un Proyecto"
                          optionLabelProp="label"
@@ -602,7 +604,7 @@ const descendingComparator = (a, b, orderBy) => {
                               {item?.nombre}
                          </Option>
                          ))}
-                    </Select> */}
+                    </Select>
                     </Col>
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosPendientesConciliar()}}>
