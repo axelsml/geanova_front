@@ -87,8 +87,8 @@ const [show, setShow] = useState(false);
 
    useEffect(() => {
      //     ventasService.getVentas(setVentas, Error);
-          terrenosService.getTerrenos(setTerrenos, Error);
-          lotesService.getCuentas(setCuentas, Error);
+          terrenosService.getTerrenos(setTerrenos, onError);
+          lotesService.getCuentas(setCuentas, onError);
           //     BuscarInfoLote()
        }, []);
    
@@ -392,23 +392,21 @@ const descendingComparator = (a, b, orderBy) => {
                </Col>
                </Row> */}
                <Row justify={"center"} className="m-auto">
-                    <Col>
+                    {/* <Col>
                     <Select
                          showSearch
                          placeholder="Seleccione un Proyecto"
                          optionLabelProp="label"
                          onChange={handleSelectChange}
                     >
-                         <Option key="todos" value="0" label="Todos">
-                         Todos
-                         </Option>
+                       
                          {terrenos?.map((item,index) => (
                          <Option key={index} value={item.id} label={item.nombre}>
                               {item?.nombre}
                          </Option>
                          ))}
                     </Select>
-                    </Col>
+                    </Col> */}
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosEfectivo()}}>
                          Cargar Efectivo
@@ -593,21 +591,19 @@ const descendingComparator = (a, b, orderBy) => {
                </Row>
                <Row justify={"center"} className="m-auto">
                     <Col>
-                    <Select
+                    {/* <Select
                          showSearch
                          placeholder="Seleccione un Proyecto"
                          optionLabelProp="label"
                          onChange={handleSelectChange2}
                     >
-                         <Option key="todos" value="0" label="Todos">
-                         Todos
-                         </Option>
+                       
                          {terrenos?.map((item,index) => (
                          <Option key={index} value={item.id} label={item.nombre}>
                               {item?.nombre}
                          </Option>
                          ))}
-                    </Select>
+                    </Select> */}
                     </Col>
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosPendientesConciliar()}}>
