@@ -87,8 +87,7 @@ const [show, setShow] = useState(false);
 
    useEffect(() => {
      //     ventasService.getVentas(setVentas, Error);
-          terrenosService.getTerrenos(setTerrenos, onError);
-          lotesService.getCuentas(setCuentas, onError);
+          // terrenosService.getTerrenos(setTerrenos, onError);
           //     BuscarInfoLote()
        }, []);
    
