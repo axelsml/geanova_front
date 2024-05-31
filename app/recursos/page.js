@@ -667,13 +667,14 @@ const descendingComparator = (a, b, orderBy) => {
                     </a>
                     </Row>
                <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
-                    <Col xs={24} sm={20} md={14} lg={14} xl={14} xxl={14}>
+                    <Col xs={24} sm={20} md={18} lg={18} xl={18} xxl={18}>
                     <TableContainer className="tabla">
                          <Table>
                          <TableHead className="tabla_encabezado">
                          
                          <TableRow>
                               <TableCell><p>Nombre Cliente</p></TableCell>
+                              <TableCell><p>Lote</p></TableCell>
                               <TableCell><p>Folio Pago</p></TableCell>
                               <TableCell><p>Monto Pagado</p></TableCell>
                               <TableCell>
@@ -684,6 +685,7 @@ const descendingComparator = (a, b, orderBy) => {
                               >
                               </TableSortLabel>Fecha Operacion</p></TableCell>
                               <TableCell><p>Fecha Transferencia</p></TableCell>
+                              <TableCell><p>Fecha Amortizacion</p></TableCell>
                               <TableCell><p>Ingreso</p></TableCell>
                               <TableCell><p></p></TableCell>
                          </TableRow>
@@ -700,6 +702,9 @@ const descendingComparator = (a, b, orderBy) => {
                               {pago.nombre_cliente}
                               </TableCell>
                               <TableCell>
+                              {pago.lote}
+                              </TableCell>
+                              <TableCell>
                               {pago.folio_pago}
                               </TableCell>
                               <TableCell>
@@ -710,6 +715,9 @@ const descendingComparator = (a, b, orderBy) => {
                               </TableCell>
                               <TableCell>
                               {pago.fecha_transferencia}
+                              </TableCell>
+                              <TableCell>
+                              {pago.fecha_amortizacion}
                               </TableCell>
                               <TableCell>
                               {pago.usuario_ingreso}
