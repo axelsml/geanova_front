@@ -264,6 +264,7 @@ function buscarMovimientosBanco(pago){
      var params ={
        fecha_operacion:pago.fecha_transferencia,
        monto_pago:pago.monto_pagado,
+       lote:pago.lote,
      }
      debugger
      pagosService.BuscarMovimientoBanco(params,onMovimientosCoinciden,onError)
