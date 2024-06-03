@@ -5,7 +5,7 @@ import { BiBuildings, BiCart, BiMoneyWithdraw, BiUser } from "react-icons/bi";
 import {TbReport  } from "react-icons/tb";
 import Image from "next/image";
 import Link from "next/link";
-
+import { usuario_id } from "@/helpers/user";
 export default function Home() {
   return (
     <div className="menu">
@@ -75,6 +75,7 @@ export default function Home() {
             </Card>
           </Link>
         </Col>
+        {usuario_id <= 2 &&(<>
         <Col span={8}>
           <Link key={"recursos"} href={"/recursos"}>
             <Card hoverable>
@@ -89,6 +90,7 @@ export default function Home() {
             </Card>
           </Link>
         </Col>
+        </>)}
       
       </Row>
 
