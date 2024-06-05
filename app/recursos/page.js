@@ -264,6 +264,7 @@ function buscarMovimientosBanco(pago){
      var params ={
        fecha_operacion:pago.fecha_transferencia,
        monto_pago:pago.monto_pagado,
+       lote:pago.lote,
      }
      debugger
      pagosService.BuscarMovimientoBanco(params,onMovimientosCoinciden,onError)
@@ -433,7 +434,9 @@ const descendingComparator = (a, b, orderBy) => {
                          <Table>
                          <TableHead className="tabla_encabezado">
                          <TableRow>
-                              <TableCell><p>Concepto</p></TableCell>
+                              <TableCell><p>Nombre Cliente</p></TableCell>
+                              <TableCell><p>Lote</p></TableCell>
+
                               <TableCell><p>Detalle</p></TableCell>
                               <TableCell>
                               <p><TableSortLabel
@@ -444,6 +447,7 @@ const descendingComparator = (a, b, orderBy) => {
                               </TableSortLabel>Fecha Operacion</p></TableCell>
                               <TableCell><p>Importe</p></TableCell>
                               <TableCell><p>Usuario</p></TableCell>
+                              <TableCell><p>Fecha Amortizacion</p></TableCell>
                               <TableCell><p></p></TableCell>
                          </TableRow>
                          </TableHead>
@@ -456,7 +460,10 @@ const descendingComparator = (a, b, orderBy) => {
                               .map((pendiente, index) => (
                               <TableRow key={index}>
                               <TableCell>
-                              {pendiente.concepto}
+                              {pendiente.info_cliente.nombre_completo}
+                              </TableCell>
+                              <TableCell>
+                              {pendiente.lote}
                               </TableCell>
                               <TableCell>
                               {pendiente.comentario}
@@ -469,6 +476,10 @@ const descendingComparator = (a, b, orderBy) => {
                               </TableCell>
                               <TableCell>
                               {pendiente.usuario_creacion}
+                              </TableCell>
+                              
+                              <TableCell>
+                              {pendiente.fecha_amortizacion}
                               </TableCell>
                               <TableCell>
                               <Button key={pendiente} onClick={() => {
