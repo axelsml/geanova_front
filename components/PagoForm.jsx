@@ -2,13 +2,14 @@
 
 import {
   Typography,
+  Tag,
   Button,
   Form,
   Col,
   DatePicker,
   Select,
   InputNumber,
-  Row
+  Row,
 } from "antd";
 import Swal from "sweetalert2";
 import { useState, useContext, useEffect } from "react";
@@ -30,7 +31,14 @@ import {
   TableFooter,
 } from "@mui/material";
 
-export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch }) {
+export default function PagoForm({
+  setNuevoPago,
+  cliente,
+  lote,
+  proximoPago,
+  setWatch,
+  watch,
+}) {
   const { setIsLoading } = useContext(LoadingContext);
   const [sistemas_pago, setSistemasPago] = useState(null);
   const [sistemaSelected, setSistemaSelected] = useState(null);
@@ -39,6 +47,7 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
   // const [cliente, setCliente] = useState(null);
   const [form] = Form.useForm();
   const { Option } = Select;
+  const { Title, Text, Paragraph } = Typography;
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -86,9 +95,9 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
           ...values,
           usuario_id: usuario_id,
           solicitud_id: lote.solicitud_id,
-          conciliacion:movimiento_id_conciliar
+          conciliacion: movimiento_id_conciliar,
         };
-        debugger
+        debugger;
         pagosService.createPago({ pago: params }, onPagoGuardado, onError);
       }
     });
@@ -130,7 +139,6 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
       window.open(
         `https://api.santamariadelaluz.com/iPagos/recibo/${data.pago.id}.pdf`
       );
-   
     } else {
       Swal.fire({
         title: "Error",
@@ -159,21 +167,21 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
     },
   };
 
-  function buscarMovimientosBanco(){
-    setIsLoading(true)
-    setPendientes([])
-    var params ={
-      fecha_operacion:fecha_movimiento,
-      monto_pago:valor,
-    }
-    debugger
-    pagosService.BuscarMovimientoBanco(params,onMovimientosCoinciden,onError)
+  function buscarMovimientosBanco() {
+    setIsLoading(true);
+    setPendientes([]);
+    var params = {
+      fecha_operacion: fecha_movimiento,
+      monto_pago: valor,
+    };
+    debugger;
+    pagosService.BuscarMovimientoBanco(params, onMovimientosCoinciden, onError);
   }
 
-  async function onMovimientosCoinciden(data){
-    setIsLoading(false)
-    setPendientes(data.pendientes)
-    if(data.pendientes.length == 0){
+  async function onMovimientosCoinciden(data) {
+    setIsLoading(false);
+    setPendientes(data.pendientes);
+    if (data.pendientes.length == 0) {
       Swal.fire({
         title: "Error",
         icon: "error",
@@ -183,8 +191,8 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
         showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
-    }else{
-      setPendientes(data.pendientes)
+    } else {
+      setPendientes(data.pendientes);
     }
   }
 
@@ -197,236 +205,242 @@ export default function PagoForm({ setNuevoPago,cliente, lote,setWatch, watch })
         watch={watch}
       /> */}
 
-     
-        <div className="grid gap-10">
+      <Row style={{ marginBottom: "16px", marginLeft: "8px" }}>
+        <Col>
+          <Text style={{ display: "block" }}>
+            <b>Próximo Pago:</b>
+          </Text>
+          <Text style={{ display: "block" }}>{proximoPago}</Text>
+        </Col>
+      </Row>
 
-          <Form
-            form={form}
-            onFinish={onGuardarPago}
-            name="pago"
-            autoComplete="off"
-            className="grid gap-1"
-            layout="vertical"
-            validateMessages={validacionMensajes}
-            initialValues={valoresIniciales}
-          >
-            <Col>
-              <Form.Item
-                name={"monto_pagado"}
-                label={"Monto de Pago"}
-                style={{ width: "100%" }}
-                initialValue={valor}
-                rules={[{ required: true }, { type: "number", min: 1 }]}
-              >
-                <InputNumber
-                  style={{
-                    width: "100%",
-                  }}
-                  onChange={(value) => {
-                    setValor(value)
-                  }}
-                  placeholder="Ingrese el Monto de Pago"
-                  formatter={formatPrecio}
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                  prefix="$"
-                  suffix="MXN"
-                />
-              </Form.Item>
+      <div className="grid gap-10">
+        <Form
+          form={form}
+          onFinish={onGuardarPago}
+          name="pago"
+          autoComplete="off"
+          className="grid gap-1"
+          layout="vertical"
+          validateMessages={validacionMensajes}
+          initialValues={valoresIniciales}
+        >
+          <Col>
+            <Form.Item
+              name={"monto_pagado"}
+              label={"Monto de Pago"}
+              style={{ width: "100%" }}
+              initialValue={valor}
+              rules={[{ required: true }, { type: "number", min: 1 }]}
+            >
+              <InputNumber
+                style={{
+                  width: "100%",
+                }}
+                onChange={(value) => {
+                  setValor(value);
+                }}
+                placeholder="Ingrese el Monto de Pago"
+                formatter={formatPrecio}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                prefix="$"
+                suffix="MXN"
+              />
+            </Form.Item>
 
-              <Form.Item
-                name="fecha"
-                label="Fecha de Pago"
+            <Form.Item
+              name="fecha"
+              label="Fecha de Pago"
+              style={{ width: "100%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Fecha de Pago es requerida",
+                },
+              ]}
+            >
+              <DatePicker
                 style={{ width: "100%" }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Fecha de Pago es requerida",
-                  },
-                ]}
+                placeholder="Ingrese la Fecha de Pago"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label={"Sistema de Pago"}
+              name={"sistema_pago_id"}
+              style={{ width: "100%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Sistema de Pago no seleccionado",
+                },
+              ]}
+            >
+              <Select
+                showSearch
+                placeholder="Seleccione un Sistema de Pago"
+                optionLabelProp="label"
+                onChange={(value) => {
+                  setSistemaSelected(value);
+                }}
               >
-                <DatePicker
+                {sistemas_pago?.map((item, index) => (
+                  <Option key={index} value={item.id} label={item.Nombre}>
+                    {item?.Nombre}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            {sistemaSelected === 1 && (
+              <>
+                <Form.Item
+                  label={"Tipo de Pago"}
+                  name={"tipo_pago_id"}
                   style={{ width: "100%" }}
-                  placeholder="Ingrese la Fecha de Pago"
-                />
-              </Form.Item>
+                  rules={[
+                    {
+                      required: true,
+                      message: "Tipo de Pago no seleccionado",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    placeholder="Seleccione un Tipo de Pago"
+                    optionLabelProp="label"
+                    onChange={(value) => {
+                      setTipoPagoSelected(value);
+                    }}
+                  >
+                    {tipo_pagos?.map((item, index) => (
+                      <Option key={index} value={item.id} label={item.nombre}>
+                        {item?.nombre}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                {tipoPagoSelected === 1 && (
+                  <InputIn
+                    placeholder="Ingrese Nombre de Quién Recibió"
+                    name="usuario_recibio"
+                    label="Recibió"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Nombre de Quién Recibió es requerido",
+                      },
+                    ]}
+                  />
+                )}
+              </>
+            )}
 
-              <Form.Item
-                label={"Sistema de Pago"}
-                name={"sistema_pago_id"}
-                style={{ width: "100%" }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Sistema de Pago no seleccionado",
-                  },
-                ]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Seleccione un Sistema de Pago"
-                  optionLabelProp="label"
-                  onChange={(value) => {
-                    setSistemaSelected(value);
+            {sistemaSelected === 2 && (
+              <div>
+                <Form.Item
+                  name="fechaTransferencia"
+                  label="Fecha de Transferencia"
+                  style={{ width: "100%" }}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Fecha de Transferencia requerida",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    onChange={(value) => {
+                      setFechaMovimiento(formatDate(value));
+                    }}
+                    style={{ width: "100%" }}
+                    placeholder="Ingrese la Fecha en la que se Realizó la Transferencia"
+                  />
+                </Form.Item>
+                <Button
+                  onClick={() => {
+                    buscarMovimientosBanco();
                   }}
                 >
-                  {sistemas_pago?.map((item, index) => (
-                    <Option key={index} value={item.id} label={item.Nombre}>
-                      {item?.Nombre}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  Buscar
+                </Button>
+                {movimientos_pendientes.length != 0 && (
+                  <>
+                    <Row justify={"center"} className="m-auto">
+                      <TableContainer component={Paper}>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Fecha Operacion</TableCell>
+                              <TableCell>Descripcion</TableCell>
+                              <TableCell>Cantidad</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                          </TableHead>
 
-              {sistemaSelected === 1 && (
-                <>
-                  <Form.Item
-                    label={"Tipo de Pago"}
-                    name={"tipo_pago_id"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Tipo de Pago no seleccionado",
-                      },
-                    ]}
-                  >
-                    <Select
-                      showSearch
-                      placeholder="Seleccione un Tipo de Pago"
-                      optionLabelProp="label"
-                      onChange={(value) => {
-                        setTipoPagoSelected(value);
-                      }}
-                    >
-                      {tipo_pagos?.map((item, index) => (
-                        <Option key={index} value={item.id} label={item.nombre}>
-                          {item?.nombre}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                  {tipoPagoSelected === 1 && (
-                    <InputIn
-                      placeholder="Ingrese Nombre de Quién Recibió"
-                      name="usuario_recibio"
-                      label="Recibió"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Nombre de Quién Recibió es requerido",
-                        },
-                      ]}
-                    />
-                  )}
-                </>
-              )}
+                          <TableBody>
+                            {movimientos_pendientes
+                              .slice(
+                                page * rowsPerPage,
+                                page * rowsPerPage + rowsPerPage
+                              )
+                              .map((movimiento, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>
+                                    {movimiento.fecha_operacion}
+                                  </TableCell>
+                                  <TableCell>{movimiento.concepto}</TableCell>
+                                  <TableCell>
+                                    ${formatPrecio(movimiento.abono)}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      key={movimiento}
+                                      onClick={() => {
+                                        setMovimientoIdConciliar(movimiento.id);
+                                        setPendientes([]);
+                                      }}
+                                      size="large"
+                                    >
+                                      Seleccionar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                          <TableFooter>
+                            <TableRow>
+                              <TablePagination
+                                rowsPerPageOptions={[5, 10, 25]}
+                                count={movimientos_pendientes.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                labelRowsPerPage="Amortizaciones por Página"
+                              />
+                            </TableRow>
+                          </TableFooter>
+                        </Table>
+                      </TableContainer>
+                    </Row>
+                  </>
+                )}
+              </div>
+            )}
+          </Col>
 
-              {sistemaSelected === 2 && (
-                <div>
-                  <Form.Item
-                    name="fechaTransferencia"
-                    label="Fecha de Transferencia"
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Fecha de Transferencia requerida",
-                      },
-                    ]}
-                  >
-                    <DatePicker
-                    onChange={(value) => {
-                      setFechaMovimiento(formatDate(value))
-                    }}
-                      style={{ width: "100%" }}
-                      placeholder="Ingrese la Fecha en la que se Realizó la Transferencia"
-                    />
-                  </Form.Item>
-                  <Button onClick={() =>{buscarMovimientosBanco()}}>
-                    Buscar
-                  </Button>
-                  {movimientos_pendientes.length != 0 &&(<>
-                  <Row justify={"center"} className="m-auto">
-                    <TableContainer component={Paper}>
-                      <Table>
-                        <TableHead>
-                        <TableRow>
-                          <TableCell>Fecha Operacion</TableCell>
-                          <TableCell>Descripcion</TableCell>
-                          <TableCell>Cantidad</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                        </TableHead>
+          <span className="flex gap-2 justify-end">
+            <Button htmlType="submit" size="large">
+              Guardar
+            </Button>
 
-                        <TableBody>
-                          {movimientos_pendientes.slice(
-                              page * rowsPerPage,
-                              page * rowsPerPage + rowsPerPage
-                            )
-                            .map((movimiento, index) => (
-                              <TableRow key={index}>
-                          <TableCell>
-                            {movimiento.fecha_operacion}
-                          </TableCell>
-                          <TableCell>
-                            {movimiento.concepto}
-                          </TableCell>
-                          <TableCell>
-                            ${formatPrecio(movimiento.abono)}
-                          </TableCell>
-                          <TableCell>
-                          <Button key={movimiento} onClick={() => {
-                              setMovimientoIdConciliar(movimiento.id);
-                              setPendientes([])
-                            }}
-                            size="large"
-                          >
-                            Seleccionar
-                          </Button>
-                          
-                          </TableCell>
-                          
-
-                        </TableRow>
-                            ))}
-                        </TableBody>
-                        <TableFooter>
-                          <TableRow>
-                            <TablePagination
-                              rowsPerPageOptions={[5, 10, 25]}
-                              count={movimientos_pendientes.length}
-                              rowsPerPage={rowsPerPage}
-                              page={page}
-                              onPageChange={handleChangePage}
-                              onRowsPerPageChange={handleChangeRowsPerPage}
-                              labelRowsPerPage="Amortizaciones por Página"
-                            />
-                          </TableRow>
-                        </TableFooter>
-                      </Table>
-                    </TableContainer>
-                  </Row>
-                  </>)}
-
-                </div>
-
-                
-              )}
-            </Col>
-
-            <span className="flex gap-2 justify-end">
-              <Button htmlType="submit" size="large">
-                Guardar
-              </Button>
-
-              <Button onClick={handleCancel} danger size="large">
-                Cancelar
-              </Button>
-            </span>
-          </Form>
-        </div>
-  
-      
+            <Button onClick={handleCancel} danger size="large">
+              Cancelar
+            </Button>
+          </span>
+        </Form>
+      </div>
     </div>
   );
 }

@@ -131,11 +131,11 @@
   margin-bottom: -20px;
 }
 
-.menu p{
+.menu p {
   color: rgb(67, 141, 204);
 }
 
-.titulo_pantallas{
+.titulo_pantallas {
   background-color: rgb(67, 141, 204);
   height: 50px;
   border-radius: 30px;
@@ -146,58 +146,80 @@
 
 }
 
-.boton{
+.boton {
   background-color: rgb(67, 141, 204);
   color: white;
 }
 
-.tabla{
+.boton-cancelar {
+  background-color: rgb(255, 17, 17);
+  color: white;
+}
+
+.tabla {
   border: 2px solid rgb(66, 142, 202);
 }
+
 .tabla tbody tr {
-  border-top: 2px solid rgb(66, 142, 202);; /* Define el borde para todas las filas */
-  border-bottom: 2px solid rgb(66, 142, 202);; /* Define el borde para todas las filas */
+  border-top: 2px solid rgb(66, 142, 202);
+  ;
+  /* Define el borde para todas las filas */
+  border-bottom: 2px solid rgb(66, 142, 202);
+  ;
+  /* Define el borde para todas las filas */
 }
 
 
-.tabla_encabezado p{
+.tabla_encabezado p {
   color: rgb(67, 141, 204);
   font-size: 18px;
 }
 
-.formulario{
+.formulario {
   color: white;
-  background-color: rgb(29,105 ,155 );
+  background-color: rgb(29, 105, 155);
   border-radius: 30px;
   padding: 10px;
   font-size: 18px;
 
 }
 
-.formulario_alterno{
-  background-color: rgb(66,142 ,204 );
+.formulario_alterno {
+  background-color: rgb(66, 142, 204);
   color: white;
   border-radius: 30px;
   padding: 10px;
   font-size: 18px;
 
 }
+
 .input_formulario {
   /* background-color: rgb(66,142 ,204 ); */
   border: none;
 }
-.informacion_col{
+
+.informacion_col {
   font-size: 18px;
   margin-top: 8px;
   margin-bottom: 8px;
 }
-.renglon_otro_color{
-  background-color: rgb(29,105 ,155 );
-  
+
+.renglon_otro_color {
+  background-color: rgb(29, 105, 155);
+
 
 }
 
-.renglon_color{
-  background-color: rgb(66,142 ,204 );
+.renglon_color {
+  background-color: rgb(66, 142, 204);
   color: white;
+}
+
+/* ------------------ CSS PARA MODAL EDITAR PAGO 04/06/2024 ------------------- */
+
+.modal-edit-pago__div--inputs {
+  margin: 0 auto;
+  margin-top: 16px;
+  align-items: center;
+  text-align: center;
 }

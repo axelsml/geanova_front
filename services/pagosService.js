@@ -27,6 +27,31 @@ class pagosService {
       });
   }
 
+  getSistemaPago(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("sistema_pago", { params: params }, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
   getTipoPagos(callback, error) {
     var call;
     if (call) {
@@ -108,7 +133,7 @@ class pagosService {
       });
   }
 
-  getMovimientosEfectivo(params,callback, error) {
+  getMovimientosEfectivo(params, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -116,7 +141,7 @@ class pagosService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get("ManejoEfectivo",{params}, { cancelToken: call.token })
+      .get("ManejoEfectivo", { params }, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -211,7 +236,7 @@ class pagosService {
         }
       });
   }
-  BuscarMovimientoBanco(params,callback, error) {
+  BuscarMovimientoBanco(params, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -219,7 +244,11 @@ class pagosService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get("buscar_moviminetos_conciliar",  { params: params },{ cancelToken: call.token })
+      .get(
+        "buscar_moviminetos_conciliar",
+        { params: params },
+        { cancelToken: call.token }
+      )
       .then((response) => {
         return callback(response.data);
       })
@@ -246,7 +275,7 @@ class pagosService {
     return http
       .get(
         "pagos_ingresados_por_conciliar",
-        {params},
+        { params },
         { cancelToken: call.token }
       )
       .then((response) => {
@@ -273,6 +302,33 @@ class pagosService {
     call = CancelToken.source();
     return http
       .get("ultimosMovimientoPorCuenta", { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
+  editarInfoPago(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("cliente/editar_informacion_tabla", params, {
+        cancelToken: call.token,
+      })
       .then((response) => {
         return callback(response.data);
       })
