@@ -1,5 +1,5 @@
 "use client";
-import { formatPrecio } from "@/helpers/formatters";
+import { formatPrecio, FormatDate } from "@/helpers/formatters";
 import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
@@ -19,6 +19,7 @@ import { FaArrowCircleLeft, FaPrint, FaPencilAlt } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
 import { FaFilePdf } from "react-icons/fa6";
 import { SiOpslevel } from "react-icons/si";
+import { usuario_id } from "@/helpers/user";
 
 import {
   Paper,
@@ -67,7 +68,6 @@ export default function ClientesInfo() {
     fecha_transferencia: null,
   });
   const [sistemas_pago, setSistemasPago] = useState(null);
-  const [sistemaPago, setSistemaPago] = useState(null);
   const [sistemaPagoSelected, setSistemaPagoSelected] = useState(null);
 
   const { Option } = Select;
@@ -245,7 +245,6 @@ export default function ClientesInfo() {
       sistema_pago: null,
       sistema_pago_id: null,
     });
-    setSistemaPago(null);
     setSistemaPagoSelected(null);
   };
 
@@ -268,16 +267,27 @@ export default function ClientesInfo() {
   };
 
   const handleSaveChanges = () => {
-    var params = {
-      id: selectedPago.pago_id,
-      no_pago: selectedPago.no_pago,
-      folio: selectedPago.folio,
-      fecha_operacion: selectedPago.fecha_operacion,
-      fecha: selectedPago.fecha,
-      fecha_transferencia: selectedPago.fecha_transferencia,
-      sistema_pago_id: sistemaPagoSelected || sistemaPago.id,
-    };
-    pagosService.editarInfoPago(params, onSaveChanges, onError);
+    if (sistemaPagoSelected == null || sistemaPagoSelected == "") {
+      Swal.fire({
+        title: "Seleccione un Sistema de Pago",
+        icon: "error",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+      });
+    } else {
+      var params = {
+        id: selectedPago.pago_id,
+        no_pago: selectedPago.no_pago,
+        folio: selectedPago.folio,
+        fecha_operacion: selectedPago.fecha_operacion,
+        fecha: selectedPago.fecha,
+        fecha_transferencia: selectedPago.fecha_transferencia,
+        sistema_pago_id: sistemaPagoSelected,
+      };
+      pagosService.editarInfoPago(params, onSaveChanges, onError);
+    }
   };
 
   async function onSaveChanges(data) {
@@ -289,8 +299,12 @@ export default function ClientesInfo() {
         cancelButtonColor: "#ff4d4f",
         showDenyButton: true,
         confirmButtonText: "Aceptar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          handleCloseModal();
+          BuscarInfoLote();
+        }
       });
-      handleCloseModal();
     } else {
       Swal.fire({
         title: "Error",
@@ -670,17 +684,19 @@ export default function ClientesInfo() {
                         </TableCell>
                         <TableCell>{pago.sistema_pago}</TableCell>
                         <TableCell>
-                          <Button
-                            className="boton"
-                            key={pago}
-                            onClick={() => {
-                              setShow(!show);
-                              handleModalPago(pago);
-                            }}
-                            size="large"
-                          >
-                            <FaPencilAlt className="m-auto" size={"20px"} />
-                          </Button>
+                          {usuario_id <= 2 && (
+                            <Button
+                              className="boton"
+                              key={pago}
+                              onClick={() => {
+                                setShow(true);
+                                handleModalPago(pago);
+                              }}
+                              size="large"
+                            >
+                              <FaPencilAlt className="m-auto" size={"20px"} />
+                            </Button>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -731,135 +747,155 @@ export default function ClientesInfo() {
             <b>Editar Pago</b>
           </Col>
         </Row>
-        <div className="modal-edit-pago__div--inputs">
-          <Col>
-            <Row>
-              <label className="modal-edit-pago__label--no-pago" htmlFor="">
-                No. de Pago
-              </label>
-            </Row>
-            <Row>
-              <InputNumber
-                id="no_pago"
-                className="modal-edit-pago__input--no-pago"
-                value={selectedPago ? selectedPago.no_pago : "Número de pago"}
-                onChange={(value) => {
-                  onChanged("no_pago", value);
-                }}
-                placeholder={
-                  selectedPago ? selectedPago.no_pago : "Número de pago"
-                }
-              />
-            </Row>
-          </Col>
-          <Col>
-            <Row>
-              <label className="modal-edit-pago__label--folio" htmlFor="">
-                Folio
-              </label>
-            </Row>
-            <Row>
-              <InputIn
-                id="folio"
-                className="modal-edit-pago__input--folio"
-                value={selectedPago ? selectedPago.folio : "Folio"}
-                onChange={(value) => {
-                  onChanged("folio", value);
-                }}
-                placeholder={selectedPago ? selectedPago.folio : "Folio"}
-              />
-            </Row>
-          </Col>
-          <Col>
-            <Row>
-              <label className="modal-edit-pago__label--fecha-op" htmlFor="">
-                Fecha de Operacion
-              </label>
-            </Row>
-            <Row>
-              <DatePicker
-                id="fecha_operacion"
-                className="modal-edit-pago__input--fecha-op"
-                onChange={(date) => onChanged("fecha_operacion", date)}
-                placeholder={
-                  selectedPago
-                    ? selectedPago.fecha_operacion
-                    : "Fecha de Operación"
-                }
-              />
-            </Row>
-          </Col>
-          <Col>
-            <Row>
-              <label className="modal-edit-pago__label--fecha" htmlFor="">
-                Fecha
-              </label>
-            </Row>
-            <Row>
-              <DatePicker
-                id="fecha"
-                className="modal-edit-pago__input--fecha"
-                onChange={(date) => {
-                  onChanged("fecha", date);
-                }}
-                placeholder={selectedPago ? selectedPago.fecha : "Fecha"}
-              />
-            </Row>
-          </Col>
-          <Col>
-            <Row>
-              <label className="modal-edit-pago__label--fecha-tran" htmlFor="">
-                Fecha de Transferencia
-              </label>
-            </Row>
-            <Row>
-              <DatePicker
-                id="fecha_transferencia"
-                className="modal-edit-pago__input--fecha-tran"
-                onChange={(date) => {
-                  onChanged("fecha_transferencia", date);
-                }}
-                placeholder={
-                  selectedPago
-                    ? selectedPago.fecha_transferencia
-                    : "Fecha Transferencia"
-                }
-              />
-            </Row>
-          </Col>
-          <Col>
-            <Row>
-              <label className="modal-edit-pago__label--sis-pago" htmlFor="">
-                Sistema de Pago
-              </label>
-            </Row>
-            <Row>
-              <Select
-                className="modal-edit-pago__input--sis-pago"
-                id="sistema_pago"
-                showSearch
-                placeholder={
-                  sistemaPago
-                    ? sistemaPago.nombre
-                    : "Seleccione un Sistema de Pago"
-                }
-                value={
-                  sistemaPago ? sistemaPago.id : "Seleccione un sistema de Pago"
-                }
-                onChange={(value) => {
-                  setSistemaPagoSelected(value);
-                }}
-              >
-                {sistemas_pago?.map((item, index) => (
-                  <Option key={index} value={item.id} label={item.Nombre}>
-                    {item?.Nombre}
-                  </Option>
-                ))}
-              </Select>
-            </Row>
-          </Col>
+        <div className="modal-edit-pago__div--inputs-container">
+          <div className="modal-edit-pago__div--inputs">
+            <Col xs={12} sm={6} lg={6}>
+              <Row justify={"center"}>
+                <label className="modal-edit-pago__label--input" htmlFor="">
+                  No. de Pago
+                </label>
+              </Row>
+              <Row justify={"center"}>
+                <InputNumber
+                  id="no_pago"
+                  className="modal-edit-pago__input--no-pago"
+                  value={selectedPago ? selectedPago.no_pago : null}
+                  onChange={(value) => {
+                    onChanged("no_pago", value);
+                  }}
+                  placeholder={
+                    selectedPago ? selectedPago.no_pago : "Número de pago"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col xs={12} sm={6} lg={6}>
+              <Row justify={"center"}>
+                <label className="modal-edit-pago__label--input" htmlFor="">
+                  Folio
+                </label>
+              </Row>
+              <Row justify={"center"}>
+                <InputIn
+                  id="folio"
+                  className="modal-edit-pago__input--folio"
+                  value={selectedPago ? selectedPago.folio : null}
+                  onChange={(value) => {
+                    onChanged("folio", value.target.value);
+                  }}
+                  placeholder={selectedPago ? selectedPago.folio : "Folio"}
+                />
+              </Row>
+            </Col>
+            <Col xs={12} sm={6} lg={8}>
+              <Row justify={"center"}>
+                <label className="modal-edit-pago__label--input" htmlFor="">
+                  Sistema de Pago
+                </label>
+              </Row>
+              <Row justify={"center"}>
+                <Select
+                  className="modal-edit-pago__input--sis-pago"
+                  id="sistema_pago"
+                  showSearch
+                  value={
+                    sistemaPagoSelected !== null ? sistemaPagoSelected : null
+                  }
+                  placeholder={"Seleccione un Sistema de Pago"}
+                  onChange={(value) => {
+                    setSistemaPagoSelected(value);
+                  }}
+                >
+                  {sistemas_pago?.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.Nombre}>
+                      {item?.Nombre}
+                    </Option>
+                  ))}
+                </Select>
+              </Row>
+            </Col>
+          </div>
+          <div className="modal-edit-pago__div--inputs-fechas">
+            <Col xs={12} sm={6} lg={8}>
+              <Row justify={"center"}>
+                <label className="modal-edit-pago__label--input" htmlFor="">
+                  Fecha de Operación
+                </label>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  type="date"
+                  id="fecha_operacion"
+                  className="modal-edit-pago__input--fecha"
+                  value={
+                    selectedPago.fecha_operacion !== null
+                      ? selectedPago.fecha_operacion
+                      : null
+                  }
+                  onChange={(date) =>
+                    onChanged("fecha_operacion", date.target.value)
+                  }
+                  placeholder={
+                    selectedPago.fecha_operacion !== null
+                      ? selectedPago.fecha_operacion
+                      : "Fecha de Operación"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col xs={12} sm={6} lg={6}>
+              <Row justify={"center"}>
+                <label className="modal-edit-pago__label--input" htmlFor="">
+                  Fecha
+                </label>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  type="date"
+                  id="fecha"
+                  className="modal-edit-pago__input--fecha"
+                  value={
+                    selectedPago.fecha !== null ? selectedPago.fecha : null
+                  }
+                  onChange={(date) => {
+                    onChanged("fecha", date.target.value);
+                  }}
+                  placeholder={
+                    selectedPago.fecha !== null ? selectedPago.fecha : "Fecha"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col xs={12} sm={6} lg={8}>
+              <Row justify={"center"}>
+                <label className="modal-edit-pago__label--input" htmlFor="">
+                  Fecha de Transferencia
+                </label>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  type="date"
+                  id="fecha_transferencia"
+                  className="modal-edit-pago__input--fecha"
+                  value={
+                    selectedPago.fecha_transferencia !== null
+                      ? selectedPago.fecha_transferencia
+                      : null
+                  }
+                  onChange={(date) => {
+                    onChanged("fecha_transferencia", date.target.value);
+                  }}
+                  placeholder={
+                    selectedPago.fecha_transferencia !== null
+                      ? selectedPago.fecha_transferencia
+                      : "Fecha Transferencia"
+                  }
+                />
+              </Row>
+            </Col>
+          </div>
         </div>
-        <div className="modal-edit-pago__buttons">
+        <div className="modal-edit-pago__div-buttons">
           <Button
             className="boton-cancelar"
             onClick={() => {

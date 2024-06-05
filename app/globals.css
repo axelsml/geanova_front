@@ -152,7 +152,7 @@
 }
 
 .boton-cancelar {
-  background-color: rgb(255, 17, 17);
+  background-color: gray;
   color: white;
 }
 
@@ -217,9 +217,66 @@
 
 /* ------------------ CSS PARA MODAL EDITAR PAGO 04/06/2024 ------------------- */
 
-.modal-edit-pago__div--inputs {
+.modal-edit-pago__div--inputs-container {
   margin: 0 auto;
   margin-top: 16px;
   align-items: center;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-edit-pago__div--inputs {
+  margin: 0 auto;
+  margin-top: 16px;
+  text-align: center;
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  height: 6vh;
+}
+
+.modal-edit-pago__input--sis-pago {
+  width: 100%;
+}
+
+.modal-edit-pago__div--inputs-fechas {
+  margin: 0 auto;
+  margin-top: 32px;
+  text-align: center;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.modal-edit-pago__div-buttons {
+  margin: 0 auto;
+  margin-top: 32px;
+  align-items: center;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  width: 50%;
+}
+
+.modal-edit-pago__label--input {
+  margin-bottom: 8px;
+  font-family: sans-serif;
+  font-weight: bolder;
+  color: rgb(29, 105, 155);
+}
+
+.modal-edit-pago__label--input:hover {
+  text-decoration: underline;
+}
+
+.modal-edit-pago__input--fecha {
+  padding: 5px;
+  border-radius: 5px;
+  border-color: rgb(221, 221, 221);
+  border-width: 1px;
+}
+
+.modal-edit-pago__input--fecha:hover {
+  border-color: rgb(67, 141, 204);
 }
