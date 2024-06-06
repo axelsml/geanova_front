@@ -62,7 +62,7 @@ export default function ClientesInfo() {
   const [selectedPago, setSelectedPago] = useState({
     pago_id: null,
     no_pago: null,
-    folio: null,
+    monto_pagado: null,
     fecha_operacion: null,
     fecha: null,
     fecha_transferencia: null,
@@ -239,7 +239,7 @@ export default function ClientesInfo() {
     setSelectedPago({
       pago_id: null,
       no_pago: null,
-      folio: null,
+      monto_pagado: null,
       fecha_operacion: null,
       fecha: null,
       sistema_pago: null,
@@ -280,7 +280,7 @@ export default function ClientesInfo() {
       var params = {
         id: selectedPago.pago_id,
         no_pago: selectedPago.no_pago,
-        folio: selectedPago.folio,
+        monto_pagado: selectedPago.monto_pagado,
         fecha_operacion: selectedPago.fecha_operacion,
         fecha: selectedPago.fecha,
         fecha_transferencia: selectedPago.fecha_transferencia,
@@ -645,7 +645,7 @@ export default function ClientesInfo() {
                       <p>Fecha Operacion</p>
                     </TableCell>
                     <TableCell>
-                      <p>Fecha</p>
+                      <p>Fecha Captura</p>
                     </TableCell>
                     <TableCell>
                       <p>Requerido</p>
@@ -772,18 +772,20 @@ export default function ClientesInfo() {
             <Col xs={12} sm={6} lg={6}>
               <Row justify={"center"}>
                 <label className="modal-edit-pago__label--input" htmlFor="">
-                  Folio
+                  Pago Realizado
                 </label>
               </Row>
               <Row justify={"center"}>
                 <InputIn
                   id="folio"
-                  className="modal-edit-pago__input--folio"
-                  value={selectedPago ? selectedPago.folio : null}
+                  className="modal-edit-pago__input--realizado"
+                  value={selectedPago ? selectedPago.monto_pagado : null}
                   onChange={(value) => {
-                    onChanged("folio", value.target.value);
+                    onChanged("monto_pagado", value.target.value);
                   }}
-                  placeholder={selectedPago ? selectedPago.folio : "Folio"}
+                  placeholder={
+                    selectedPago ? selectedPago.monto_pagado : "Pago Realizado"
+                  }
                 />
               </Row>
             </Col>
@@ -846,7 +848,7 @@ export default function ClientesInfo() {
             <Col xs={12} sm={6} lg={6}>
               <Row justify={"center"}>
                 <label className="modal-edit-pago__label--input" htmlFor="">
-                  Fecha
+                  Fecha Captura
                 </label>
               </Row>
               <Row justify={"center"}>
