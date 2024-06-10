@@ -62,6 +62,7 @@ export default function ReporteLotes() {
   const [show, setShow] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [pagosLength, setPagosLength] = useState([]);
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
@@ -78,6 +79,7 @@ export default function ReporteLotes() {
     setIsLoading(false);
     if (data.encontrado) {
       setInfo(data.response);
+      setPagosLength(data.response["resumen_lote"]["pagos"].length);
     } else {
       Swal.fire({
         title: "Error",
@@ -335,7 +337,7 @@ export default function ReporteLotes() {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={infoLote.pagos.length}
+                    count={pagosLength}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
