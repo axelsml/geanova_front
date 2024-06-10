@@ -50,7 +50,7 @@ class lotesService {
         }
       });
   }
-  
+
   getLoteSuperficie(params, callback, error) {
     var call;
     if (call) {
@@ -75,7 +75,7 @@ class lotesService {
         }
       });
   }
-  getLoteByTerrenoIdPlazo(terreno_id,lote_id, callback, error) {
+  getLoteByTerrenoIdPlazo(terreno_id, lote_id, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -83,7 +83,9 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(`getLoteByTerrenoIdPlazo/${terreno_id}/${lote_id}`, { cancelToken: call.token })
+      .get(`getLoteByTerrenoIdPlazo/${terreno_id}/${lote_id}`, {
+        cancelToken: call.token,
+      })
       .then((response) => {
         return callback(response.data);
       })
@@ -99,7 +101,7 @@ class lotesService {
         }
       });
   }
-  getClienteByLote(terreno_id,lote_id, callback, error) {
+  getClienteByLote(terreno_id, lote_id, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -107,7 +109,9 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(`getClienteByLote/${terreno_id}/${lote_id}`, { cancelToken: call.token })
+      .get(`getClienteByLote/${terreno_id}/${lote_id}`, {
+        cancelToken: call.token,
+      })
       .then((response) => {
         return callback(response.data);
       })
@@ -135,6 +139,36 @@ class lotesService {
       .post("asignarSuperficie", params, {
         cancelToken: call.token,
       })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+  reporteLotes(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(
+        "reportes/reporte_lotes",
+        { params },
+        {
+          cancelToken: call.token,
+        }
+      )
       .then((response) => {
         return callback(response.data);
       })

@@ -160,6 +160,10 @@
   border: 2px solid rgb(66, 142, 202);
 }
 
+.large {
+  width: 70vw;
+}
+
 .tabla tbody tr {
   border-top: 2px solid rgb(66, 142, 202);
   ;

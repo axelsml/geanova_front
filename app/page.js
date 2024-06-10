@@ -133,7 +133,7 @@ export default function Home() {
               <div>
                 <Row justify={"center"}>
                   <Image
-                    // src={"/icono ingreso.svg"}
+                    src={"/icono reporte.svg"}
                     width={200}
                     height={200}
                     priority
