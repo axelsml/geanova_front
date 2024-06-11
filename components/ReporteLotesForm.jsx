@@ -3,20 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import { LoadingContext } from "@/contexts/loading";
 import { usuario_id } from "@/helpers/user";
 
-import { formatPrecio, formatPrecio2, FormatDate } from "@/helpers/formatters";
-import {
-  Button,
-  Col,
-  Collapse,
-  Row,
-  Typography,
-  Form,
-  Select,
-  Modal,
-  DatePicker,
-  Tabs,
-} from "antd";
-import InputIn from "@/components/Input";
+import { formatPrecio } from "@/helpers/formatters";
+import { Button, Col, Row, Form, Select, Modal, Tabs } from "antd";
 import {
   Paper,
   Table,
@@ -29,14 +17,7 @@ import {
   TableFooter,
 } from "@mui/material";
 import Swal from "sweetalert2";
-import {
-  FaRegFileAlt,
-  FaFilePdf,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaMoneyBillAlt,
-  FaCoins,
-} from "react-icons/fa";
+import { FaFilePdf } from "react-icons/fa";
 
 import ventasService from "@/services/ventasService";
 import terrenosService from "@/services/terrenosService";
@@ -66,6 +47,7 @@ export default function ReporteLotes() {
   const [show, setShow] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
@@ -75,6 +57,7 @@ export default function ReporteLotes() {
     setIsLoading(true);
     var params = {
       lote_id: loteSelected.id,
+      terreno_id: terrenoSelected.id,
     };
     lotesService.reporteLotes(params, onInfoClienteCargado, onError);
   };
@@ -137,6 +120,16 @@ export default function ReporteLotes() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleMouseEnter = () => {
+    console.log("entro al handleMouseEnter");
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    console.log("salio del handleMouseEnter");
+    setIsHovered(false);
   };
 
   return (
@@ -298,7 +291,13 @@ export default function ReporteLotes() {
                     <p>Telefono</p>
                   </TableCell>
                   <TableCell>
-                    <p>Estado</p>
+                    <p
+                      className="hoover-target"
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      Estado
+                    </p>
                   </TableCell>
                   <TableCell>
                     <p>Monto Pago</p>
@@ -467,6 +466,75 @@ export default function ReporteLotes() {
             </Col>
           </Row>
         </Modal>
+      )}
+      {isHovered && (
+        <div className="hover-container">
+          <table className="hover-popup">
+            <thead className="hover-popup-thead">
+              <tr>
+                <td>Color</td>
+                <td>Estado</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <Button
+                    disabled
+                    size={"small"}
+                    shape="round"
+                    style={{ backgroundColor: "#0000FF" }}
+                  />
+                </td>
+                <td>Liquidada</td>
+              </tr>
+              <tr>
+                <td>
+                  <Button
+                    disabled
+                    size={"small"}
+                    shape="round"
+                    style={{ backgroundColor: "#008000" }}
+                  />
+                </td>
+                <td>Al corriente</td>
+              </tr>
+              <tr>
+                <td>
+                  <Button
+                    disabled
+                    size={"small"}
+                    shape="round"
+                    style={{ backgroundColor: "#FFFF00" }}
+                  />
+                </td>
+                <td>Adelantado</td>
+              </tr>
+              <tr>
+                <td>
+                  <Button
+                    disabled
+                    size={"small"}
+                    shape="round"
+                    style={{ backgroundColor: "#F39C12" }}
+                  />
+                </td>
+                <td>Atrasado</td>
+              </tr>
+              <tr>
+                <td>
+                  <Button
+                    disabled
+                    size={"small"}
+                    shape="round"
+                    style={{ backgroundColor: "#FF0000" }}
+                  />
+                </td>
+                <td>Vencido</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

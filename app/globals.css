@@ -307,3 +307,45 @@
   border-radius: 1px solid;
   border-color: #C8D1DB;
 }
+
+/*---------------------------------------------------TABLA POP UP PARA REPORTE LOTES--------------------------------------------------- */
+.hoover-target {
+  cursor: pointer;
+}
+
+.hover-container {
+  position: absolute;
+  display: inline-block;
+}
+
+.hover-popup {
+  position: relative;
+  left: 12vw;
+  bottom: 12vh;
+  margin-top: 10px;
+  border: 1.5px solid #ccc;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  padding: 10px;
+
+}
+
+.hover-popup table {
+  width: 200px;
+  border-collapse: collapse;
+}
+
+.hover-popup table,
+.hover-popup td {
+  border: 1px solid rgb(67, 141, 204);
+  padding: 8px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.hover-popup-thead {
+  background-color: rgb(67, 141, 204);
+  font-weight: bold;
+  color: #fff;
+}
