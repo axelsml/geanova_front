@@ -57,9 +57,9 @@ export default function ReporteLotes() {
   const [infoFecha, setInfoFecha] = useState(null);
   const [nuevoPago, setNuevoPago] = useState(false);
   const [color, setColor] = useState(null);
-  const [totalLotes, setTotalLotes] = useState(null);
-  const [totalPagados, setTotalPagados] = useState(null);
-  const [totalVencidos, setTotalVencidos] = useState(null);
+  const [totalLotes, setTotalLotes] = useState(0);
+  const [totalPagados, setTotalPagados] = useState(0);
+  const [totalVencidos, setTotalVencidos] = useState(0);
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
@@ -73,6 +73,7 @@ export default function ReporteLotes() {
   }, []);
 
   const BuscarInfoLote = () => {
+    setIsLoading(true);
     var params = {
       lote_id: loteSelected.id,
     };
@@ -225,9 +226,9 @@ export default function ReporteLotes() {
             <input
               id="lotes"
               className="reporte-lotes__input--realizado"
-              value={totalLotes !== null ? totalLotes : null}
+              value={totalLotes !== 0 ? totalLotes : null}
               disabled={true}
-              placeholder={totalLotes !== null ? totalLotes : ""}
+              placeholder={totalLotes !== 0 ? totalLotes : ""}
             />
           </Row>
         </Col>
@@ -242,11 +243,11 @@ export default function ReporteLotes() {
               id="pagados"
               className="reporte-lotes__input--realizado"
               value={
-                totalPagados !== null ? "$ " + formatPrecio(totalPagados) : null
+                totalPagados !== 0 ? "$ " + formatPrecio(totalPagados) : null
               }
               disabled={true}
               placeholder={
-                totalPagados !== null ? "$ " + formatPrecio(totalPagados) : ""
+                totalPagados !== 0 ? "$ " + formatPrecio(totalPagados) : ""
               }
             />
           </Row>
@@ -262,13 +263,11 @@ export default function ReporteLotes() {
               id="vencidos"
               className="reporte-lotes__input--realizado"
               value={
-                totalVencidos !== null
-                  ? "$ " + formatPrecio(totalVencidos)
-                  : null
+                totalVencidos !== 0 ? "$ " + formatPrecio(totalVencidos) : null
               }
               disabled={true}
               placeholder={
-                totalVencidos !== null ? "$ " + formatPrecio(totalVencidos) : ""
+                totalVencidos !== 0 ? "$ " + formatPrecio(totalVencidos) : ""
               }
             />
           </Row>
