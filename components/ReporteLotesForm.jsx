@@ -55,6 +55,9 @@ export default function ReporteLotes() {
 
   const BuscarInfoLote = () => {
     setIsLoading(true);
+    setTotalLotes(0);
+    setTotalPagados(0);
+    setTotalVencidos(0);
     var params = {
       lote_id: loteSelected.id,
       terreno_id: terrenoSelected.id,
