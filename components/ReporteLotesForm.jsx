@@ -309,6 +309,9 @@ export default function ReporteLotes() {
                     <p>Monto Contrato</p>
                   </TableCell>
                   <TableCell>
+                    <p>Pagado al momento</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Saldo Vencido</p>
                   </TableCell>
                   <TableCell>
@@ -360,6 +363,12 @@ export default function ReporteLotes() {
                       ${" "}
                       {formatPrecio(
                         parseFloat(item["resumen_lote"]["monto_contrato"])
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      ${" "}
+                      {formatPrecio(
+                        parseFloat(item["resumen_lote"]["monto_pagado"])
                       )}
                     </TableCell>
                     <TableCell>
