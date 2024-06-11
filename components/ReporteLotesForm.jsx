@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { LoadingContext } from "@/contexts/loading";
 import { usuario_id } from "@/helpers/user";
 
-import { formatPrecio, FormatDate } from "@/helpers/formatters";
+import { formatPrecio, formatPrecio2, FormatDate } from "@/helpers/formatters";
 import {
   Button,
   Col,
@@ -16,6 +16,7 @@ import {
   DatePicker,
   Tabs,
 } from "antd";
+import InputIn from "@/components/Input";
 import {
   Paper,
   Table,
@@ -55,6 +56,10 @@ export default function ReporteLotes() {
   const [infoLote, setInfoLote] = useState(null);
   const [infoFecha, setInfoFecha] = useState(null);
   const [nuevoPago, setNuevoPago] = useState(false);
+  const [color, setColor] = useState(null);
+  const [totalLotes, setTotalLotes] = useState(null);
+  const [totalPagados, setTotalPagados] = useState(null);
+  const [totalVencidos, setTotalVencidos] = useState(null);
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
@@ -62,7 +67,6 @@ export default function ReporteLotes() {
   const [show, setShow] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [pagosLength, setPagosLength] = useState([]);
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
@@ -79,7 +83,11 @@ export default function ReporteLotes() {
     setIsLoading(false);
     if (data.encontrado) {
       setInfo(data.response);
-      setPagosLength(data.response["resumen_lote"]["pagos"].length);
+      setColor(data.response);
+      setTotalLotes(data.lotes);
+      setTotalPagados(data.pagados);
+      setTotalVencidos(data.vencidos);
+      debugger;
     } else {
       Swal.fire({
         title: "Error",
@@ -91,7 +99,6 @@ export default function ReporteLotes() {
         confirmButtonText: "Aceptar",
       });
     }
-    console.log(lotes);
   }
 
   const onBuscarLotes = (value) => {
@@ -207,6 +214,66 @@ export default function ReporteLotes() {
           </Button>
         </Col>
       </Row>
+      <div className="reporte-lotes__labels-container">
+        <Col xs={12} sm={6} lg={6}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="lotes"
+              className="reporte-lotes__input--realizado"
+              value={totalLotes !== null ? totalLotes : null}
+              disabled={true}
+              placeholder={totalLotes !== null ? totalLotes : ""}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={6}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Pagado
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="pagados"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalPagados !== null ? "$ " + formatPrecio(totalPagados) : null
+              }
+              disabled={true}
+              placeholder={
+                totalPagados !== null ? "$ " + formatPrecio(totalPagados) : ""
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={6}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Vencido
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="vencidos"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalVencidos !== null
+                  ? "$ " + formatPrecio(totalVencidos)
+                  : null
+              }
+              disabled={true}
+              placeholder={
+                totalVencidos !== null ? "$ " + formatPrecio(totalVencidos) : ""
+              }
+            />
+          </Row>
+        </Col>
+      </div>
       {info != null && (
         <Row justify={"center"} className="large tabla">
           <TableContainer component={Paper}>
@@ -316,19 +383,24 @@ export default function ReporteLotes() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        className="boton"
-                        size={"large"}
-                        onClick={() => {
-                          handleModalPago(
-                            item["resumen_lote"],
-                            item["resumen_cliente"],
-                            item["fecha_proximo_pago"]
-                          );
-                        }}
-                      >
-                        <FaMoneyCheckDollar className="m-auto" size={"20px"} />
-                      </Button>
+                      {color !== "blue" && (
+                        <Button
+                          className="boton"
+                          size={"large"}
+                          onClick={() => {
+                            handleModalPago(
+                              item["resumen_lote"],
+                              item["resumen_cliente"],
+                              item["fecha_proximo_pago"]
+                            );
+                          }}
+                        >
+                          <FaMoneyCheckDollar
+                            className="m-auto"
+                            size={"20px"}
+                          />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -337,7 +409,7 @@ export default function ReporteLotes() {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={pagosLength}
+                    count={totalLotes}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}

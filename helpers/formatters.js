@@ -59,8 +59,8 @@ export const fecha_mes_anterior = () => {
   return yyyymmdd;
 };
 
-export const formatPrecio = (value) => 
-`${value.toLocaleString('es-MX')}`;
+export const formatPrecio = (value) => `${value.toLocaleString("es-MX")}`;
+export const formatPrecio2 = (value) => `${value.toFixed(2)}`;
 
 export const FormatDate = (date) => {
   var aux, months, newDate, dias, diaNumero;
