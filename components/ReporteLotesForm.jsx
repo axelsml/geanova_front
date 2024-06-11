@@ -241,11 +241,15 @@ export default function ReporteLotes() {
               id="pagados"
               className="reporte-lotes__input--realizado"
               value={
-                totalPagados !== 0 ? "$ " + formatPrecio2(totalPagados) : null
+                totalPagados !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPagados))
+                  : null
               }
               disabled={true}
               placeholder={
-                totalPagados !== 0 ? "$ " + formatPrecio2(totalPagados) : ""
+                totalPagados !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPagados))
+                  : ""
               }
             />
           </Row>
@@ -261,11 +265,15 @@ export default function ReporteLotes() {
               id="vencidos"
               className="reporte-lotes__input--realizado"
               value={
-                totalVencidos !== 0 ? "$ " + formatPrecio2(totalVencidos) : null
+                totalVencidos !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalVencidos))
+                  : null
               }
               disabled={true}
               placeholder={
-                totalVencidos !== 0 ? "$ " + formatPrecio2(totalVencidos) : ""
+                totalVencidos !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalVencidos))
+                  : ""
               }
             />
           </Row>
