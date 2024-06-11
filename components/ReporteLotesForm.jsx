@@ -348,17 +348,30 @@ export default function ReporteLotes() {
                     <TableCell>
                       ${" "}
                       {formatPrecio(
-                        item["resumen_lote"]["amortizaciones"][0]["monto_pago"]
+                        parseFloat(
+                          item["resumen_lote"]["amortizaciones"][0][
+                            "monto_pago"
+                          ]
+                        )
                       )}
                     </TableCell>
                     <TableCell>
-                      $ {formatPrecio(item["resumen_lote"]["anticipo"])}
+                      ${" "}
+                      {formatPrecio(
+                        parseFloat(item["resumen_lote"]["anticipo"])
+                      )}
                     </TableCell>
                     <TableCell>
-                      $ {formatPrecio(item["resumen_lote"]["monto_contrato"])}
+                      ${" "}
+                      {formatPrecio(
+                        parseFloat(item["resumen_lote"]["monto_contrato"])
+                      )}
                     </TableCell>
                     <TableCell>
-                      $ {formatPrecio(item["resumen_lote"]["monto_vencido"])}
+                      ${" "}
+                      {formatPrecio(
+                        parseFloat(item["resumen_lote"]["monto_vencido"])
+                      )}
                     </TableCell>
                     <TableCell>
                       <Button
