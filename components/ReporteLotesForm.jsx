@@ -348,11 +348,7 @@ export default function ReporteLotes() {
                     <TableCell>
                       ${" "}
                       {formatPrecio(
-                        parseFloat(
-                          item["resumen_lote"]["amortizaciones"][0][
-                            "monto_pago"
-                          ]
-                        )
+                        parseFloat(item["resumen_lote"]["monto_pago_requerido"])
                       )}
                     </TableCell>
                     <TableCell>
