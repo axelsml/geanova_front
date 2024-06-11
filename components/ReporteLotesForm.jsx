@@ -56,7 +56,6 @@ export default function ReporteLotes() {
   const [infoLote, setInfoLote] = useState(null);
   const [infoFecha, setInfoFecha] = useState(null);
   const [nuevoPago, setNuevoPago] = useState(false);
-  const [color, setColor] = useState(null);
   const [totalLotes, setTotalLotes] = useState(0);
   const [totalPagados, setTotalPagados] = useState(0);
   const [totalVencidos, setTotalVencidos] = useState(0);
@@ -84,7 +83,6 @@ export default function ReporteLotes() {
     setIsLoading(false);
     if (data.encontrado) {
       setInfo(data.response);
-      setColor(data.response);
       setTotalLotes(data.lotes);
       setTotalPagados(data.pagados);
       setTotalVencidos(data.vencidos);
@@ -243,11 +241,11 @@ export default function ReporteLotes() {
               id="pagados"
               className="reporte-lotes__input--realizado"
               value={
-                totalPagados !== 0 ? "$ " + formatPrecio(totalPagados) : null
+                totalPagados !== 0 ? "$ " + formatPrecio2(totalPagados) : null
               }
               disabled={true}
               placeholder={
-                totalPagados !== 0 ? "$ " + formatPrecio(totalPagados) : ""
+                totalPagados !== 0 ? "$ " + formatPrecio2(totalPagados) : ""
               }
             />
           </Row>
@@ -263,11 +261,11 @@ export default function ReporteLotes() {
               id="vencidos"
               className="reporte-lotes__input--realizado"
               value={
-                totalVencidos !== 0 ? "$ " + formatPrecio(totalVencidos) : null
+                totalVencidos !== 0 ? "$ " + formatPrecio2(totalVencidos) : null
               }
               disabled={true}
               placeholder={
-                totalVencidos !== 0 ? "$ " + formatPrecio(totalVencidos) : ""
+                totalVencidos !== 0 ? "$ " + formatPrecio2(totalVencidos) : ""
               }
             />
           </Row>
@@ -382,7 +380,8 @@ export default function ReporteLotes() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      {color !== "blue" && (
+                      {item["resumen_lote"]["situacion_solicitud_color"] !==
+                        "blue" && (
                         <Button
                           className="boton"
                           size={"large"}
