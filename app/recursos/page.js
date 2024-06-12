@@ -67,6 +67,9 @@ const [page, setPage] = useState(0);
   const [page2, setPage2] = useState(0);
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
 
+  const [page3, setPage3] = useState(0);
+  const [rowsPerPage3, setRowsPerPage3] = useState(5);
+
 const [pago_conciliar_id, setPagoConciliarId] = useState(0);
 const [show, setShow] = useState(false);
 
@@ -88,6 +91,15 @@ const [show, setShow] = useState(false);
      setPage2(0);
    };
 
+   
+   const handleChangePage3 = (event, newPage) => {
+     setPage3(newPage);
+   };
+ 
+   const handleChangeRowsPerPage3 = (event) => {
+     setRowsPerPage3(parseInt(event.target.value, 10));
+     setPage3(0);
+   };
    useEffect(() => {
      //     ventasService.getVentas(setVentas, Error);
           terrenosService.getTerrenos(setTerrenos, onError);
@@ -666,7 +678,7 @@ const descendingComparator = (a, b, orderBy) => {
                     </Col>
                </Row>
                <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
-                         <Col xs={24} sm={20} md={10} lg={10} xl={10} xxl={10}>
+                         <Col xs={24} sm={20} md={20} lg={20} xl={20} xxl={20}>
                          <TableContainer className="tabla">
                               <Table>
                               <TableHead>
@@ -679,7 +691,10 @@ const descendingComparator = (a, b, orderBy) => {
                               </TableRow>
                               </TableHead>
                               <TableBody>
-                                   {movimientos_por_conciliar.map((mov, index) => (
+                                   {stableSort(movimientos_por_conciliar, getComparator(order, orderBy)).slice(
+                                        page3 * rowsPerPage3,
+                                        page3 * rowsPerPage3 + rowsPerPage3
+                                        ).map((mov, index) => (
                                    <TableRow key={index}>
                                         <TableCell>
                                         {mov.cuenta}
@@ -701,6 +716,15 @@ const descendingComparator = (a, b, orderBy) => {
                               </TableBody>
                               <TableFooter>
                                    <TableRow>
+                                        <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25]}
+                                        count={movimientos_por_conciliar.length}
+                                        rowsPerPage={rowsPerPage3}
+                                        page={page3}
+                                        onPageChange={handleChangePage3}
+                                        onRowsPerPageChange={handleChangeRowsPerPage3}
+                                        labelRowsPerPage="Pendientes por Página"
+                                        />
                                    </TableRow>
                               </TableFooter>
                               </Table>
