@@ -49,6 +49,7 @@ const [por_conciliar, setMovimientoBanco] = useState([]);
 const [movimientos_pendientes, setPendientes] = useState([]);
 const [pago_seleccionado, setPagoSeleccionado] = useState({});
 const [ultimos_movimientos, setUltimosMovimientos] = useState([]);
+const [movimientos_por_conciliar, setMovimientosPorConciliar] = useState([]);
 
 const [visible, setVisible] = useState(false);
 const [order, setOrder] = useState('asc');
@@ -123,6 +124,7 @@ function buscarUltimoRegistroBancos(){
 }
 async function onUltimosMovimientosEncontrados(data){
      setUltimosMovimientos(data.respuesta)
+     setMovimientosPorConciliar(data.movimientos_pendientes)
 }
   const onError = () => {
     setIsLoading(false);
@@ -651,6 +653,48 @@ const descendingComparator = (a, b, orderBy) => {
                                         </TableCell>
                                         <TableCell>
                                         {mov.ultima_actualizacion}
+                                        </TableCell>
+                                   </TableRow>
+                                   ))}
+                              </TableBody>
+                              <TableFooter>
+                                   <TableRow>
+                                   </TableRow>
+                              </TableFooter>
+                              </Table>
+                         </TableContainer>
+                    </Col>
+               </Row>
+               <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
+                         <Col xs={24} sm={20} md={10} lg={10} xl={10} xxl={10}>
+                         <TableContainer className="tabla">
+                              <Table>
+                              <TableHead>
+                              <TableRow>
+                                   <TableCell>Cuenta</TableCell>
+                                   <TableCell>Fecha Operacion</TableCell>
+                                   <TableCell>Descripcion</TableCell>
+                                   <TableCell>Descripcion Larga</TableCell>
+                                   <TableCell>Monto</TableCell>
+                              </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                   {movimientos_por_conciliar.map((mov, index) => (
+                                   <TableRow key={index}>
+                                        <TableCell>
+                                        {mov.cuenta}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.fecha_operacion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.descripcion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.concepto}
+                                        </TableCell>
+                                        <TableCell>
+                                        ${formatPrecio(parseFloat(mov.abono))}
                                         </TableCell>
                                    </TableRow>
                                    ))}
