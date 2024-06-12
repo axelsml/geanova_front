@@ -220,9 +220,9 @@ export default function ReporteLotes() {
             <input
               id="lotes"
               className="reporte-lotes__input--realizado"
-              value={totalLotes !== 0 ? totalLotes : null}
+              value={totalLotes !== 0 ? totalLotes : 0}
               disabled={true}
-              placeholder={totalLotes !== 0 ? totalLotes : ""}
+              placeholder={totalLotes !== 0 ? totalLotes : "$ 0.0"}
             />
           </Row>
         </Col>
@@ -239,13 +239,13 @@ export default function ReporteLotes() {
               value={
                 totalPagados !== 0
                   ? "$ " + formatPrecio(parseFloat(totalPagados))
-                  : null
+                  : "$ 0.0"
               }
               disabled={true}
               placeholder={
                 totalPagados !== 0
                   ? "$ " + formatPrecio(parseFloat(totalPagados))
-                  : ""
+                  : "$ 0.0"
               }
             />
           </Row>
@@ -263,13 +263,13 @@ export default function ReporteLotes() {
               value={
                 totalVencidos !== 0
                   ? "$ " + formatPrecio(parseFloat(totalVencidos))
-                  : null
+                  : "$ 0.0"
               }
               disabled={true}
               placeholder={
                 totalVencidos !== 0
                   ? "$ " + formatPrecio(parseFloat(totalVencidos))
-                  : ""
+                  : "$ 0.0"
               }
             />
           </Row>
