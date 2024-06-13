@@ -2,7 +2,7 @@
 import usuariosService from "@/services/usuariosService";
 import { redirect, useRouter } from "next/navigation";
 import InputIn from "@/components/Input";
-import { Form, Button, Row ,Col,Upload,message,Tabs,Modal, Select  } from "antd";
+import { Form, Button, Row ,Col,Upload,message,Tabs,Modal, Select, Checkbox  } from "antd";
 import {Table as TablaExcel } from "antd";
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -43,7 +43,7 @@ const [excelData, setExcelData] = useState([]);
 const [pendientes, setMovimientosPendientes] = useState([]);
 const [monto_pendientes, setMovimientosPendientesMonto] = useState(0);
 const [monto_pendientes2, setMovimientosPendientesMonto2] = useState(0);
-
+const [check, setCheck] = useState(false);
 const [recibidos, setMovimientosRecibidos] = useState([]);
 const [por_conciliar, setMovimientoBanco] = useState([]);
 const [movimientos_pendientes, setPendientes] = useState([]);
@@ -235,7 +235,8 @@ async function onUltimosMovimientosEncontrados(data){
 function cargarMovimientosEfectivo(){
      setIsLoading(true)
      var params = {
-          terreno_id:terrenoSelected
+          terreno_id:terrenoSelected,
+          check:check
      }
      pagosService.getMovimientosEfectivo(params,onMovimientosEfectivoCargados,onError)
 }
@@ -422,6 +423,14 @@ const descendingComparator = (a, b, orderBy) => {
                          </Option>
                          ))}
                     </Select>
+                    </Col>
+                    <Col>
+                         <Checkbox
+                         onChange={()=>{setCheck(!check)}}
+                         checked={check}
+                         >
+                         Recibidos
+                         </Checkbox>
                     </Col>
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosEfectivo()}}>
@@ -677,60 +686,7 @@ const descendingComparator = (a, b, orderBy) => {
                          </TableContainer>
                     </Col>
                </Row>
-               <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
-                         <Col xs={24} sm={20} md={20} lg={20} xl={20} xxl={20}>
-                         <TableContainer className="tabla">
-                              <Table>
-                              <TableHead>
-                              <TableRow>
-                                   <TableCell>Cuenta</TableCell>
-                                   <TableCell>Fecha Operacion</TableCell>
-                                   <TableCell>Descripcion</TableCell>
-                                   <TableCell>Descripcion Larga</TableCell>
-                                   <TableCell>Monto</TableCell>
-                              </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                   {stableSort(movimientos_por_conciliar, getComparator(order, orderBy)).slice(
-                                        page3 * rowsPerPage3,
-                                        page3 * rowsPerPage3 + rowsPerPage3
-                                        ).map((mov, index) => (
-                                   <TableRow key={index}>
-                                        <TableCell>
-                                        {mov.cuenta}
-                                        </TableCell>
-                                        <TableCell>
-                                        {mov.fecha_operacion}
-                                        </TableCell>
-                                        <TableCell>
-                                        {mov.descripcion}
-                                        </TableCell>
-                                        <TableCell>
-                                        {mov.concepto}
-                                        </TableCell>
-                                        <TableCell>
-                                        ${formatPrecio(parseFloat(mov.abono))}
-                                        </TableCell>
-                                   </TableRow>
-                                   ))}
-                              </TableBody>
-                              <TableFooter>
-                                   <TableRow>
-                                        <TablePagination
-                                        rowsPerPageOptions={[5, 10, 25]}
-                                        count={movimientos_por_conciliar.length}
-                                        rowsPerPage={rowsPerPage3}
-                                        page={page3}
-                                        onPageChange={handleChangePage3}
-                                        onRowsPerPageChange={handleChangeRowsPerPage3}
-                                        labelRowsPerPage="Pendientes por Página"
-                                        />
-                                   </TableRow>
-                              </TableFooter>
-                              </Table>
-                         </TableContainer>
-                    </Col>
-               </Row>
+               
                </>)}
                
                {por_conciliar.length != 0 && (<>
@@ -832,6 +788,65 @@ const descendingComparator = (a, b, orderBy) => {
                     </Col>
                </Row>
                </>)}
+               <Row style={{paddingTop:"20px"}} justify={"center"} className="m-auto">
+                    <Col className="formulario">
+                         <b>Movimientos Disponibles</b>
+                    </Col>
+               </Row>
+               <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
+                         <Col xs={24} sm={20} md={20} lg={20} xl={20} xxl={20}>
+                         <TableContainer className="tabla">
+                              <Table>
+                              <TableHead>
+                              <TableRow>
+                                   <TableCell>Cuenta</TableCell>
+                                   <TableCell>Fecha Operacion</TableCell>
+                                   <TableCell>Descripcion</TableCell>
+                                   <TableCell>Descripcion Larga</TableCell>
+                                   <TableCell>Monto</TableCell>
+                              </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                   {stableSort(movimientos_por_conciliar, getComparator(order, orderBy)).slice(
+                                        page3 * rowsPerPage3,
+                                        page3 * rowsPerPage3 + rowsPerPage3
+                                        ).map((mov, index) => (
+                                   <TableRow key={index}>
+                                        <TableCell>
+                                        {mov.cuenta}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.fecha_operacion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.descripcion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.concepto}
+                                        </TableCell>
+                                        <TableCell>
+                                        ${formatPrecio(parseFloat(mov.abono))}
+                                        </TableCell>
+                                   </TableRow>
+                                   ))}
+                              </TableBody>
+                              <TableFooter>
+                                   <TableRow>
+                                        <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25]}
+                                        count={movimientos_por_conciliar.length}
+                                        rowsPerPage={rowsPerPage3}
+                                        page={page3}
+                                        onPageChange={handleChangePage3}
+                                        onRowsPerPageChange={handleChangeRowsPerPage3}
+                                        labelRowsPerPage="Pendientes por Página"
+                                        />
+                                   </TableRow>
+                              </TableFooter>
+                              </Table>
+                         </TableContainer>
+                    </Col>
+               </Row>
                {/* {excelData.slice(1).length != 0 &&(<>
                          <TablaExcel className="formulario" dataSource={excelData.slice(1)} columns={columns} />
                </>)} */}
