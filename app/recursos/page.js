@@ -49,6 +49,7 @@ const [por_conciliar, setMovimientoBanco] = useState([]);
 const [movimientos_pendientes, setPendientes] = useState([]);
 const [pago_seleccionado, setPagoSeleccionado] = useState({});
 const [ultimos_movimientos, setUltimosMovimientos] = useState([]);
+const [movimientos_por_conciliar, setMovimientosPorConciliar] = useState([]);
 
 const [visible, setVisible] = useState(false);
 const [order, setOrder] = useState('asc');
@@ -65,6 +66,9 @@ const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page2, setPage2] = useState(0);
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
+
+  const [page3, setPage3] = useState(0);
+  const [rowsPerPage3, setRowsPerPage3] = useState(5);
 
 const [pago_conciliar_id, setPagoConciliarId] = useState(0);
 const [show, setShow] = useState(false);
@@ -87,6 +91,15 @@ const [show, setShow] = useState(false);
      setPage2(0);
    };
 
+   
+   const handleChangePage3 = (event, newPage) => {
+     setPage3(newPage);
+   };
+ 
+   const handleChangeRowsPerPage3 = (event) => {
+     setRowsPerPage3(parseInt(event.target.value, 10));
+     setPage3(0);
+   };
    useEffect(() => {
      //     ventasService.getVentas(setVentas, Error);
           terrenosService.getTerrenos(setTerrenos, onError);
@@ -123,6 +136,7 @@ function buscarUltimoRegistroBancos(){
 }
 async function onUltimosMovimientosEncontrados(data){
      setUltimosMovimientos(data.respuesta)
+     setMovimientosPorConciliar(data.movimientos_pendientes)
 }
   const onError = () => {
     setIsLoading(false);
@@ -657,6 +671,60 @@ const descendingComparator = (a, b, orderBy) => {
                               </TableBody>
                               <TableFooter>
                                    <TableRow>
+                                   </TableRow>
+                              </TableFooter>
+                              </Table>
+                         </TableContainer>
+                    </Col>
+               </Row>
+               <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
+                         <Col xs={24} sm={20} md={20} lg={20} xl={20} xxl={20}>
+                         <TableContainer className="tabla">
+                              <Table>
+                              <TableHead>
+                              <TableRow>
+                                   <TableCell>Cuenta</TableCell>
+                                   <TableCell>Fecha Operacion</TableCell>
+                                   <TableCell>Descripcion</TableCell>
+                                   <TableCell>Descripcion Larga</TableCell>
+                                   <TableCell>Monto</TableCell>
+                              </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                   {stableSort(movimientos_por_conciliar, getComparator(order, orderBy)).slice(
+                                        page3 * rowsPerPage3,
+                                        page3 * rowsPerPage3 + rowsPerPage3
+                                        ).map((mov, index) => (
+                                   <TableRow key={index}>
+                                        <TableCell>
+                                        {mov.cuenta}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.fecha_operacion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.descripcion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.concepto}
+                                        </TableCell>
+                                        <TableCell>
+                                        ${formatPrecio(parseFloat(mov.abono))}
+                                        </TableCell>
+                                   </TableRow>
+                                   ))}
+                              </TableBody>
+                              <TableFooter>
+                                   <TableRow>
+                                        <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25]}
+                                        count={movimientos_por_conciliar.length}
+                                        rowsPerPage={rowsPerPage3}
+                                        page={page3}
+                                        onPageChange={handleChangePage3}
+                                        onRowsPerPageChange={handleChangeRowsPerPage3}
+                                        labelRowsPerPage="Pendientes por Página"
+                                        />
                                    </TableRow>
                               </TableFooter>
                               </Table>
