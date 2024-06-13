@@ -40,6 +40,7 @@ export default function ReporteLotes() {
   const [totalLotes, setTotalLotes] = useState(0);
   const [totalPagados, setTotalPagados] = useState(0);
   const [totalVencidos, setTotalVencidos] = useState(0);
+  const [totalPendiente, setTotalPendiente] = useState(0);
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
@@ -58,6 +59,7 @@ export default function ReporteLotes() {
     setTotalLotes(0);
     setTotalPagados(0);
     setTotalVencidos(0);
+    setTotalPendiente(0);
     var params = {
       lote_id: loteSelected.id,
       terreno_id: terrenoSelected.id,
@@ -72,6 +74,7 @@ export default function ReporteLotes() {
       setTotalLotes(data.lotes);
       setTotalPagados(data.pagados);
       setTotalVencidos(data.vencidos);
+      setTotalPendiente(data.pendiente);
       debugger;
     } else {
       Swal.fire({
@@ -210,7 +213,7 @@ export default function ReporteLotes() {
         </Col>
       </Row>
       <div className="reporte-lotes__labels-container">
-        <Col xs={12} sm={6} lg={6}>
+        <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
               Lotes
@@ -226,7 +229,7 @@ export default function ReporteLotes() {
             />
           </Row>
         </Col>
-        <Col xs={12} sm={6} lg={6}>
+        <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
               Monto Pagado
@@ -250,7 +253,7 @@ export default function ReporteLotes() {
             />
           </Row>
         </Col>
-        <Col xs={12} sm={6} lg={6}>
+        <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
               Monto Vencido
@@ -269,6 +272,30 @@ export default function ReporteLotes() {
               placeholder={
                 totalVencidos !== 0
                   ? "$ " + formatPrecio(parseFloat(totalVencidos))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Pendiente
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="pendiente"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalPendiente !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPendiente))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalPendiente !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPendiente))
                   : "$ 0.0"
               }
             />
