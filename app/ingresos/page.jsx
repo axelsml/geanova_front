@@ -27,6 +27,9 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
+import {
+  formatPrecio,
+} from "@/helpers/formatters";
 import Swal from "sweetalert2";
 import pagosService from "@/services/pagosService";
 import { formatDate } from "@/helpers/formatters";
@@ -48,6 +51,12 @@ export default function ReporteIngresos() {
 
   const [resumenIngresos, setResumenIngresos] = useState({});
   const [detalleIngresos, setDetalleIngresos] = useState({});
+
+  const [anticipo, setAnticipo] = useState({});
+  const [efectivo, setEfectivo] = useState({});
+  const [transferencia, setTransferencia] = useState({});
+  const [total, setTotal] = useState({});
+  const [detalles, setDetalles] = useState([]);
 
   useEffect(() => {
     terrenosService.getTerrenosAll(onTerreno);
@@ -72,17 +81,25 @@ export default function ReporteIngresos() {
 
   async function onReporte(data) {
     setIsLoading(false);
-    data
-      ? setResumenIngresos(data.resumen)
-      : Swal.fire({
-          title: "Error",
-          icon: "error",
-          text: "No se encontraron registros con la información solicitada",
-          confirmButtonColor: "#4096ff",
-          cancelButtonColor: "#ff4d4f",
-          showDenyButton: true,
-          confirmButtonText: "Aceptar",
-        });
+    debugger
+    if(data.total.numero != 0){
+      // ? setResumenIngresos(data.resumen)
+      setAnticipo(data.anticipo)
+      setEfectivo(data.cobranza_efectivo)
+      setTransferencia(data.cobranza_terminal)
+      setTotal(data.total)
+    }else{
+
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No se encontraron registros con la información solicitada",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+      });
+    }
   }
 
   const onError = (e) => {
@@ -140,170 +157,147 @@ export default function ReporteIngresos() {
             </Select>
           </Col>
           <Col className="rep-ing-boton--buscar">
-            <Button onClick={handleSearchButton}>BUSCAR</Button>
+            <Button className="boton" onClick={handleSearchButton}>BUSCAR</Button>
           </Col>
         </Row>
-        <h1 className="rep-ing-title__h1">Reporte de Ingresos</h1>
-        <Row>
-          {resumenIngresos.cobranza != undefined && (
-            <div className="rep-ing-main-div__table">
-              <Table className="rep-ing__table">
-                <thead className="rep-ing__thead">
-                  <tr>
-                    <th className="rep-ing__th">Concepto</th>
-                    <th className="rep-ing__th">Tipo de pago</th>
-                    <th className="rep-ing__th">Número</th>
-                    <th className="rep-ing__th">Importe</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    className="rep-ing__tr"
-                    onClick={() => {
-                      handleShow();
-                      setDetalleIngresos(resumenIngresos.cobranza);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="rep-ing__td">Cobranza</td>
-                    <td className="rep-ing__td">Oficina</td>
-                    <td className="rep-ing__td">
-                      {resumenIngresos.cobranza?.oficina}
-                    </td>
-                    <td className="rep-ing__td">
-                      {formatNumero(
-                        parseFloat(resumenIngresos.cobranza?.oficinamonto),
-                        "$"
-                      )}
-                    </td>
-                  </tr>
-                  <tr
-                    className="rep-ing__tr"
-                    onClick={() => {
-                      handleShow();
-                      setDetalleIngresos(resumenIngresos.cobranza);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="rep-ing__td"></td>
-                    <td className="rep-ing__td">Transferencia</td>
-                    <td className="rep-ing__td">
-                      {resumenIngresos.cobranza?.transferencia}
-                    </td>
-                    <td className="rep-ing__td">
-                      {formatNumero(
-                        parseFloat(
-                          resumenIngresos.cobranza?.transferenciamonto
-                        ),
-                        "$"
-                      )}
-                    </td>
-                  </tr>
-                  <tr
-                    className="rep-ing__tr"
-                    onClick={() => {
-                      handleShow();
-                      setDetalleIngresos(resumenIngresos.anticipo);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="rep-ing__td">Anticipo</td>
-                    <td className="rep-ing__td">Oficina</td>
-                    <td className="rep-ing__td">
-                      {resumenIngresos.anticipo?.oficina}
-                    </td>
-                    <td className="rep-ing__td">
-                      {formatNumero(
-                        parseFloat(resumenIngresos.anticipo?.oficinamonto),
-                        "$"
-                      )}
-                    </td>
-                  </tr>
-                  <tr
-                    className="rep-ing__tr"
-                    onClick={() => {
-                      handleShow();
-                      setDetalleIngresos(resumenIngresos.anticipo);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="rep-ing__td"></td>
-                    <td className="rep-ing__td">Transferencia</td>
-                    <td className="rep-ing__td">
-                      {resumenIngresos.anticipo?.transferencia}
-                    </td>
-                    <td className="rep-ing__td">
-                      {formatNumero(
-                        parseFloat(
-                          resumenIngresos.anticipo?.transferenciamonto
-                        ),
-                        "$"
-                      )}
-                    </td>
-                  </tr>
-                  <tr className="rep-ing__tr">
-                    <td className="rep-ing__td">Total</td>
-                    <td className="rep-ing__td"></td>
-                    <td className="rep-ing__td">
-                      {resumenIngresos?.suma_numero}
-                    </td>
-                    <td className="rep-ing__td">
-                      {formatNumero(
-                        parseFloat(resumenIngresos?.suma_importe),
-                        "$"
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </div>
-          )}
-        </Row>
+
+        <Row style={{paddingTop:"20px"}} justify={"center"} className="m-auto">
+            <Col className="formulario">
+                  <b>Reporte de Ingresos</b>
+            </Col>
+        </Row>      
+         <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
+                         <Col xs={26} sm={20} md={16} lg={9} xl={9} xxl={9}>
+                         <TableContainer className="tabla">
+                              <Table>
+                              <TableHead>
+                              <TableRow>
+                                   <TableCell>Concepto</TableCell>
+                                   <TableCell>Tipo</TableCell>
+                                   <TableCell>Número</TableCell>
+                                   <TableCell>Importe</TableCell>
+                              </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                <TableRow style={{cursor:"pointer"}} onClick={()=>{setDetalles(efectivo.detalle);setShow(true)}}>
+                                  <TableCell>
+                                    Cobranza
+                                  </TableCell>
+                                  <TableCell>
+                                    Efectivo
+                                  </TableCell>
+                                  <TableCell>
+                                    {efectivo.numero}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatNumero(parseFloat(efectivo.importe),"$")}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow style={{cursor:"pointer"}} onClick={()=>{setDetalles(transferencia.detalle);setShow(true)}}>
+                                  <TableCell>
+                                  </TableCell>
+                                  <TableCell>
+                                    Transferencia
+                                  </TableCell>
+                                  <TableCell>
+                                    {transferencia.numero}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatNumero(parseFloat(transferencia.importe),"$")}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow style={{cursor:"pointer"}} onClick={()=>{setDetalles(anticipo.detalle);setShow(true)}}>
+                                  <TableCell>
+                                    Anticipo
+                                  </TableCell>
+                                  <TableCell>
+                                  </TableCell>
+                                  <TableCell>
+                                    {anticipo.numero}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatNumero(parseFloat(anticipo.importe),"$")}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>
+                                    Total
+                                  </TableCell>
+                                  <TableCell>
+                                  </TableCell>
+                                  <TableCell>
+                                    {total.numero}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatNumero(parseFloat(total.importe),"$")}
+                                  </TableCell>
+                                </TableRow>
+                              </TableBody>
+                              <TableFooter>
+                                   <TableRow>
+                                      
+                                   </TableRow>
+                              </TableFooter>
+                              </Table>
+                         </TableContainer>
+                    </Col>
+               </Row>      
         <Modal
           width={900}
           height={600}
-          title="Detalles de las solicitudes"
+          title=""
           visible={show}
           onCancel={handleClose}
           okButtonProps={{ style: { display: "none" } }}
           cancelButtonProps={{ style: { display: "none" } }}
         >
-          {detalleIngresos.detalle != undefined && (
+           <Row style={{paddingTop:"20px"}} justify={"center"} className="m-auto">
+            <Col className="formulario">
+                  <b>Detalles de las solicitudes</b>
+            </Col>
+        </Row>    
+          {detalles.length != 0 && (
             <>
-              <Table>
-                <thead>
-                  <th>No.</th>
-                  <th>Folio</th>
-                  <th>Nombre</th>
-                  <th>Telefono</th>
-                  <th>Monto Pagado</th>
-                  <th>Fecha</th>
-                  <th>Tipo de pago</th>
-                </thead>
-                <tbody>
-                  {detalleIngresos.detalle.map((item, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{item["pago_folio"]}</td>
-                        <td>
-                          {item["usuario_cliente"][0]["primer_nombre"] + " "}
-                          {item["usuario_cliente"][0]["primer_apellido"] + " "}
-                          {item["usuario_cliente"][0]["segundo_apellido"]}
-                        </td>
-                        <td>
-                          {item["usuario_cliente"][0]["telefono_celular"]}
-                        </td>
-                        <td>
-                          {formatNumero(parseFloat(item["monto_pagado"]), "$")}
-                        </td>
-                        <td>{item["fecha_pago"]}</td>
-                        <td>{item["sistema_pago"]}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </Table>
+             <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
+                         <Col xs={22} sm={12} md={12} lg={12} xl={12} xxl={12}>
+                         <TableContainer className="tabla">
+                              <Table>
+                              <TableHead>
+                              <TableRow>
+                                   <TableCell>#</TableCell>
+                                   <TableCell>Lote</TableCell>
+                                   <TableCell>Nombre Cliente</TableCell>
+                                   <TableCell>Monto Pagado</TableCell>
+                              </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                   {detalles.map((item, index) => (
+                                   <TableRow key={index}>
+                                      <TableCell>
+                                        {index + 1}
+                                        </TableCell>
+                                        <TableCell>
+                                        {item.info_lote.lote}
+                                        </TableCell>
+                                        <TableCell>
+                                        {item.info_cliente.nombre_completo}
+                                        </TableCell>
+                                        <TableCell>
+                                        ${formatPrecio(parseFloat(item.info_pago))}
+                                        </TableCell>
+                                   </TableRow>
+                                   ))}
+                              </TableBody>
+                              <TableFooter>
+                                   <TableRow>
+                                       
+                                   </TableRow>
+                              </TableFooter>
+                              </Table>
+                         </TableContainer>
+                    </Col>
+               </Row>
+             
             </>
           )}
         </Modal>
