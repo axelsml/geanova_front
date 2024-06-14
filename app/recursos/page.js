@@ -151,6 +151,18 @@ async function onUltimosMovimientosEncontrados(data){
     });
   };
 
+  function excelDateToJSDate(serial) {
+     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+     const timezoneOffset = date.getTimezoneOffset() * 60000; // Compensa el desfase de la zona horaria
+     return new Date(date.getTime() + timezoneOffset);
+   }
+
+   function formatFecha(fecha) {
+     debugger
+     let partes = fecha.split('-');
+     return `${partes[0]}-${partes[2]}-${partes[1]}`;
+   }
+
   function guardarEstadoCuenta(excel_data){
      debugger
      const columns_aux = excel_data.length > 0 ? excel_data[0].map((header, index) => ({ title: header, dataIndex: index.toString() })) : [];
@@ -164,11 +176,14 @@ async function onUltimosMovimientosEncontrados(data){
     for (let i = 0; i < datos.length; i++) {
      
          if(columns_aux[0].title == "CUENTA"){
-          let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
-          let fecha_ingreso = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          let fecha = excelDateToJSDate( datos[i][1]);
+          let formattedDate = fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+          // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          // let fecha_ingreso = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          debugger
           var info = {
-          fecha_operacion:fecha,
-          fecha_ingreso:fecha_ingreso,
+          fecha_operacion:formattedDate,
+          fecha_ingreso:formattedDate,
           cuenta: datos[i][0],
           cuenta_id:2,
           descripcion:datos[i][11],
@@ -182,10 +197,13 @@ async function onUltimosMovimientosEncontrados(data){
 
           }
      }else{
-          let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+          // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+          let fecha = excelDateToJSDate( datos[i][0]);
+          let formattedDate = fecha.toISOString().split('T')[0];
+          // let fecha = formatFecha(datos[i][0]);
           var info = {
           cuenta_id:1,     
-          fecha_operacion:fecha,
+          fecha_operacion:formattedDate,
           descripcion:datos[i][1],
           cargo:parseFloat(datos[i][2]),
           abono:parseFloat(datos[i][3]),
