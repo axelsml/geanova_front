@@ -162,7 +162,11 @@ async function onUltimosMovimientosEncontrados(data){
      let partes = fecha.split('-');
      return `${partes[0]}-${partes[2]}-${partes[1]}`;
    }
-
+   function formatDateString(dateString) {
+     const [day, month, year] = dateString.split('/').map(Number);
+     const date = new Date(year, month - 1, day); // Meses en JavaScript van de 0 a 11
+     return date.toISOString().split('T')[0]; // Retorna en formato YYYY-MM-DD
+   }
   function guardarEstadoCuenta(excel_data){
      debugger
      const columns_aux = excel_data.length > 0 ? excel_data[0].map((header, index) => ({ title: header, dataIndex: index.toString() })) : [];
@@ -176,11 +180,18 @@ async function onUltimosMovimientosEncontrados(data){
     for (let i = 0; i < datos.length; i++) {
      
          if(columns_aux[0].title == "CUENTA"){
-          let fecha = excelDateToJSDate( datos[i][1]);
-          let formattedDate = fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+          console.log(datos[i][1])
+          debugger
+          var  formattedDate = ""
+          if (typeof datos[i][0] === 'number') {
+               let fecha = excelDateToJSDate( datos[i][0]);
+               formattedDate = fecha.toISOString().split('T')[0];
+          }else{
+              formattedDate = formatDateString(datos[i][0]);
+          }
+          // Formato YYYY-MM-DD
           // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
           // let fecha_ingreso = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
-          debugger
           var info = {
           fecha_operacion:formattedDate,
           fecha_ingreso:formattedDate,
@@ -197,10 +208,15 @@ async function onUltimosMovimientosEncontrados(data){
 
           }
      }else{
-          // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
-          let fecha = excelDateToJSDate( datos[i][0]);
-          let formattedDate = fecha.toISOString().split('T')[0];
-          // let fecha = formatFecha(datos[i][0]);
+          console.log(datos[i][0])
+              // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+          var  formattedDate = ""
+          if (typeof datos[i][0] === 'number') {
+               let fecha = excelDateToJSDate( datos[i][0]);
+               formattedDate = fecha.toISOString().split('T')[0];
+          }else{
+              formattedDate = formatDateString(datos[i][0]);
+          }
           var info = {
           cuenta_id:1,     
           fecha_operacion:formattedDate,
