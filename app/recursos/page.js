@@ -156,7 +156,10 @@ async function onUltimosMovimientosEncontrados(data){
      const timezoneOffset = date.getTimezoneOffset() * 60000; // Compensa el desfase de la zona horaria
      return new Date(date.getTime() + timezoneOffset);
    }
-
+   function convertDateFormat(dateString) {
+     const [year, day, month] = dateString.split('-');
+     return `${year}-${month}-${day}`;
+   }
    function formatFecha(fecha) {
      debugger
      let partes = fecha.split('-');
@@ -165,7 +168,8 @@ async function onUltimosMovimientosEncontrados(data){
    function formatDateString(dateString) {
      const [day, month, year] = dateString.split('/').map(Number);
      const date = new Date(year, month - 1, day); // Meses en JavaScript van de 0 a 11
-     return date.toISOString().split('T')[0]; // Retorna en formato YYYY-MM-DD
+     const formattedDate = date.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+     return formattedDate;
    }
   function guardarEstadoCuenta(excel_data){
      debugger
@@ -186,6 +190,7 @@ async function onUltimosMovimientosEncontrados(data){
           if (typeof datos[i][0] === 'number') {
                let fecha = excelDateToJSDate( datos[i][0]);
                formattedDate = fecha.toISOString().split('T')[0];
+               formattedDate = convertDateFormat(formattedDate)
           }else{
               formattedDate = formatDateString(datos[i][0]);
           }
@@ -214,6 +219,8 @@ async function onUltimosMovimientosEncontrados(data){
           if (typeof datos[i][0] === 'number') {
                let fecha = excelDateToJSDate( datos[i][0]);
                formattedDate = fecha.toISOString().split('T')[0];
+               formattedDate = convertDateFormat(formattedDate)
+
           }else{
               formattedDate = formatDateString(datos[i][0]);
           }
