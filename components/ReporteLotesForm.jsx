@@ -150,7 +150,7 @@ export default function ReporteLotes() {
           xxl={7}
           className="titulo_pantallas"
         >
-          <b>INFORMACION DEL CLIENTE</b>
+          <b>REPORTE DE LOTES</b>
         </Col>
       </Row>
       <Row justify={"center"} style={{ marginTop: "15px" }}>
@@ -356,107 +356,111 @@ export default function ReporteLotes() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {info.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item["resumen_lote"]["lote"]}</TableCell>
-                    <TableCell>
-                      {item["resumen_cliente"]["nombre_completo"]}
-                    </TableCell>
-                    <TableCell>
-                      {item["resumen_cliente"]["telefono_celular"]}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        disabled
-                        size={"small"}
-                        shape="round"
-                        style={{
-                          backgroundColor:
-                            item["resumen_lote"]["situacion_solicitud_color"],
-                        }}
-                      ></Button>
-                    </TableCell>
-                    <TableCell>
-                      ${" "}
-                      {formatPrecio(
-                        parseFloat(item["resumen_lote"]["monto_pago_requerido"])
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      ${" "}
-                      {formatPrecio(
-                        parseFloat(item["resumen_lote"]["anticipo"])
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      ${" "}
-                      {formatPrecio(
-                        parseFloat(item["resumen_lote"]["monto_contrato"])
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      ${" "}
-                      {formatPrecio(
-                        parseFloat(item["resumen_lote"]["monto_pagado"])
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      ${" "}
-                      {formatPrecio(
-                        parseFloat(item["resumen_lote"]["monto_vencido"])
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        className="boton"
-                        size="large"
-                        key={item}
-                        onClick={() => {
-                          window.open(
-                            `https://api.santamariadelaluz.com/getClienteByLote/${terrenoSelected.id}/${item["resumen_lote"]["lote_id"]}.pdf`
-                          );
-                        }}
-                      >
-                        <FaFilePdf className="m-auto" size={"20px"} />
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        className="boton"
-                        size="large"
-                        onClick={() => {
-                          window.open(
-                            `https://api.santamariadelaluz.com/iUsuarios/${item["resumen_lote"]["amortizaciones"][0]["solicitud_id"]}.pdf`
-                          );
-                        }}
-                      >
-                        <FaFilePdf className="m-auto" size={"20px"} />
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      {item["resumen_lote"]["situacion_solicitud_color"] !==
-                        "blue" && (
+                {info
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{item["resumen_lote"]["lote"]}</TableCell>
+                      <TableCell>
+                        {item["resumen_cliente"]["nombre_completo"]}
+                      </TableCell>
+                      <TableCell>
+                        {item["resumen_cliente"]["telefono_celular"]}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          disabled
+                          size={"small"}
+                          shape="round"
+                          style={{
+                            backgroundColor:
+                              item["resumen_lote"]["situacion_solicitud_color"],
+                          }}
+                        ></Button>
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(
+                            item["resumen_lote"]["monto_pago_requerido"]
+                          )
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["anticipo"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["monto_contrato"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["monto_pagado"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["monto_vencido"])
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Button
                           className="boton"
-                          size={"large"}
+                          size="large"
+                          key={item}
                           onClick={() => {
-                            handleModalPago(
-                              item["resumen_lote"],
-                              item["resumen_cliente"],
-                              item["fecha_proximo_pago"]
+                            window.open(
+                              `https://api.santamariadelaluz.com/getClienteByLote/${terrenoSelected.id}/${item["resumen_lote"]["lote_id"]}.pdf`
                             );
                           }}
                         >
-                          <FaMoneyCheckDollar
-                            className="m-auto"
-                            size={"20px"}
-                          />
+                          <FaFilePdf className="m-auto" size={"20px"} />
                         </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="boton"
+                          size="large"
+                          onClick={() => {
+                            window.open(
+                              `https://api.santamariadelaluz.com/iUsuarios/${item["resumen_lote"]["amortizaciones"][0]["solicitud_id"]}.pdf`
+                            );
+                          }}
+                        >
+                          <FaFilePdf className="m-auto" size={"20px"} />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        {item["resumen_lote"]["situacion_solicitud_color"] !==
+                          "blue" && (
+                          <Button
+                            className="boton"
+                            size={"large"}
+                            onClick={() => {
+                              handleModalPago(
+                                item["resumen_lote"],
+                                item["resumen_cliente"],
+                                item["fecha_proximo_pago"]
+                              );
+                            }}
+                          >
+                            <FaMoneyCheckDollar
+                              className="m-auto"
+                              size={"20px"}
+                            />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
               <TableFooter>
                 <TableRow>
