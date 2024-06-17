@@ -187,12 +187,12 @@ async function onUltimosMovimientosEncontrados(data){
           console.log(datos[i][1])
           debugger
           var  formattedDate = ""
-          if (typeof datos[i][0] === 'number') {
-               let fecha = excelDateToJSDate( datos[i][0]);
+          if (typeof datos[i][1] === 'number') {
+               let fecha = excelDateToJSDate( datos[i][1]);
                formattedDate = fecha.toISOString().split('T')[0];
                formattedDate = convertDateFormat(formattedDate)
           }else{
-              formattedDate = formatDateString(datos[i][0]);
+              formattedDate = formatDateString(datos[i][1]);
           }
           // Formato YYYY-MM-DD
           // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
