@@ -151,6 +151,7 @@ export default function ReporteCobranza() {
               style={{ width: "100%" }}
             >
               <DatePicker
+                allowClear={false}
                 onChange={(value) => {
                   setFechaInicial(formatDate(value));
                 }}
@@ -166,6 +167,7 @@ export default function ReporteCobranza() {
               style={{ width: "100%" }}
             >
               <DatePicker
+                allowClear={false}
                 onChange={(value) => {
                   setFechaFinal(formatDate(value));
                 }}
@@ -295,6 +297,7 @@ export default function ReporteCobranza() {
       <Row justify={"center"}>
         <Button
           className="boton boton-margin-bottom"
+          disabled={fechaInicial > fechaFinal}
           onClick={() => {
             onSearch();
           }}
