@@ -10,16 +10,17 @@ import ReporteCobranza from "@/components/ReporteCobranzaForm";
 export default function Reportes() {
   const [showReporteLote, setShowReporteLote] = useState(false);
 
-  const handleTabChange = (key) => {
-    if (key === "2") {
-    }
-  };
+  // const handleTabChange = (key) => {
+  //   if (key === "2") {
+  //   }
+  // };
+  // en <Tabs /> onChange={handleTabChange} como prop
 
   return (
     <div>
       <Row justify={"center"}>
         <Col xs={24} sm={20} md={16} lg={12} xl={16} xxl={16}>
-          <Tabs defaultActiveKey="1" onChange={handleTabChange}>
+          <Tabs defaultActiveKey="1">
             <TabPane tab="Lotes" key={"1"}>
               <ReporteLotes />
             </TabPane>
