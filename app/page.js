@@ -155,7 +155,7 @@ export default function Home() {
               <div>
                 <Row justify={"center"}>
                   <Image
-                    src={"/icono ingreso.svg"}
+                    src={"/icono configuracion.svg"}
                     width={200}
                     height={200}
                     priority
