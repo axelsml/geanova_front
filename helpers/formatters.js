@@ -59,8 +59,17 @@ export const fecha_mes_anterior = () => {
   return yyyymmdd;
 };
 
-export const formatPrecio = (value) => 
-`${value.toLocaleString('es-MX')}`;
+export const formatPrecio = (value) => `${value.toLocaleString("es-MX")}`;
+
+export const fechaFormateada = (value) => {
+  let fecha = new Intl.DateTimeFormat("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(value));
+
+  return fecha;
+};
 
 export const FormatDate = (date) => {
   var aux, months, newDate, dias, diaNumero;

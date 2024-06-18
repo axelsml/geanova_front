@@ -151,6 +151,11 @@
   color: white;
 }
 
+.boton-eliminar {
+  background-color: rgb(204, 67, 67);
+  color: white;
+}
+
 .boton-cancelar {
   background-color: gray;
   color: white;
