@@ -166,7 +166,7 @@
 }
 
 .large {
-  width: 70vw;
+  width: 75vw;
 }
 
 .tabla tbody tr {
@@ -288,4 +288,101 @@
 
 .modal-edit-pago__input--fecha:hover {
   border-color: rgb(67, 141, 204);
+}
+
+/*---------------------------------------REPORTE LOTES 10/06/24--------------------------------------- */
+
+.reporte-lotes__labels-container {
+
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.reporte-lotes__label--input {
+  font-family: sans-serif;
+  font-weight: bold;
+  color: rgb(29, 105, 155);
+}
+
+.reporte-lotes__input--realizado {
+  width: 100%;
+  padding: 5px;
+  text-align: center;
+  background-color: #C8D1DB;
+  border-radius: 1px solid;
+  border-color: #C8D1DB;
+}
+
+/*---------------------------------------------------TABLA POP UP PARA REPORTE LOTES--------------------------------------------------- */
+.hoover-target {
+  cursor: pointer;
+}
+
+.hover-container {
+  position: absolute;
+  display: inline-block;
+}
+
+.hover-popup {
+  position: relative;
+  left: 12vw;
+  bottom: 12vh;
+  margin-top: 10px;
+  border: 1.5px solid #ccc;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  padding: 10px;
+
+}
+
+.popup-reporte-cobranza {
+  position: absolute;
+  left: 58vw;
+  bottom: 50vh;
+  margin-top: 10px;
+}
+
+.hover-popup table {
+  width: 200px;
+  border-collapse: collapse;
+}
+
+.hover-popup table,
+.hover-popup td {
+  border: 1px solid rgb(67, 141, 204);
+  padding: 8px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.hover-popup-thead {
+  background-color: rgb(67, 141, 204);
+  font-weight: bold;
+  color: #fff;
+}
+
+/*---------------------------------------------------- REPORTE COBRANZA 14/06/24 -------------------------------------------------*/
+
+.boton-margin-bottom {
+  margin-bottom: 24px;
+}
+
+.reporte-cobranza__container--filtros {
+  margin-top: 48px;
+}
+
+.table-center-text {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.reporte-cobranza__labels-container {
+  margin: 0 auto;
+  margin-bottom: 24px;
+  width: 30vw;
+  display: flex;
+  justify-content: space-around;
 }

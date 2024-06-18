@@ -2,7 +2,7 @@
 import usuariosService from "@/services/usuariosService";
 import { redirect, useRouter } from "next/navigation";
 import InputIn from "@/components/Input";
-import { Form, Button, Row ,Col,Upload,message,Tabs,Modal, Select  } from "antd";
+import { Form, Button, Row ,Col,Upload,message,Tabs,Modal, Select, Checkbox  } from "antd";
 import {Table as TablaExcel } from "antd";
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -43,12 +43,13 @@ const [excelData, setExcelData] = useState([]);
 const [pendientes, setMovimientosPendientes] = useState([]);
 const [monto_pendientes, setMovimientosPendientesMonto] = useState(0);
 const [monto_pendientes2, setMovimientosPendientesMonto2] = useState(0);
-
+const [check, setCheck] = useState(false);
 const [recibidos, setMovimientosRecibidos] = useState([]);
 const [por_conciliar, setMovimientoBanco] = useState([]);
 const [movimientos_pendientes, setPendientes] = useState([]);
 const [pago_seleccionado, setPagoSeleccionado] = useState({});
 const [ultimos_movimientos, setUltimosMovimientos] = useState([]);
+const [movimientos_por_conciliar, setMovimientosPorConciliar] = useState([]);
 
 const [visible, setVisible] = useState(false);
 const [order, setOrder] = useState('asc');
@@ -65,6 +66,9 @@ const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page2, setPage2] = useState(0);
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
+
+  const [page3, setPage3] = useState(0);
+  const [rowsPerPage3, setRowsPerPage3] = useState(5);
 
 const [pago_conciliar_id, setPagoConciliarId] = useState(0);
 const [show, setShow] = useState(false);
@@ -87,6 +91,15 @@ const [show, setShow] = useState(false);
      setPage2(0);
    };
 
+   
+   const handleChangePage3 = (event, newPage) => {
+     setPage3(newPage);
+   };
+ 
+   const handleChangeRowsPerPage3 = (event) => {
+     setRowsPerPage3(parseInt(event.target.value, 10));
+     setPage3(0);
+   };
    useEffect(() => {
      //     ventasService.getVentas(setVentas, Error);
           terrenosService.getTerrenos(setTerrenos, onError);
@@ -123,6 +136,7 @@ function buscarUltimoRegistroBancos(){
 }
 async function onUltimosMovimientosEncontrados(data){
      setUltimosMovimientos(data.respuesta)
+     setMovimientosPorConciliar(data.movimientos_pendientes)
 }
   const onError = () => {
     setIsLoading(false);
@@ -137,6 +151,26 @@ async function onUltimosMovimientosEncontrados(data){
     });
   };
 
+  function excelDateToJSDate(serial) {
+     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+     const timezoneOffset = date.getTimezoneOffset() * 60000; // Compensa el desfase de la zona horaria
+     return new Date(date.getTime() + timezoneOffset);
+   }
+   function convertDateFormat(dateString) {
+     const [year, day, month] = dateString.split('-');
+     return `${year}-${month}-${day}`;
+   }
+   function formatFecha(fecha) {
+     debugger
+     let partes = fecha.split('-');
+     return `${partes[0]}-${partes[2]}-${partes[1]}`;
+   }
+   function formatDateString(dateString) {
+     const [day, month, year] = dateString.split('/').map(Number);
+     const date = new Date(year, month - 1, day); // Meses en JavaScript van de 0 a 11
+     const formattedDate = date.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+     return formattedDate;
+   }
   function guardarEstadoCuenta(excel_data){
      debugger
      const columns_aux = excel_data.length > 0 ? excel_data[0].map((header, index) => ({ title: header, dataIndex: index.toString() })) : [];
@@ -150,11 +184,22 @@ async function onUltimosMovimientosEncontrados(data){
     for (let i = 0; i < datos.length; i++) {
      
          if(columns_aux[0].title == "CUENTA"){
-          let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
-          let fecha_ingreso = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          console.log(datos[i][1])
+          debugger
+          var  formattedDate = ""
+          if (typeof datos[i][1] === 'number') {
+               let fecha = excelDateToJSDate( datos[i][1]);
+               formattedDate = fecha.toISOString().split('T')[0];
+               formattedDate = convertDateFormat(formattedDate)
+          }else{
+              formattedDate = formatDateString(datos[i][1]);
+          }
+          // Formato YYYY-MM-DD
+          // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
+          // let fecha_ingreso = XLSX.SSF.format('YYYY-DD-MM', datos[i][1]);
           var info = {
-          fecha_operacion:fecha,
-          fecha_ingreso:fecha_ingreso,
+          fecha_operacion:formattedDate,
+          fecha_ingreso:formattedDate,
           cuenta: datos[i][0],
           cuenta_id:2,
           descripcion:datos[i][11],
@@ -168,10 +213,20 @@ async function onUltimosMovimientosEncontrados(data){
 
           }
      }else{
-          let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+          console.log(datos[i][0])
+              // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+          var  formattedDate = ""
+          if (typeof datos[i][0] === 'number') {
+               let fecha = excelDateToJSDate( datos[i][0]);
+               formattedDate = fecha.toISOString().split('T')[0];
+               formattedDate = convertDateFormat(formattedDate)
+
+          }else{
+              formattedDate = formatDateString(datos[i][0]);
+          }
           var info = {
           cuenta_id:1,     
-          fecha_operacion:fecha,
+          fecha_operacion:formattedDate,
           descripcion:datos[i][1],
           cargo:parseFloat(datos[i][2]),
           abono:parseFloat(datos[i][3]),
@@ -221,7 +276,8 @@ async function onUltimosMovimientosEncontrados(data){
 function cargarMovimientosEfectivo(){
      setIsLoading(true)
      var params = {
-          terreno_id:terrenoSelected
+          terreno_id:terrenoSelected,
+          check:check
      }
      pagosService.getMovimientosEfectivo(params,onMovimientosEfectivoCargados,onError)
 }
@@ -265,6 +321,7 @@ function buscarMovimientosBanco(pago){
        fecha_operacion:pago.fecha_transferencia,
        monto_pago:pago.monto_pagado,
        lote:pago.lote,
+       pago_id:pago.id,
      }
      debugger
      pagosService.BuscarMovimientoBanco(params,onMovimientosCoinciden,onError)
@@ -408,6 +465,14 @@ const descendingComparator = (a, b, orderBy) => {
                          </Option>
                          ))}
                     </Select>
+                    </Col>
+                    <Col>
+                         <Checkbox
+                         onChange={()=>{setCheck(!check)}}
+                         checked={check}
+                         >
+                         Recibidos
+                         </Checkbox>
                     </Col>
                     <Col>
                     <Button className="boton" onClick={() =>{cargarMovimientosEfectivo()}}>
@@ -663,6 +728,7 @@ const descendingComparator = (a, b, orderBy) => {
                          </TableContainer>
                     </Col>
                </Row>
+               
                </>)}
                
                {por_conciliar.length != 0 && (<>
@@ -764,6 +830,65 @@ const descendingComparator = (a, b, orderBy) => {
                     </Col>
                </Row>
                </>)}
+               <Row style={{paddingTop:"20px"}} justify={"center"} className="m-auto">
+                    <Col className="formulario">
+                         <b>Movimientos Disponibles</b>
+                    </Col>
+               </Row>
+               <Row justify={"center"} className="m-auto" style={{marginTop:"20px"}}>
+                         <Col xs={24} sm={20} md={20} lg={20} xl={20} xxl={20}>
+                         <TableContainer className="tabla">
+                              <Table>
+                              <TableHead>
+                              <TableRow>
+                                   <TableCell>Cuenta</TableCell>
+                                   <TableCell>Fecha Operacion</TableCell>
+                                   <TableCell>Descripcion</TableCell>
+                                   <TableCell>Descripcion Larga</TableCell>
+                                   <TableCell>Monto</TableCell>
+                              </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                   {stableSort(movimientos_por_conciliar, getComparator(order, orderBy)).slice(
+                                        page3 * rowsPerPage3,
+                                        page3 * rowsPerPage3 + rowsPerPage3
+                                        ).map((mov, index) => (
+                                   <TableRow key={index}>
+                                        <TableCell>
+                                        {mov.cuenta}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.fecha_operacion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.descripcion}
+                                        </TableCell>
+                                        <TableCell>
+                                        {mov.concepto}
+                                        </TableCell>
+                                        <TableCell>
+                                        ${formatPrecio(parseFloat(mov.abono))}
+                                        </TableCell>
+                                   </TableRow>
+                                   ))}
+                              </TableBody>
+                              <TableFooter>
+                                   <TableRow>
+                                        <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25]}
+                                        count={movimientos_por_conciliar.length}
+                                        rowsPerPage={rowsPerPage3}
+                                        page={page3}
+                                        onPageChange={handleChangePage3}
+                                        onRowsPerPageChange={handleChangeRowsPerPage3}
+                                        labelRowsPerPage="Pendientes por Página"
+                                        />
+                                   </TableRow>
+                              </TableFooter>
+                              </Table>
+                         </TableContainer>
+                    </Col>
+               </Row>
                {/* {excelData.slice(1).length != 0 &&(<>
                          <TablaExcel className="formulario" dataSource={excelData.slice(1)} columns={columns} />
                </>)} */}

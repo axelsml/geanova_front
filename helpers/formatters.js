@@ -71,6 +71,8 @@ export const fechaFormateada = (value) => {
   return fecha;
 };
 
+export const formatPrecio2 = (value) => `${value.toFixed(2)}`;
+
 export const FormatDate = (date) => {
   var aux, months, newDate, dias, diaNumero;
   months = [
