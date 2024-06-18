@@ -13,6 +13,8 @@ import {
   Select,
   Modal,
   DatePicker,
+  Input,
+  Checkbox,
 } from "antd";
 import { useContext, useEffect, useState } from "react";
 import { FaArrowCircleLeft, FaPrint, FaPencilAlt } from "react-icons/fa";
@@ -53,12 +55,14 @@ export default function ClientesInfo() {
   const [lotes, setLotes] = useState(null);
   const [loteSelected, setLoteSelected] = useState(null);
 
-  const [info_lote, setInfoLote] = useState(null);
+  const [clienteInfo, setClienteInfo] = useState([]);
   const [info_cliente, setInfoCliente] = useState(null);
   const [imagenes, verImagenes] = useState(false);
   const [fecha_proximo_pago, setProximoPago] = useState(null);
 
   const [show, setShow] = useState(false);
+  const [showModalEditar, setShowModalEditar] = useState(false);
+
   const [selectedPago, setSelectedPago] = useState({
     pago_id: null,
     no_pago: null,
@@ -69,6 +73,29 @@ export default function ClientesInfo() {
   });
   const [sistemas_pago, setSistemasPago] = useState(null);
   const [sistemaPagoSelected, setSistemaPagoSelected] = useState(null);
+
+  const [info_lote, setInfoLote] = useState(null);
+
+  const [primerNombre, setPrimerNombre] = useState(null);
+  const [segundoNombre, setSegundoNombre] = useState(null);
+  const [primerApellido, setPrimerApellido] = useState(null);
+  const [segundoApellido, setSegundoApellido] = useState(null);
+  const [montoContrato, setMontoContrato] = useState(null);
+  const [cantidadPagos, setCantidadPagos] = useState(null);
+  const [anticipo, setAnticipo] = useState(null);
+
+  const [sistemas_pagoModal, setSistemasPagoModal] = useState(null);
+  const [sistemaPagoSelectedModal, setSistemaPagoSelectedModal] =
+    useState(null);
+
+  const [calle, setCalle] = useState(null);
+  const [colonia, setColonia] = useState(null);
+  const [numeroExt, setNumeroExt] = useState(null);
+  const [numeroInt, setNumeroInt] = useState(null);
+  const [codigoPostal, setCodigoPostal] = useState(null);
+  const [totalImpuestoLuz, setTotalImpuestoLuz] = useState(0);
+  const [agregarLuz, setAgregarLuz] = useState(false);
+  const [tieneLuz, setTieneLuz] = useState(false);
 
   const { Option } = Select;
 
@@ -248,6 +275,10 @@ export default function ClientesInfo() {
     setSistemaPagoSelected(null);
   };
 
+  const handleCloseModalEditar = () => {
+    setShowModalEditar(false);
+  };
+
   const handleCancel = () => {
     Swal.fire({
       title: "¿Cancelar cambios?",
@@ -324,6 +355,168 @@ export default function ClientesInfo() {
       [name]: value,
     }));
   };
+
+  async function actualizarDatos() {
+    let form = {
+      solicitud_id: info_lote.solicitud_id,
+      idCliente: info_cliente.id,
+      primerNombre: primerNombre,
+      segundoNombre: segundoNombre,
+      primerApellido: primerApellido,
+      segundoApellido: segundoApellido,
+      calle: calle,
+      colonia: colonia,
+      numero_ext: numeroExt,
+      numero_int: numeroInt,
+      cp: codigoPostal,
+      montoContrato: montoContrato,
+      cantidadPagos: cantidadPagos,
+      anticipo: anticipo,
+      sistemaPago: sistemaPagoSelectedModal,
+      montoLuz: totalImpuestoLuz,
+      tieneLuz: tieneLuz,
+    };
+
+    await Swal.fire({
+      title: "Guardar cambios en la información del cliente?",
+      icon: "question",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      confirmButtonText: "Aceptar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log("form:", form);
+        console.log("Boton Actualizar");
+        lotesService.updateClienteByLote(form, onClienteActualizado, onError);
+      }
+    });
+  }
+
+  function datosModal() {
+    setIsLoading(true);
+
+    pagosService.getSistemasPago(setSistemasPagoModal, onError);
+
+    lotesService
+      .cargarClienteInfo(info_lote.solicitud_id, setClienteInfo, onError)
+      .then(() => {
+        setIsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    if (Object.keys(clienteInfo).length > 0) {
+      let infoClienteNombre = clienteInfo.nombre[0];
+      setPrimerNombre(infoClienteNombre.primer_nombre);
+      setSegundoNombre(infoClienteNombre.segundo_nombre);
+      setPrimerApellido(infoClienteNombre.primer_apellido);
+      setSegundoApellido(infoClienteNombre.segundo_apellido);
+      let infoClienteDomicilio = clienteInfo.domicilio[0];
+      setCalle(infoClienteDomicilio.calle);
+      setColonia(infoClienteDomicilio.colonia);
+      setNumeroExt(infoClienteDomicilio.numero_ext);
+      setNumeroInt(infoClienteDomicilio.numero_int);
+      setCodigoPostal(infoClienteDomicilio.cp);
+
+      setMontoContrato(info_lote.monto_contrato);
+      setCantidadPagos(info_lote.cantidad_pagos);
+      setAnticipo(info_lote.anticipo);
+      if (info_lote.sistema_pago == "Transferencia") {
+        setSistemaPagoSelectedModal(2);
+      } else {
+        setSistemaPagoSelectedModal(1);
+      }
+
+      setAgregarLuz(false);
+    }
+  }, [clienteInfo]);
+
+  function calcularLuz(superficie) {
+    let calculo;
+    calculo = 25900 / 119;
+    calculo = calculo * superficie;
+    console.log("calculo: ", calculo);
+    setTotalImpuestoLuz(calculo);
+    let total;
+    if (!agregarLuz) {
+      total = montoContrato + calculo;
+      setTieneLuz("agregar");
+      setMontoContrato(total);
+    } else {
+      total = montoContrato - calculo;
+      setMontoContrato(total);
+    }
+  }
+
+  function restarLuz(superficie) {
+    let calculo;
+    calculo = 25900 / 119;
+    calculo = calculo * superficie;
+    console.log("calculo: ", calculo);
+    setTotalImpuestoLuz(calculo);
+    let total;
+    if (!agregarLuz) {
+      total = montoContrato - calculo;
+      setTieneLuz("quitar");
+      setMontoContrato(total);
+    } else {
+      total = montoContrato + calculo;
+      setMontoContrato(total);
+    }
+  }
+
+  const formatValue = (value) => {
+    if (value === "" || value === undefined) return "";
+    const fixedValue = Number(value).toFixed(0);
+    return `$ ${fixedValue}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const parseValue = (value) => {
+    return value.replace(/\$\s?|(,*)/g, "");
+  };
+
+  const onClienteActualizado = (data) => {
+    setShowModalEditar(false);
+    console.log(data);
+    if (data.montoModificado) {
+      //Borrar mortizaciones con la funcion borrarAmortizacion()
+      console.log("se modifico el monto: ", data.montoModificado);
+      borrarAmortizacion();
+    } else {
+      console.log("no se modifico el monto: ", data.montoModificado);
+    }
+    setIsLoading(false);
+    if (data.type == "success") {
+      BuscarInfoLote();
+      Swal.fire({
+        title: "Cliente actualizado con Éxito",
+        icon: "success",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    } else {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: data.message,
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
+  };
+
+  const customTitle = (
+    <Row justify={"center"}>
+      <Typography.Title level={3}>
+        Editar Información del Cliente
+      </Typography.Title>
+    </Row>
+  );
 
   return (
     <div className="p-8 grid gap-4">
@@ -403,6 +596,22 @@ export default function ClientesInfo() {
                 style={{ marginTop: "5px" }}
               >
                 <Col xs={24} sm={24} lg={24}>
+                  <Row gutter={[16]}>
+                    <Col xs={24} sm={12} lg={12}></Col>
+                    <Col xs={24} sm={12} lg={12} style={{ textAlign: "right" }}>
+                      <Button
+                        className="boton renglon_otro_color"
+                        onClick={() => {
+                          console.log("modal abierto");
+                          datosModal();
+                          setShowModalEditar(true);
+                        }}
+                        size="large"
+                      >
+                        <FaPencilAlt className="m-auto" size={"20px"} />
+                      </Button>
+                    </Col>
+                  </Row>
                   <Row gutter={[16]}>
                     <Col xs={24} sm={12} lg={12}>
                       Nombre Cliente: {info_cliente.nombre_completo}
@@ -915,6 +1124,228 @@ export default function ClientesInfo() {
             Guardar
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        title={customTitle}
+        footer={null}
+        width={1000}
+        open={showModalEditar}
+        onCancel={() => handleCloseModalEditar()}
+      >
+        <Form labelCol={{ span: 10 }} labelAlign={"right"}>
+          <Row style={{ paddingTop: 10 }}>
+            <Col
+              xs={24}
+              sm={20}
+              md={16}
+              lg={14}
+              xl={14}
+              xxl={14}
+              style={{
+                maxWidth: 450,
+              }}
+            >
+              <Form.Item label="Primer Nombre">
+                <Input
+                  placeholder="Primer Nombre"
+                  value={primerNombre}
+                  onChange={(e) => {
+                    setPrimerNombre(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Segundo Nombre">
+                <Input
+                  placeholder="Segundo Nombre"
+                  value={segundoNombre}
+                  onChange={(e) => {
+                    setSegundoNombre(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Primer Apellido">
+                <Input
+                  placeholder="Primer Apellido"
+                  value={primerApellido}
+                  onChange={(e) => {
+                    setPrimerApellido(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Segundo Apellido">
+                <Input
+                  placeholder="Segundo Apellido"
+                  value={segundoApellido}
+                  onChange={(e) => {
+                    setSegundoApellido(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Monto Contrato">
+                <InputNumber
+                  placeholder="Monto Contrato"
+                  style={{ width: "100%" }}
+                  value={montoContrato}
+                  formatter={formatValue}
+                  parser={parseValue}
+                  step={0.01}
+                  min={0}
+                  onChange={(e) => {
+                    setMontoContrato(e);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Cantidad Pagos">
+                <InputNumber
+                  placeholder="Cantidad Pagos"
+                  style={{ width: "100%" }}
+                  value={cantidadPagos}
+                  onChange={(e) => {
+                    setCantidadPagos(e);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Anticipo">
+                <InputNumber
+                  placeholder="Anticipo"
+                  style={{ width: "100%" }}
+                  value={anticipo}
+                  onChange={(e) => {
+                    setAnticipo(e);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Sistema de Pago">
+                <Select
+                  showSearch
+                  placeholder="Sistema de pago"
+                  optionLabelProp="label"
+                  value={sistemaPagoSelectedModal}
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setSistemaPagoSelectedModal(value);
+                  }}
+                >
+                  {sistemas_pagoModal?.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.Nombre}>
+                      {item?.Nombre}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col
+              xs={24}
+              sm={20}
+              md={16}
+              lg={14}
+              xl={14}
+              xxl={14}
+              style={{
+                maxWidth: 450,
+              }}
+            >
+              <Form.Item label="Calle">
+                <Input
+                  placeholder="Calle"
+                  value={calle}
+                  onChange={(e) => {
+                    setCalle(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Colonia">
+                <Input
+                  placeholder="Colonia"
+                  value={colonia}
+                  onChange={(e) => {
+                    setColonia(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Número exterior">
+                <Input
+                  placeholder="Número exterior"
+                  value={numeroExt}
+                  onChange={(e) => {
+                    setNumeroExt(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Número interior">
+                <Input
+                  placeholder="Número Interior"
+                  value={numeroInt}
+                  onChange={(e) => {
+                    setNumeroInt(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Código Postal">
+                <InputNumber
+                  placeholder="Código Postal"
+                  value={codigoPostal}
+                  maxLength={5}
+                  style={{ width: "100%" }}
+                  onChange={(e) => {
+                    setCodigoPostal(e);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  clienteInfo.tiene_luz !== null ? "Quitar Luz" : "Agregar luz"
+                }
+              >
+                <Checkbox
+                  checked={agregarLuz}
+                  onChange={() => {
+                    setAgregarLuz(!agregarLuz);
+                    if (clienteInfo.tiene_luz) {
+                      restarLuz(info_lote.superficie);
+                    } else {
+                      calcularLuz(info_lote.superficie);
+                    }
+                  }}
+                >
+                  {agregarLuz && (
+                    <Typography.Text>
+                      Se {clienteInfo.tiene_luz !== null ? "quitó " : "agregó "}
+                      ${formatPrecio(totalImpuestoLuz.toFixed(0))} al monto
+                      contrato
+                    </Typography.Text>
+                  )}
+                  {clienteInfo.tiene_luz !== null && agregarLuz === false && (
+                    <Typography.Text>
+                      Ya cuenta con Luz en la solicitud
+                    </Typography.Text>
+                  )}
+                </Checkbox>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <div
+            className="terreno-edit__botones-footer"
+            style={{ paddingBottom: 15 }}
+          >
+            <span className="flex gap-2 justify-end">
+              <Button
+                onClick={actualizarDatos}
+                className="boton"
+                htmlType="submit"
+                size="large"
+              >
+                Guardar
+              </Button>
+
+              <Button onClick={handleCloseModalEditar} danger size="large">
+                Cancelar
+              </Button>
+            </span>
+          </div>
+        </Form>
       </Modal>
 
       {/* {!nuevoPago && ventas?.length > 0 && (

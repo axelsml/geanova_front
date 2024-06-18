@@ -1,8 +1,8 @@
 import http from "./axiosService.js";
 import axios from "axios";
 
-class lotesService {
-  getLoteByTerrenoId(params, callback, error) {
+class ConfiguracionService {
+  getIUsuarioSistema(callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -10,7 +10,59 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(`getLoteByTerrenoId/${params}`, { cancelToken: call.token })
+      .get("getIUsuarioSistema", { cancelToken: call.token })
+      .then((response) => {
+        console.log("getIUsuarioSistema: ", response.data);
+        return callback(response.data.usuarios);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
+  getIUsuarioSistemaSearch(search, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`getIUsuarioSistema/${search}`, { cancelToken: call.token })
+      .then((response) => {
+        console.log(`getIUsuarioSistema/${search}`, response.data);
+        return callback(response.data.usuarios);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
+  guardarIUsuario(callback, params, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("guardarIUsuario", params, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -26,7 +78,7 @@ class lotesService {
         }
       });
   }
-  getLotesAsignados(params, callback, error) {
+  editarIUsuario(callback, params, error) {
     var call;
     if (call) {
       call.cancel();
@@ -34,7 +86,7 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(`getLotesAsignados/${params}`, { cancelToken: call.token })
+      .post("editarIUsuario", params, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -51,7 +103,7 @@ class lotesService {
       });
   }
 
-  getLoteSuperficie(params, callback, error) {
+  eliminarIUsuario(callback, id, error) {
     var call;
     if (call) {
       call.cancel();
@@ -59,59 +111,7 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(`getLoteSuperficie/${params}`, { cancelToken: call.token })
-      .then((response) => {
-        return callback(response.data);
-      })
-      .catch((response) => {
-        try {
-          if (axios.isCancel(response)) {
-            console.log("Peticion Cancelada");
-          } else {
-            error(response.data);
-          }
-        } catch (err) {
-          console.error("Error Handled", err);
-        }
-      });
-  }
-  getLoteByTerrenoIdPlazo(terreno_id, lote_id, callback, error) {
-    var call;
-    if (call) {
-      call.cancel();
-    }
-    const CancelToken = axios.CancelToken;
-    call = CancelToken.source();
-    return http
-      .get(`getLoteByTerrenoIdPlazo/${terreno_id}/${lote_id}`, {
-        cancelToken: call.token,
-      })
-      .then((response) => {
-        return callback(response.data);
-      })
-      .catch((response) => {
-        try {
-          if (axios.isCancel(response)) {
-            console.log("Peticion Cancelada");
-          } else {
-            error(response.data);
-          }
-        } catch (err) {
-          console.error("Error Handled", err);
-        }
-      });
-  }
-  getClienteByLote(terreno_id, lote_id, callback, error) {
-    var call;
-    if (call) {
-      call.cancel();
-    }
-    const CancelToken = axios.CancelToken;
-    call = CancelToken.source();
-    return http
-      .get(`getClienteByLote/${terreno_id}/${lote_id}`, {
-        cancelToken: call.token,
-      })
+      .delete(`eliminarIUsuario/${id}`, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -128,7 +128,7 @@ class lotesService {
       });
   }
 
-  asignarSuperficie(params, callback, error) {
+  getIRoles(callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -136,11 +136,9 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .post("asignarSuperficie", params, {
-        cancelToken: call.token,
-      })
+      .get("getIRolesC", { cancelToken: call.token })
       .then((response) => {
-        return callback(response.data);
+        return callback(response.data.roles);
       })
       .catch((response) => {
         try {
@@ -154,7 +152,8 @@ class lotesService {
         }
       });
   }
-  reporteLotes(params, callback, error) {
+
+  getIRolesSearch(search, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -162,13 +161,32 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(
-        "reportes/reporte_lotes",
-        { params },
-        {
-          cancelToken: call.token,
+      .get(`getIRolesC/${search}`, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data.roles);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
         }
-      )
+      });
+  }
+
+  guardarIRoles(callback, params, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("guardarIRoles", params, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -185,7 +203,7 @@ class lotesService {
       });
   }
 
-  updateClienteByLote(params, callback, error) {
+  editarIRoles(callback, params, error) {
     var call;
     if (call) {
       call.cancel();
@@ -193,9 +211,7 @@ class lotesService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .post("updateClienteByLote", params, {
-        cancelToken: call.token,
-      })
+      .post("editarIRoles", params, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -212,18 +228,17 @@ class lotesService {
       });
   }
 
-  cargarClienteInfo(solicitud_id, callback, error) {
-    let call;
+  eliminarIRoles(callback, id, error) {
+    var call;
     if (call) {
       call.cancel();
     }
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .get(`cargarClienteInfo/${solicitud_id}`, {
-        cancelToken: call.token,
-      })
+      .delete(`eliminarIRoles/${id}`, { cancelToken: call.token })
       .then((response) => {
+        console.log("response.data", response.data);
         return callback(response.data);
       })
       .catch((response) => {
@@ -240,4 +255,4 @@ class lotesService {
   }
 }
 
-export default new lotesService();
+export default new ConfiguracionService();
