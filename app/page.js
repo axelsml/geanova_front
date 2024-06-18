@@ -148,6 +148,28 @@ export default function Home() {
           </Link>
         </Col>
       </Row>
+      <Row gutter={[16, 16]} wrap style={{ marginTop: "10px" }}>
+        <Col span={8}>
+          <Link key={"Configuracion"} href={"/configuracion"}>
+            <Card hoverable>
+              <div>
+                <Row justify={"center"}>
+                  <Image
+                    src={"/icono ingreso.svg"}
+                    width={200}
+                    height={200}
+                    priority
+                    alt="Logo Configuracion"
+                  />
+                </Row>
+                <Row justify={"center"}>
+                  <p className="text-lg text-center">Configuración</p>
+                </Row>
+              </div>
+            </Card>
+          </Link>
+        </Col>
+      </Row>
     </div>
   );
 }
