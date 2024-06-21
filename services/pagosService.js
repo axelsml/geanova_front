@@ -370,7 +370,7 @@ class pagosService {
       });
   }
 
-  getReporteCobranza(params, callback, error) {
+  getReporteEstatusCobranza(params, callback, error) {
     var call;
     if (call) {
       call.cancel();
@@ -379,7 +379,7 @@ class pagosService {
     call = CancelToken.source();
     return http
       .get(
-        "reportes/reporte_cobranza",
+        "reportes/reporte_status_cobranza",
         { params: params },
         { cancelToken: call.token }
       )

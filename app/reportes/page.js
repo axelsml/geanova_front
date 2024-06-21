@@ -6,6 +6,7 @@ import TabPane from "antd/es/tabs/TabPane";
 
 import ReporteLotes from "@/components/ReporteLotesForm";
 import ReporteCobranza from "@/components/ReporteCobranzaForm";
+import ReporteEstatusCobranza from "@/components/ReporteEstatusCobranza";
 
 export default function Reportes() {
   const [showReporteLote, setShowReporteLote] = useState(false);
@@ -26,6 +27,9 @@ export default function Reportes() {
             </TabPane>
             <TabPane tab="Cobranza" key={"2"}>
               <ReporteCobranza />
+            </TabPane>
+            <TabPane tab="Estatús Cobranza" key={"3"}>
+              <ReporteEstatusCobranza />
             </TabPane>
           </Tabs>
         </Col>
