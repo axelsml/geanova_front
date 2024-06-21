@@ -80,6 +80,8 @@ export default function ReporteEstatusCobranza() {
         showDenyButton: true,
         confirmButtonText: "Aceptar",
       });
+      setDataClientes();
+      setDataSemanas();
     }
   }
 
@@ -232,6 +234,12 @@ export default function ReporteEstatusCobranza() {
                 <TableCell style={{ textAlign: "center" }}>
                   <b>Clientes</b>
                 </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  <b>Terreno</b>
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  <b>Lote</b>
+                </TableCell>
                 {dataFechas.map((item, index) => (
                   <TableCell
                     key={index}
@@ -252,6 +260,12 @@ export default function ReporteEstatusCobranza() {
                     <TableRow key={index}>
                       <TableCell style={{ textAlign: "center" }}>
                         {item.nombre_cliente}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {item.terreno}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {item.lote}
                       </TableCell>
                       {item.pagos.map((pago, index) => (
                         <TableCell key={index} style={{ textAlign: "center" }}>
