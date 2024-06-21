@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { LoadingContext } from "@/contexts/loading";
 import { usuario_id } from "@/helpers/user";
 
-import { formatPrecio, formatDate } from "@/helpers/formatters";
+import { formatPrecio, formatPrecio2, formatDate } from "@/helpers/formatters";
 import { Button, Col, Row, Form, Select, Modal, DatePicker } from "antd";
 import {
   Paper,
@@ -185,7 +185,7 @@ export default function ReporteEstatusCobranza() {
       {dataSemanas != null && (
         <Row
           justify={"center"}
-          className="w-2/4 m-auto tabla"
+          className="w-3/4 m-auto tabla"
           style={{ marginTop: "24px" }}
         >
           <TableContainer>
@@ -201,7 +201,16 @@ export default function ReporteEstatusCobranza() {
                   <b>Pagado</b>
                 </TableCell>
                 <TableCell style={{ textAlign: "center" }}>
+                  <b>Monto pagado</b>
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
                   <b>Sin Pagar</b>
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  <b>Monto sin pagar</b>
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  <b>Porcentaje pagado</b>
                 </TableCell>
               </TableHead>
               <TableBody>
@@ -217,7 +226,16 @@ export default function ReporteEstatusCobranza() {
                       {item.pagado}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
+                      $ {formatPrecio(item.suma_pagado)}
+                    </TableCell>
+                    <TableCell style={{ textAlign: "center" }}>
                       {item.sin_pagar}
+                    </TableCell>
+                    <TableCell style={{ textAlign: "center" }}>
+                      $ {formatPrecio(item.suma_sin_pagar)}
+                    </TableCell>
+                    <TableCell style={{ textAlign: "center" }}>
+                      {formatPrecio2(item.porcentaje)} %
                     </TableCell>
                   </TableRow>
                 ))}
