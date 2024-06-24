@@ -41,6 +41,10 @@ export default function ReporteLotes() {
   const [totalPagados, setTotalPagados] = useState(0);
   const [totalVencidos, setTotalVencidos] = useState(0);
   const [totalPendiente, setTotalPendiente] = useState(0);
+  const [totalSemanal, setTotalSemanal] = useState(0);
+  const [totalMensual, setTotalMensual] = useState(0);
+  const [totalLiquidados, setTotalLiquidados] = useState(0);
+  const [totalCobranza, setTotalCobranza] = useState(0);
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
@@ -60,6 +64,10 @@ export default function ReporteLotes() {
     setTotalPagados(0);
     setTotalVencidos(0);
     setTotalPendiente(0);
+    setTotalSemanal(0);
+    setTotalMensual(0);
+    setTotalLiquidados(0);
+    setTotalCobranza(0);
     var params = {
       lote_id: loteSelected.id,
       terreno_id: terrenoSelected.id,
@@ -75,7 +83,10 @@ export default function ReporteLotes() {
       setTotalPagados(data.pagados);
       setTotalVencidos(data.vencidos);
       setTotalPendiente(data.pendiente);
-      debugger;
+      setTotalSemanal(data.semanal);
+      setTotalMensual(data.mensual);
+      setTotalLiquidados(data.liquidados);
+      setTotalCobranza(data.cobranza);
     } else {
       Swal.fire({
         title: "Error",
@@ -111,7 +122,6 @@ export default function ReporteLotes() {
     setInfoLote(lote);
     setInfoCliente(cliente);
     setInfoFecha(fecha);
-    debugger;
   };
 
   const handleCloseModal = () => {
@@ -207,7 +217,11 @@ export default function ReporteLotes() {
           </Form.Item>
         </Col>
         <Col>
-          <Button className="boton" onClick={BuscarInfoLote}>
+          <Button
+            className="boton"
+            disabled={terrenoSelected == null || loteSelected == null}
+            onClick={BuscarInfoLote}
+          >
             Buscar
           </Button>
         </Col>
@@ -296,6 +310,88 @@ export default function ReporteLotes() {
               placeholder={
                 totalPendiente !== 0
                   ? "$ " + formatPrecio(parseFloat(totalPendiente))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+      </div>
+      <div className="reporte-lotes__labels-container">
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes liquidados
+            </label>
+          </Row>
+          <Row justify={"liquidados"}>
+            <input
+              id="liquidados"
+              className="reporte-lotes__input--realizado"
+              value={totalLiquidados !== 0 ? totalLiquidados : 0}
+              disabled={true}
+              placeholder={totalLiquidados !== 0 ? totalLiquidados : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes en cobranza
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="cobranza"
+              className="reporte-lotes__input--realizado"
+              value={totalCobranza !== 0 ? totalCobranza : 0}
+              disabled={true}
+              placeholder={totalCobranza !== 0 ? totalCobranza : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto semanal
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="semanal"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalSemanal !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalSemanal))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalSemanal !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalSemanal))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto mensual
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="mensual"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalMensual !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalMensual))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalMensual !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalMensual))
                   : "$ 0.0"
               }
             />

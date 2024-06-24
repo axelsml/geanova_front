@@ -328,26 +328,32 @@
 .hover-container {
   position: absolute;
   display: inline-block;
+  top: 0;
+  left: 15%;
+}
+
+.reporte-cobranza {
+  left: 75%;
 }
 
 .hover-popup {
   position: relative;
-  left: 12vw;
-  bottom: 12vh;
-  margin-top: 10px;
+  /* left: 12vw;
+  bottom: 12vh; */
+  /* margin-top: 10px; */
   border: 1.5px solid #ccc;
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   z-index: 10;
-  padding: 10px;
+  /* padding: 10px; */
 
 }
 
 .popup-reporte-cobranza {
   position: absolute;
-  left: 58vw;
-  bottom: 50vh;
-  margin-top: 10px;
+  left: 0;
+  top: 0;
+  z-index: 1;
 }
 
 .hover-popup table {
@@ -388,7 +394,7 @@
 .reporte-cobranza__labels-container {
   margin: 0 auto;
   margin-bottom: 24px;
-  width: 30vw;
+  width: 40vw;
   display: flex;
   justify-content: space-around;
 }

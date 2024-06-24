@@ -26,6 +26,7 @@ export default function ReporteCobranza() {
   const { setIsLoading } = useContext(LoadingContext);
 
   const [data, setData] = useState(null);
+  const [dataSolicitudes, setDataSolicitudes] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [sistemasPago, setSistemasPago] = useState(null);
@@ -40,6 +41,7 @@ export default function ReporteCobranza() {
   const [totalPagado, setTotalPagado] = useState(0);
   const [totalContrato, setTotalContrato] = useState(0);
   const [totalPendiente, setTotalPendiente] = useState(0);
+  const [totalAnticipo, setTotalAnticipo] = useState(0);
 
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
@@ -51,6 +53,8 @@ export default function ReporteCobranza() {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page2, setPage2] = useState(0);
+  const [rowsPerPage2, setRowsPerPage2] = useState(5);
 
   const [isHovered, setIsHovered] = useState(false);
 
@@ -73,6 +77,7 @@ export default function ReporteCobranza() {
     setTotalPagado(0);
     setTotalContrato(0);
     setTotalPendiente(0);
+    setTotalAnticipo(0);
     var params = {
       fecha_inicial: fechaInicial,
       fecha_final: fechaFinal,
@@ -82,16 +87,17 @@ export default function ReporteCobranza() {
       status_id: statusPagoId,
     };
     pagosService.getReporteCobranza(params, onReporte, onError);
-    debugger;
   };
 
   async function onReporte(data) {
     setIsLoading(false);
     if (data.encontrado && data.response.length > 0) {
       setData(data.response);
+      setDataSolicitudes(data.solicitudes);
       setTotalPagado(data.pagado);
       setTotalContrato(data.contrato);
       setTotalPendiente(data.pendiente);
+      setTotalAnticipo(data.anticipo);
       setPagos(data.pagos);
     } else {
       Swal.fire({
@@ -114,6 +120,15 @@ export default function ReporteCobranza() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleChangePage2 = (event, newPage) => {
+    setPage2(newPage);
+  };
+
+  const handleChangeRowsPerPage2 = (event) => {
+    setRowsPerPage2(parseInt(event.target.value, 10));
+    setPage2(0);
   };
 
   const handleMouseEnter = () => {
@@ -306,7 +321,31 @@ export default function ReporteCobranza() {
         </Button>
       </Row>
       <div className="reporte-cobranza__labels-container">
-        <Col xs={12} sm={6} lg={6}>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Anticipo
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="anticipo"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalAnticipo !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalAnticipo))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalAnticipo !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalAnticipo))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
               Monto Pagado
@@ -330,7 +369,7 @@ export default function ReporteCobranza() {
             />
           </Row>
         </Col>
-        <Col xs={12} sm={6} lg={6}>
+        <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
               Monto Contrato
@@ -354,7 +393,7 @@ export default function ReporteCobranza() {
             />
           </Row>
         </Col>
-        <Col xs={12} sm={6} lg={6}>
+        <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
               Monto Pendiente
@@ -463,9 +502,79 @@ export default function ReporteCobranza() {
           </TableContainer>
         </Row>
       )}
+      {data != null && (
+        <Row style={{ marginTop: "24px" }} justify={"center"} className="tabla">
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow className="tabla_encabezado">
+                  <TableCell>
+                    <p>Cliente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Proyecto</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>No. Lote</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Anticipo</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Solicitud</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Status Solicitud</p>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {dataSolicitudes
+                  .slice(
+                    page2 * rowsPerPage2,
+                    page2 * rowsPerPage2 + rowsPerPage2
+                  )
+                  .map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{item.cliente_nombre}</TableCell>
+                      <TableCell>{item.proyecto}</TableCell>
+                      <TableCell>{item.no_lote}</TableCell>
+                      <TableCell>$ {formatPrecio(item.anticipo)}</TableCell>
+                      <TableCell>{item.fecha}</TableCell>
+                      <TableCell>
+                        {" "}
+                        <Button
+                          disabled
+                          size={"small"}
+                          shape="round"
+                          style={{
+                            backgroundColor: item.status,
+                          }}
+                        ></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={dataSolicitudes.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page2}
+                    onPageChange={handleChangePage2}
+                    onRowsPerPageChange={handleChangeRowsPerPage2}
+                    labelRowsPerPage="Solicitudes por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Row>
+      )}
       {isHovered && (
-        <div className="hover-container">
-          <table className="hover-popup popup-reporte-cobranza">
+        <div className="hover-container reporte-cobranza">
+          <table className="hover-popup">
             <thead className="hover-popup-thead">
               <tr>
                 <td>Color</td>
