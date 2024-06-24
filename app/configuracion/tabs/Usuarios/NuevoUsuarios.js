@@ -64,7 +64,6 @@ export default function NuevoUsuario({ callback, recargarDatos }) {
       confirmButtonText: "Aceptar",
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log("form:", form);
         configuracionService
           .guardarIUsuario(onUsuarioGuardado, form, onError)
           .then((result) => {
@@ -79,8 +78,6 @@ export default function NuevoUsuario({ callback, recargarDatos }) {
    * @param {Objeto} datos: datos de respuesta de la operación de guardado del usuario.
    */
   const onUsuarioGuardado = (data) => {
-    console.log(data);
-
     setIsLoading(false);
     if (data.type == "success") {
       recargarDatos();

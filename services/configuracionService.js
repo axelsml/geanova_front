@@ -2,6 +2,7 @@ import http from "./axiosService.js";
 import axios from "axios";
 
 class ConfiguracionService {
+  //Usuarios
   getIUsuarioSistema(callback, error) {
     var call;
     if (call) {
@@ -12,7 +13,6 @@ class ConfiguracionService {
     return http
       .get("getIUsuarioSistema", { cancelToken: call.token })
       .then((response) => {
-        console.log("getIUsuarioSistema: ", response.data);
         return callback(response.data.usuarios);
       })
       .catch((response) => {
@@ -127,7 +127,7 @@ class ConfiguracionService {
         }
       });
   }
-
+  //Roles
   getIRoles(callback, error) {
     var call;
     if (call) {
@@ -253,6 +253,61 @@ class ConfiguracionService {
         }
       });
   }
+  //Menus
+  getIMenu(rol_id, callback, callbackMenu, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`getIMenuC/${rol_id}`, { cancelToken: call.token })
+      .then((response) => {
+        return Promise.all([
+          callbackMenu(response.data.menusActivos),
+          callback(response.data.menus),
+        ]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
+  guardarIMenu(callback, params, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("guardarIMenu", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
+  //Permisos
 }
 
 export default new ConfiguracionService();

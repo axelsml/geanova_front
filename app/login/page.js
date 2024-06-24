@@ -14,11 +14,11 @@ export default function LoginPage() {
   const router = useRouter();
 
   const [usuario_id, setUsuarioId] = useState(null);
-
+  const [credencialesUsuario, setCredencialesUsuario] = useState();
   useEffect(() => {
     // Solo accedemos a localStorage si estamos en el navegador
-    if (typeof window !== 'undefined') {
-      const storedUsuario = window.localStorage.getItem('usuario');
+    if (typeof window !== "undefined") {
+      const storedUsuario = window.localStorage.getItem("usuario");
       if (storedUsuario) {
         const usuarioId = JSON.parse(storedUsuario).id;
         if (usuarioId !== null) {
@@ -27,8 +27,6 @@ export default function LoginPage() {
       }
     }
   }, []);
- 
-
 
   const { setIsLoading } = useContext(LoadingContext);
 
@@ -39,8 +37,9 @@ export default function LoginPage() {
 
   const onUsuarioLoaded = async (data) => {
     setIsLoading(false);
-
     if (data.success) {
+      await assignCookie("token", JSON.stringify(data.token));
+      await assignCookie("menu", JSON.stringify(data.menu));
       await assignCookie("usuario", JSON.stringify(data.success));
       await localStorage.setItem("usuario", JSON.stringify(data.user));
       router.push("/");
