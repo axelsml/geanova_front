@@ -97,6 +97,7 @@ export default function ClientesInfo() {
   const [agregarLuz, setAgregarLuz] = useState(false);
   const [tieneLuz, setTieneLuz] = useState(false);
   const [financiamientoId, setFinanciamientoId] = useState(null);
+  const [financiamientoNombre, setFinanciamientoNombre] = useState(null);
 
   const opcionFinanciamiento = [
     { index: 0, id: 1, nombre: "Mensual" },
@@ -284,6 +285,8 @@ export default function ClientesInfo() {
 
   const handleCloseModalEditar = () => {
     setShowModalEditar(false);
+    setFinanciamientoId(null);
+    setFinanciamientoNombre(null);
   };
 
   const handleCancel = () => {
@@ -1333,13 +1336,19 @@ export default function ClientesInfo() {
               </Form.Item>
               <Form.Item label="Financiamiento">
                 <Select
-                  showSearch
                   placeholder={"Financiamiento"}
                   optionLabelProp="label"
-                  value={info_lote ? info_lote.financiamiento_nombre : " "}
+                  value={
+                    financiamientoNombre
+                      ? financiamientoNombre
+                      : info_lote
+                      ? info_lote.financiamiento_nombre
+                      : " "
+                  }
                   style={{ width: "100%" }}
-                  onChange={(value) => {
+                  onChange={(value, label) => {
                     setFinanciamientoId(value);
+                    setFinanciamientoNombre(label);
                   }}
                 >
                   {opcionFinanciamiento.map((item, index) => (
