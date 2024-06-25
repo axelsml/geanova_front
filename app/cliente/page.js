@@ -142,6 +142,8 @@ export default function ClientesInfo() {
     setInfoLote(null);
     setProximoPago(null);
     setIsLoading(true);
+    setFinanciamientoId(null);
+    setFinanciamientoNombre(null);
     lotesService.getClienteByLote(
       terrenoSelected.id,
       loteSelected.id,
