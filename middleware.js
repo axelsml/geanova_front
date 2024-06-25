@@ -22,5 +22,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/', '/login(.*)', '/lotes(.*)', '/registro(.*)', '/plazos(.*)', '/terrenos(.*)', '/ventas(.*)', '/api(.*)'],
+  matcher: ['/', '/login(.*)', '/lotes(.*)', '/cliente(.*)', '/configuracion(.*)', '/registro(.*)', '/plazos(.*)', '/terrenos(.*)', '/ventas(.*)', '/api(.*)'],
 }

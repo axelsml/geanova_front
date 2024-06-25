@@ -1,6 +1,6 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
-import { Row, Col, Typography, Input, Button, Modal } from "antd";
+import { Row, Col, Typography, Input, Button, Modal, Tooltip } from "antd";
 import {
   Paper,
   Table,
@@ -17,18 +17,19 @@ import { fechaFormateada } from "@/helpers/formatters";
 import {
   FaPencilAlt,
   FaRegTrashAlt,
-  FaUserPlus,
   FaUserTag,
+  FaUsersCog,
 } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
 import Swal from "sweetalert2";
 import NuevoRol from "./NuevoRol";
 import EditarRol from "./EditarRol";
+import AsignarMenu from "../Menus/AsignarMenu";
 /**
- * Tabla de Usuarios que muestra la lista de roles con opciones de edición y eliminación.
+ * Tabla de Roles que muestra la lista de roles con opciones de edición y eliminación.
  * @returns {JSX.Element} - Componente de React que renderiza la tabla de usuarios.
  */
-export default function TablaUsuarios() {
+export default function TablaRoles() {
   //Variables del funcionamiento de la Tabla
   const [orderBy, setOrderBy] = useState("created_at");
   const [order, setOrder] = useState("asc");
@@ -39,7 +40,7 @@ export default function TablaUsuarios() {
   const [show, setShow] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const [showEditar, setShowEditar] = useState(false);
+  const [showAsignar, setShowAsignar] = useState(false);
   const [showModalEditar, setShowModalEditar] = useState(false);
   //Variables del componente
   const [datos, setDatos] = useState([]);
@@ -55,11 +56,19 @@ export default function TablaUsuarios() {
     setShowModalEditar(false);
   };
 
+  const handleCloseModalAsignar = () => {
+    setShowAsignar(false);
+  };
+
   // Handler para abrir el modal de edición de rol
   const handleModalEditarRol = (inforRol) => {
-    console.log("inforRol: ", inforRol);
     setData(inforRol);
     setShowModalEditar(true);
+  };
+
+  const handleModalAsignarMenu = (inforRol) => {
+    setData(inforRol);
+    setShowAsignar(true);
   };
 
   // Handler para eliminar un rol
@@ -85,8 +94,6 @@ export default function TablaUsuarios() {
 
   // Callback cuando se elimina un rol
   const onRolEliminado = (data) => {
-    console.log("data: ", data);
-    console.log("data: ", data.type);
     setIsLoading(false);
     if (data.type == "success") {
       Swal.fire({
@@ -113,13 +120,19 @@ export default function TablaUsuarios() {
   // Títulos personalizados para los modales
   const customTitle = (
     <Row justify={"center"}>
-      <Typography.Title level={3}>Registrar Usuario</Typography.Title>
+      <Typography.Title level={3}>Registrar Roles</Typography.Title>
     </Row>
   );
 
   const customTitleEditar = (
     <Row justify={"center"}>
-      <Typography.Title level={3}>Editar Usuario</Typography.Title>
+      <Typography.Title level={3}>Editar Roles</Typography.Title>
+    </Row>
+  );
+
+  const customTitleAsignar = (
+    <Row justify={"center"}>
+      <Typography.Title level={3}>Asignar Menú</Typography.Title>
     </Row>
   );
 
@@ -184,8 +197,6 @@ export default function TablaUsuarios() {
 
   // Handler para la búsqueda de roles
   const onSearch = (value) => {
-    console.log("value: ", value);
-    console.log("value: ", typeof value);
     configuracionService.getIRolesSearch(value, setDatos, onError);
   };
 
@@ -198,15 +209,17 @@ export default function TablaUsuarios() {
         }}
         justify="space-between"
       >
-        <Button
-          className="boton"
-          onClick={() => {
-            setShowModal(true);
-          }}
-          size="large"
-        >
-          <FaUserTag className="m-auto" size={"20px"} />
-        </Button>
+        <Tooltip title="Haz clic aquí para crear un nuevo rol de usuario">
+          <Button
+            className="boton"
+            onClick={() => {
+              setShowModal(true);
+            }}
+            size="large"
+          >
+            <FaUserTag className="m-auto" size={"20px"} />
+          </Button>
+        </Tooltip>
         <Input.Search
           placeholder="Buscar Rol"
           style={{
@@ -247,26 +260,42 @@ export default function TablaUsuarios() {
                       </TableCell>
                       <TableCell>{fechaFormateada(dato.created_at)}</TableCell>
                       <TableCell>
-                        <Button
-                          className="boton"
-                          key={dato}
-                          onClick={() => {
-                            handleModalEditarRol(dato);
-                          }}
-                          size="large"
-                        >
-                          <FaPencilAlt className="m-auto" size={"20px"} />
-                        </Button>
-                        <Button
-                          className="boton-eliminar"
-                          key={dato.id}
-                          onClick={() => {
-                            handleEliminarRol(dato.id, dato.nombre);
-                          }}
-                          size="large"
-                        >
-                          <FaRegTrashAlt className="m-auto" size={"20px"} />
-                        </Button>
+                        <Tooltip title="Haz clic aquí para editar un rol de usuario">
+                          <Button
+                            className="boton"
+                            key={dato}
+                            onClick={() => {
+                              handleModalEditarRol(dato);
+                            }}
+                            size="large"
+                          >
+                            <FaPencilAlt className="m-auto" size={"20px"} />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="Haz clic aquí para asignar un menu al rol de usuario">
+                          <Button
+                            className="boton"
+                            key={dato}
+                            onClick={() => {
+                              handleModalAsignarMenu(dato);
+                            }}
+                            size="large"
+                          >
+                            <FaUsersCog className="m-auto" size={"20px"} />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="Haz clic aquí para eliminar un rol de usuario">
+                          <Button
+                            className="boton-eliminar"
+                            key={dato.id}
+                            onClick={() => {
+                              handleEliminarRol(dato.id, dato.nombre);
+                            }}
+                            size="large"
+                          >
+                            <FaRegTrashAlt className="m-auto" size={"20px"} />
+                          </Button>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -317,6 +346,22 @@ export default function TablaUsuarios() {
           recargarDatos={cargarDatos}
           callback={handleCloseModalEditar}
         ></EditarRol>
+      </Modal>
+
+      <Modal
+        title={customTitleAsignar}
+        footer={null}
+        destroyOnClose
+        width={600}
+        open={showAsignar}
+        onCancel={() => handleCloseModalAsignar()}
+      >
+        {/* Formulario de Editar Rol */}
+        <AsignarMenu
+          data={data}
+          recargarDatos={cargarDatos}
+          callback={handleCloseModalAsignar}
+        ></AsignarMenu>
       </Modal>
     </div>
   );

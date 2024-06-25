@@ -131,6 +131,12 @@
   margin-bottom: -20px;
 }
 
+.menu {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+}
+
 .menu p {
   color: rgb(67, 141, 204);
 }

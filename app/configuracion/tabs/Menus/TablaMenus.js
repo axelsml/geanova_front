@@ -1,6 +1,6 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
-import { Row, Col, Typography, Input, Button, Modal, Tooltip } from "antd";
+import { Row, Col, Typography, Input, Button, Modal } from "antd";
 import {
   Paper,
   Table,
@@ -14,16 +14,16 @@ import {
 } from "@mui/material";
 import configuracionService from "@/services/configuracionService";
 import { fechaFormateada } from "@/helpers/formatters";
-import { FaPencilAlt, FaRegTrashAlt, FaUserPlus } from "react-icons/fa";
-import NuevoUsuario from "./NuevoUsuarios";
+import { FaPencilAlt, FaRegTrashAlt, FaUserTag } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
-import EditarUsuarios from "./EditarUsuario";
 import Swal from "sweetalert2";
+import NuevoMenu from "./NuevoMenu";
+import AsignarMenu from "./AsignarMenu";
 /**
- * Componente para mostrar una tabla de usuarios con opciones para editar y eliminar.
- * @returns {JSX.Element}: el elemento JSX para representar el componente.
+ * Tabla de Usuarios que muestra la lista de Menues con opciones de edición y eliminación.
+ * @returns {JSX.Element} - Componente de React que renderiza la tabla de usuarios.
  */
-export default function TablaUsuarios() {
+export default function TablaMenus() {
   //Variables del funcionamiento de la Tabla
   const [orderBy, setOrderBy] = useState("created_at");
   const [order, setOrder] = useState("asc");
@@ -31,10 +31,7 @@ export default function TablaUsuarios() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   //Variables del modal
-  const [show, setShow] = useState(false);
   const [showModal, setShowModal] = useState(false);
-
-  const [showEditar, setShowEditar] = useState(false);
   const [showModalEditar, setShowModalEditar] = useState(false);
 
   //Variables del componente
@@ -42,27 +39,26 @@ export default function TablaUsuarios() {
   const [data, setData] = useState([]);
   const { setIsLoading } = useContext(LoadingContext);
 
-  // Función para manejar el cierre del modal para agregar un nuevo usuario
+  // Handlers para cerrar los modales
   const handleCloseModal = () => {
     setShowModal(false);
   };
 
-  // Función para manejar el cierre del modal para editar un usuario
   const handleCloseModalEditar = () => {
     setShowModalEditar(false);
   };
 
-  // Función para manejar la apertura del modal para editar un usuario
-  const handleModalEditarUsuario = (infoUsuario) => {
-    setData(infoUsuario);
+  // Handler para abrir el modal de edición de Menu
+  const handleModalEditarMenu = (inforMenu) => {
+    setData(inforMenu);
     setShowModalEditar(true);
   };
 
-  // Función para manejar la eliminación de un usuario
-  async function handleEliminarUsuario(id, nombre) {
+  // Handler para eliminar un Menu
+  async function handleEliminarMenu(id, nombre) {
     await Swal.fire({
-      title: "Eliminar este usuario?",
-      text: `¿Estás seguro de eliminar a ${nombre} ? `,
+      title: "Eliminar este Menu?",
+      text: `¿Estás seguro de eliminar ${nombre} ? `,
       icon: "question",
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
@@ -71,7 +67,7 @@ export default function TablaUsuarios() {
     }).then((result) => {
       if (result.isConfirmed) {
         configuracionService
-          .eliminarIUsuario(onUsuarioEliminado, id, onError)
+          .eliminarIMenues(onMenuEliminado, id, onError)
           .then(() => {
             cargarDatos();
           });
@@ -79,12 +75,12 @@ export default function TablaUsuarios() {
     });
   }
 
-  // Callback cuando se elimina un usuario
-  const onUsuarioEliminado = (data) => {
+  // Callback cuando se elimina un Menu
+  const onMenuEliminado = (data) => {
     setIsLoading(false);
     if (data.type == "success") {
       Swal.fire({
-        title: "Usuario eliminado con éxito",
+        title: "Menú eliminado con éxito",
         icon: "success",
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
@@ -107,13 +103,13 @@ export default function TablaUsuarios() {
   // Títulos personalizados para los modales
   const customTitle = (
     <Row justify={"center"}>
-      <Typography.Title level={3}>Registrar Usuario</Typography.Title>
+      <Typography.Title level={3}>Registrar Menú</Typography.Title>
     </Row>
   );
 
-  const customTitleEditar = (
+  const customTitleAsignar = (
     <Row justify={"center"}>
-      <Typography.Title level={3}>Editar Usuario</Typography.Title>
+      <Typography.Title level={3}>Asignar Menú</Typography.Title>
     </Row>
   );
 
@@ -168,102 +164,81 @@ export default function TablaUsuarios() {
     cargarDatos();
   }, []);
 
-  // Función para cargar los datos de los usuarios
+  // Función para cargar los datos de los Menues
   function cargarDatos() {
     setIsLoading(true);
-    configuracionService.getIUsuarioSistema(setDatos, onError).then(() => {
+    configuracionService.getIMenu(setDatos, onError).then(() => {
       setIsLoading(false);
     });
   }
-  // Handler para la búsqueda de usuarios en la tabla
+
+  // Handler para la búsqueda de Menues
   const onSearch = (value) => {
-    configuracionService.getIUsuarioSistemaSearch(value, setDatos, onError);
+    configuracionService.getIMenuSearch(value, setDatos, onError);
   };
 
   return (
     <div style={{ paddingBottom: 30 }}>
       <Row
-        style={{ paddingTop: 20, paddingBottom: 20 }}
+        style={{
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}
         justify="space-between"
       >
-        <Col>
-          <Tooltip title="Haz clic aquí para crear un nuevo usuario">
-            <Button
-              className="boton"
-              onClick={() => setShowModal(true)}
-              size="large"
-            >
-              <FaUserPlus className="m-auto" size={"20px"} />
-            </Button>
-          </Tooltip>
-        </Col>
-        <Col xs={24} sm={20} md={16} lg={10} xl={8} xxl={6}>
-          <Input.Search
-            placeholder="Buscar Usuario"
-            enterButton="Buscar"
-            size="large"
-            onSearch={onSearch}
-            style={{ width: "100%" }}
-          />
-        </Col>
+        <Button
+          className="boton"
+          onClick={() => {
+            setShowModal(true);
+          }}
+          size="large"
+        >
+          <FaUserTag className="m-auto" size={"20px"} />
+        </Button>
+        <Input.Search
+          placeholder="Buscar Menú"
+          style={{
+            width: "30%",
+          }}
+          enterButton="Buscar"
+          size="large"
+          onSearch={onSearch}
+        />
       </Row>
       <Row justify={"center"}>
-        <Col xs={24}>
+        <Col xs={24} sm={20} md={16} lg={24} xl={24} xxl={24}>
           <TableContainer component={Paper} className="tabla">
             <Table>
               <TableHead className="tabla_encabezado">
                 <TableRow>
                   <TableCell>
-                    <p>Nombre Usuario</p>
+                    <p>Nombre Menú</p>
                   </TableCell>
                   <TableCell>
-                    <p>Nickname</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Rol</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Estatus</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Creación</p>
+                    <p></p>
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {stableSort(datos, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((dato, index) => (
                     <TableRow key={index}>
-                      <TableCell>{dato.nombre}</TableCell>
-                      <TableCell>{dato.nick}</TableCell>
-                      <TableCell>{dato.nombreRol}</TableCell>
+                      <TableCell>{dato.descripcion}</TableCell>
                       <TableCell>
-                        {dato.active ? "Activo" : "Inactivo"}
-                      </TableCell>
-                      <TableCell>{fechaFormateada(dato.created_at)}</TableCell>
-                      <TableCell>
-                        <Tooltip title="Haz clic aquí para editar este usuario">
-                          <Button
-                            className="boton"
-                            onClick={() => handleModalEditarUsuario(dato)}
-                            size="large"
-                          >
-                            <FaPencilAlt className="m-auto" size={"20px"} />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip title="Haz clic aquí para eliminar a este usuario">
-                          <Button
-                            className="boton-eliminar"
-                            onClick={() =>
-                              handleEliminarUsuario(dato.id, dato.nombre)
-                            }
-                            size="large"
-                          >
-                            <FaRegTrashAlt className="m-auto" size={"20px"} />
-                          </Button>
-                        </Tooltip>
+                        <Button
+                          className="boton"
+                          key={dato}
+                          icon={<FaPencilAlt className="m-auto" />}
+                          onClick={() => {
+                            handleModalEditarMenu(dato);
+                          }}
+                          size="large"
+                        >
+                          Asignar
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -286,29 +261,34 @@ export default function TablaUsuarios() {
         </Col>
       </Row>
       <Modal
-        title="Nuevo Usuario"
+        title={customTitle}
         footer={null}
-        width={1000}
+        width={600}
         open={showModal}
         destroyOnClose
-        onCancel={handleCloseModal}
+        onCancel={() => handleCloseModal()}
       >
-        <NuevoUsuario recargarDatos={cargarDatos} callback={handleCloseModal} />
+        {/* Formulario de Nuevo Menu */}
+        <NuevoMenu
+          recargarDatos={cargarDatos}
+          callback={handleCloseModal}
+        ></NuevoMenu>
       </Modal>
 
       <Modal
-        title="Editar Usuario"
+        title={customTitleAsignar}
         footer={null}
         destroyOnClose
-        width={1000}
+        width={600}
         open={showModalEditar}
-        onCancel={handleCloseModalEditar}
+        onCancel={() => handleCloseModalEditar()}
       >
-        <EditarUsuarios
+        {/* Formulario de Editar Menu */}
+        <AsignarMenu
           data={data}
           recargarDatos={cargarDatos}
           callback={handleCloseModalEditar}
-        />
+        ></AsignarMenu>
       </Modal>
     </div>
   );
