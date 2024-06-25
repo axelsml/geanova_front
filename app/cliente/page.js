@@ -96,6 +96,13 @@ export default function ClientesInfo() {
   const [totalImpuestoLuz, setTotalImpuestoLuz] = useState(0);
   const [agregarLuz, setAgregarLuz] = useState(false);
   const [tieneLuz, setTieneLuz] = useState(false);
+  const [financiamientoId, setFinanciamientoId] = useState(null);
+
+  const opcionFinanciamiento = [
+    { index: 0, id: 1, nombre: "Mensual" },
+    { index: 1, id: 2, nombre: "Quincenal" },
+    { index: 2, id: 3, nombre: "Semanal" },
+  ];
 
   const { Option } = Select;
 
@@ -375,6 +382,7 @@ export default function ClientesInfo() {
       sistemaPago: sistemaPagoSelectedModal,
       montoLuz: totalImpuestoLuz,
       tieneLuz: tieneLuz,
+      financiamiento_id: financiamientoId,
     };
 
     await Swal.fire({
@@ -1322,6 +1330,24 @@ export default function ClientesInfo() {
                     </Typography.Text>
                   )}
                 </Checkbox>
+              </Form.Item>
+              <Form.Item label="Financiamiento">
+                <Select
+                  showSearch
+                  placeholder={"Financiamiento"}
+                  optionLabelProp="label"
+                  value={info_lote ? info_lote.financiamiento_nombre : " "}
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setFinanciamientoId(value);
+                  }}
+                >
+                  {opcionFinanciamiento.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.nombre}>
+                      {item?.nombre}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
