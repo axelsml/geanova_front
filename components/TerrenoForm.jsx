@@ -126,19 +126,27 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
             validateMessages={validacionMensajes}
             layout="vertical"
           >
-             <Row justify={"center"}>
-              <Col xs={24} sm={20} md={16} lg={12} xl={8} xxl={4} className="titulo_pantallas">
-              <b>DATOS DEL TERRENO</b>
+            <Row justify={"center"}>
+              <Col
+                xs={24}
+                sm={20}
+                md={16}
+                lg={12}
+                xl={8}
+                xxl={4}
+                className="titulo_pantallas"
+              >
+                <b>DATOS DEL TERRENO</b>
               </Col>
             </Row>
-            
-            <Row gutter={[16, 16]} style={{marginTop:"15px"}}>
+
+            <Row gutter={[16, 16]} style={{ marginTop: "15px" }}>
               <Col xs={24} sm={12} lg={12} className="formulario_col">
                 <div className="formulario">
                   <p>Nombre Del Propietario</p>
 
                   <InputIn
-                  className = "input_formulario"
+                    className="input_formulario"
                     placeholder="Nombre Del Propietario"
                     name="nombrePropietario"
                     rules={[
@@ -151,7 +159,6 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                   <p>Empresa</p>
 
                   <Form.Item
-                    
                     name={"empresaId"}
                     style={{ width: "100%" }}
                     rules={[
@@ -177,10 +184,9 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                   <p>Nombre del Terreno</p>
 
                   <InputIn
-                   className = "input_formulario"
+                    className="input_formulario"
                     placeholder="Ingrese el Nombre del Terreno"
                     name="nombreTerreno"
-
                     rules={[
                       {
                         required: true,
@@ -188,12 +194,11 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       },
                     ]}
                   />
-                   <p>Domicilio del Terreno</p>
+                  <p>Domicilio del Terreno</p>
                   <InputIn
-                   className = "input_formulario"
+                    className="input_formulario"
                     placeholder="Ingrese el Domicilio del Terreno"
                     name="domicilioTerreno"
-                  
                     rules={[
                       {
                         required: true,
@@ -201,10 +206,10 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       },
                     ]}
                   />
-                   <p>Colonia/Localidad</p>
+                  <p>Colonia/Localidad</p>
 
                   <InputIn
-                   className = "input_formulario"
+                    className="input_formulario"
                     placeholder="Colonia/Localidad"
                     name="colonia"
                     rules={[
@@ -216,7 +221,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                   />
                   <p>Ciudad</p>
                   <InputIn
-                   className = "input_formulario"
+                    className="input_formulario"
                     placeholder="Ciudad"
                     name="ciudad"
                     rules={[
@@ -226,14 +231,12 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       },
                     ]}
                   />
-
                 </div>
               </Col>
               <Col xs={24} sm={12} lg={12}>
-              <div className="formulario">
-                <p> Cantidad De Lotes</p>
+                <div className="formulario">
+                  <p> Cantidad De Lotes</p>
                   <Form.Item
-                  
                     name={"cantidadLotes"}
                     style={{ width: "100%" }}
                     rules={[
@@ -245,19 +248,17 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese la Cantidad de Lotes"
                       style={{
                         width: "100%",
                       }}
                     />
                   </Form.Item>
-                <p>Precio De Compra</p>
+                  <p>Precio De Compra</p>
 
                   <Form.Item
-                  
                     name={"precioCompra"}
-                   
                     style={{ width: "100%" }}
                     rules={[
                       {
@@ -267,9 +268,8 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       },
                     ]}
                   >
-
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese El Precio De Compra"
                       onChange={(data) => setPrecioCompra(data)}
                       suffix={"M2"}
@@ -278,11 +278,10 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                <p>Superficie Total</p>
+                  <p>Superficie Total</p>
 
                   <Form.Item
                     name={"superficieTotal"}
-          
                     style={{ width: "100%" }}
                     rules={[
                       {
@@ -293,7 +292,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese la Superficie del Total en M2"
                       onChange={(data) => setSuperficieTotalProyecto(data)}
                       suffix={"M2"}
@@ -302,7 +301,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                <p>Precio Por M2</p>
+                  <p>Precio Por M2</p>
 
                   <Form.Item
                     name={"precio_m2"}
@@ -316,8 +315,8 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
-                     placeholder={"Ingrese Precio del M2"}
+                      className="input_formulario"
+                      placeholder={"Ingrese Precio del M2"}
                       value={precio_compra / superficie_total_proyecto}
                       suffix={"M2"}
                       style={{
@@ -325,7 +324,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                <p>Precio Proyectado De Area Vendible (Contado)</p>
+                  <p>Precio Proyectado De Area Vendible (Contado)</p>
 
                   <Form.Item
                     name={"precioProyectadoContado"}
@@ -340,7 +339,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese el Precio Proyectado"
                       suffix={"M2"}
                       style={{
@@ -348,7 +347,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                 <p>Área de Reserva</p> 
+                  <p>Área de Reserva</p>
                   <Form.Item
                     name={"areaReserva"}
                     label={""}
@@ -362,7 +361,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese el Área de Reserva en M2"
                       suffix={"M2"}
                       style={{
@@ -370,7 +369,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                 <p>Área Vendible</p> 
+                  <p>Área Vendible</p>
 
                   <Form.Item
                     name={"areaVendible"}
@@ -385,7 +384,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese el Área Vendible en M2"
                       suffix={"M2"}
                       style={{
@@ -393,7 +392,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                 <p>Área de Vialidad</p> 
+                  <p>Área de Vialidad</p>
 
                   <Form.Item
                     name={"areaVialidad"}
@@ -408,7 +407,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                     ]}
                   >
                     <InputNumber
-                     className = "input_formulario"
+                      className="input_formulario"
                       placeholder="Ingrese el Área de Vialidad en M2"
                       suffix={"M2"}
                       style={{
@@ -416,16 +415,16 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       }}
                     />
                   </Form.Item>
-                </div >
+                </div>
               </Col>
             </Row>
 
             <span className="flex gap-2 justify-end">
-              <Button htmlType="submit"  size={"large"} className="boton">
+              <Button htmlType="submit" size={"large"} className="boton">
                 Guardar
               </Button>
 
-              <Button onClick={handleCancel} danger  size={"large"}>
+              <Button onClick={handleCancel} danger size={"large"}>
                 Cancelar
               </Button>
             </span>
