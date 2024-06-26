@@ -264,7 +264,9 @@ export default function ReporteEstatusCobranza() {
                     style={{ textAlign: "center" }}
                     title={item.fechas}
                   >
-                    <b>Semana {index + 1}</b>
+                    <b style={{ color: "rgb(66, 142, 204)" }}>
+                      Semana {index + 1}
+                    </b>
                   </TableCell>
                 ))}
                 <TableCell style={{ textAlign: "center" }}>
@@ -275,7 +277,15 @@ export default function ReporteEstatusCobranza() {
                 {dataClientes
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((item, index) => (
-                    <TableRow key={index}>
+                    <TableRow
+                      key={index}
+                      style={{
+                        backgroundColor:
+                          item.financiamiento_id === 1
+                            ? "rgb(66, 142, 202)"
+                            : "inherit",
+                      }}
+                    >
                       <TableCell style={{ textAlign: "center" }}>
                         {item.nombre_cliente}
                       </TableCell>
@@ -285,11 +295,28 @@ export default function ReporteEstatusCobranza() {
                       <TableCell style={{ textAlign: "center" }}>
                         {item.lote}
                       </TableCell>
-                      {item.pagos.map((pago, index) => (
-                        <TableCell key={index} style={{ textAlign: "center" }}>
-                          $ {formatPrecio(pago.monto_pagado)}
-                        </TableCell>
-                      ))}
+                      {item.pagos.map((pago, index) =>
+                        pago.monto_pagado !== "" ? (
+                          <TableCell
+                            key={index}
+                            style={{ textAlign: "center" }}
+                          >
+                            $ {formatPrecio(pago.monto_pagado)}
+                          </TableCell>
+                        ) : (
+                          <TableCell
+                            key={index}
+                            style={{ textAlign: "center" }}
+                          >
+                            <Button
+                              disabled
+                              size={"small"}
+                              shape="round"
+                              style={{ backgroundColor: "lightslategray" }}
+                            />
+                          </TableCell>
+                        )
+                      )}
                       <TableCell style={{ textAlign: "center" }}>
                         $ {formatPrecio(item.importe_total)}
                       </TableCell>
