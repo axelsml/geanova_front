@@ -40,6 +40,7 @@ import lotesService from "@/services/lotesService";
 import pagosService from "@/services/pagosService";
 import InputIn from "@/components/Input";
 import { InputNumber } from "antd";
+import { getCookie, getCookieValue, getCookies } from "@/helpers/Cookies";
 
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
@@ -99,6 +100,8 @@ export default function ClientesInfo() {
   const [financiamientoId, setFinanciamientoId] = useState(null);
   const [financiamientoNombre, setFinanciamientoNombre] = useState(null);
 
+  const [cookiePermisos, setCookiePermisos] = useState([]);
+
   const opcionFinanciamiento = [
     { index: 0, id: 1, nombre: "Mensual" },
     { index: 1, id: 2, nombre: "Quincenal" },
@@ -109,6 +112,20 @@ export default function ClientesInfo() {
 
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
+
+    getCookieValue("permisos")
+      .then((cookieValue) => {
+        let permisosParse = JSON.parse(cookieValue);
+        const item = permisosParse.find(
+          (item) => item.nombrePantalla === "informacion del cliente"
+        );
+
+        console.log("item: ", item.nivel_id);
+        setCookiePermisos(item.nivel_id);
+      })
+      .catch((error) => {
+        console.error("Error getting cookie value:", error);
+      });
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -615,7 +632,6 @@ export default function ClientesInfo() {
                       <Button
                         className="boton renglon_otro_color"
                         onClick={() => {
-                          console.log("modal abierto");
                           datosModal();
                           setShowModalEditar(true);
                         }}

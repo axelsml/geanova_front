@@ -38,7 +38,7 @@ export default function LoginPage() {
   const onUsuarioLoaded = async (data) => {
     setIsLoading(false);
     if (data.success) {
-      await assignCookie("token", JSON.stringify(data.token));
+      await assignCookie("permisos", JSON.stringify(data.permisos));
       await assignCookie("menu", JSON.stringify(data.menu));
       await assignCookie("usuario", JSON.stringify(data.success));
       await localStorage.setItem("usuario", JSON.stringify(data.user));

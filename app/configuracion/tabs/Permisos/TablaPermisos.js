@@ -1,6 +1,6 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
-import { Row, Col, Typography, Input, Button, Modal } from "antd";
+import { Row, Col, Typography, Input, Button, Modal, Tooltip } from "antd";
 import {
   Paper,
   Table,
@@ -13,26 +13,21 @@ import {
   TableFooter,
 } from "@mui/material";
 import configuracionService from "@/services/configuracionService";
-import { fechaFormateada } from "@/helpers/formatters";
-import { FaPencilAlt, FaRegTrashAlt, FaUserTag } from "react-icons/fa";
+import { FaUserCheck } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
-import Swal from "sweetalert2";
-import NuevoPermiso from "./NuevoPermiso";
-import EditarPermiso from "./EditarPermiso";
+import EditarPermisos from "./EditarPermisos";
 /**
  * Tabla de Usuarios que muestra la lista de Permisoes con opciones de edición y eliminación.
  * @returns {JSX.Element} - Componente de React que renderiza la tabla de usuarios.
  */
 export default function TablaPermisos() {
   //Variables del funcionamiento de la Tabla
-  const [orderBy, setOrderBy] = useState("created_at");
-  const [order, setOrder] = useState("asc");
+  const [orderBy] = useState("created_at");
+  const [order] = useState("asc");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   //Variables del modal
-  const [showModal, setShowModal] = useState(false);
-
   const [showModalEditar, setShowModalEditar] = useState(false);
   //Variables del componente
   const [datos, setDatos] = useState([]);
@@ -40,10 +35,6 @@ export default function TablaPermisos() {
   const { setIsLoading } = useContext(LoadingContext);
 
   // Handlers para cerrar los modales
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
-
   const handleCloseModalEditar = () => {
     setShowModalEditar(false);
   };
@@ -54,62 +45,10 @@ export default function TablaPermisos() {
     setShowModalEditar(true);
   };
 
-  // Handler para eliminar un Permiso
-  async function handleEliminarPermiso(id, nombre) {
-    await Swal.fire({
-      title: "Eliminar este Permiso?",
-      text: `¿Estás seguro de eliminar ${nombre} ? `,
-      icon: "question",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      confirmButtonText: "Aceptar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        configuracionService
-          .eliminarIPermisoes(onPermisoEliminado, id, onError)
-          .then(() => {
-            cargarDatos();
-          });
-      }
-    });
-  }
-
-  // Callback cuando se elimina un Permiso
-  const onPermisoEliminado = (data) => {
-    setIsLoading(false);
-    if (data.type == "success") {
-      Swal.fire({
-        title: "Permiso eliminado con éxito",
-        icon: "success",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    } else {
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: data.message,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    }
-  };
-
   // Títulos personalizados para los modales
-  const customTitle = (
-    <Row justify={"center"}>
-      <Typography.Title level={3}>Registrar Permiso</Typography.Title>
-    </Row>
-  );
-
   const customTitleEditar = (
     <Row justify={"center"}>
-      <Typography.Title level={3}>Editar Permiso</Typography.Title>
+      <Typography.Title level={3}>Editar Permisos</Typography.Title>
     </Row>
   );
 
@@ -167,7 +106,7 @@ export default function TablaPermisos() {
   // Función para cargar los datos de los Permisoes
   function cargarDatos() {
     setIsLoading(true);
-    configuracionService.getIPermiso(setDatos, onError).then(() => {
+    configuracionService.getIUsuarioSistema(setDatos, onError).then(() => {
       setIsLoading(false);
     });
   }
@@ -184,17 +123,8 @@ export default function TablaPermisos() {
           paddingTop: 20,
           paddingBottom: 20,
         }}
-        justify="space-between"
+        justify="end"
       >
-        <Button
-          className="boton"
-          onClick={() => {
-            setShowModal(true);
-          }}
-          size="large"
-        >
-          <FaUserTag className="m-auto" size={"20px"} />
-        </Button>
         <Input.Search
           placeholder="Buscar Permiso"
           style={{
@@ -212,15 +142,14 @@ export default function TablaPermisos() {
               <TableHead className="tabla_encabezado">
                 <TableRow>
                   <TableCell>
-                    <p>Nombre Permiso</p>
+                    <p>Nombre Usuario</p>
                   </TableCell>
                   <TableCell>
-                    <p>Estatus</p>
+                    <p>Rol</p>
                   </TableCell>
                   <TableCell>
-                    <p>Fecha Creación</p>
+                    <p>Permisos</p>
                   </TableCell>
-                  <TableCell></TableCell>
                 </TableRow>
               </TableHead>
 
@@ -228,33 +157,22 @@ export default function TablaPermisos() {
                 {stableSort(datos, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((dato, index) => (
-                    <TableRow key={index}>
+                    <TableRow key={dato.id}>
                       <TableCell>{dato.nombre}</TableCell>
+                      <TableCell>{dato.nombreRol}</TableCell>
                       <TableCell>
-                        {dato.active ? "Activo" : "Inactivo"}
-                      </TableCell>
-                      <TableCell>{fechaFormateada(dato.created_at)}</TableCell>
-                      <TableCell>
-                        <Button
-                          className="boton"
-                          key={dato}
-                          onClick={() => {
-                            handleModalEditarPermiso(dato);
-                          }}
-                          size="large"
-                        >
-                          <FaPencilAlt className="m-auto" size={"20px"} />
-                        </Button>
-                        <Button
-                          className="boton-eliminar"
-                          key={dato.id}
-                          onClick={() => {
-                            handleEliminarPermiso(dato.id, dato.nombre);
-                          }}
-                          size="large"
-                        >
-                          <FaRegTrashAlt className="m-auto" size={"20px"} />
-                        </Button>
+                        <Tooltip title="Haz clic aquí para asignar permisos a un usuario">
+                          <Button
+                            className="boton"
+                            key={dato}
+                            onClick={() => {
+                              handleModalEditarPermiso(dato);
+                            }}
+                            size="large"
+                          >
+                            <FaUserCheck className="m-auto" size={"20px"} />
+                          </Button>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -277,21 +195,6 @@ export default function TablaPermisos() {
         </Col>
       </Row>
       <Modal
-        title={customTitle}
-        footer={null}
-        width={600}
-        open={showModal}
-        destroyOnClose
-        onCancel={() => handleCloseModal()}
-      >
-        {/* Formulario de Nuevo Permiso */}
-        <NuevoPermiso
-          recargarDatos={cargarDatos}
-          callback={handleCloseModal}
-        ></NuevoPermiso>
-      </Modal>
-
-      <Modal
         title={customTitleEditar}
         footer={null}
         destroyOnClose
@@ -300,11 +203,11 @@ export default function TablaPermisos() {
         onCancel={() => handleCloseModalEditar()}
       >
         {/* Formulario de Editar Permiso */}
-        <EditarPermiso
+        <EditarPermisos
           data={data}
           recargarDatos={cargarDatos}
           callback={handleCloseModalEditar}
-        ></EditarPermiso>
+        ></EditarPermisos>
       </Modal>
     </div>
   );

@@ -9,7 +9,9 @@ import {
   Form,
   Checkbox,
   Select,
+  Modal,
   Alert,
+  Input,
 } from "antd";
 import {
   Paper,
@@ -27,7 +29,12 @@ import terrenosService from "@/services/terrenosService";
 import Swal from "sweetalert2";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
 import recursosService from "@/services/recursosService";
-import { fechaFormateada, formatPrecio } from "@/helpers/formatters";
+import {
+  fechaFormateada,
+  formatPrecio,
+  toTitleCase,
+} from "@/helpers/formatters";
+import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
 
 const { RangePicker } = DatePicker;
 export default function DetalleEstadoCuenta() {
@@ -43,6 +50,9 @@ export default function DetalleEstadoCuenta() {
   const [page2, setPage2] = useState(0);
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
 
+  //Variables del modal
+  const [showModal, setShowModal] = useState(false);
+
   const [tablaAlonso, setTablaAlonso] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
   const { setIsLoading } = useContext(LoadingContext);
@@ -54,6 +64,11 @@ export default function DetalleEstadoCuenta() {
   const [tipoSelected, setTipoSelected] = useState(null);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [datos, setDatos] = useState([]);
+  const [datosResumen, setDatosResumen] = useState([]);
+
+  const [formValues, setFormValues] = useState({});
+  const [formValuesSucursal, setFormValuesSucursal] = useState({});
 
   const { Option } = Select;
 
@@ -72,6 +87,11 @@ export default function DetalleEstadoCuenta() {
     } else {
       setErrorMessage(`Error al realizar la consulta, favor de revisar ${e}`);
     }
+  };
+
+  // Handlers para cerrar los modales
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   useEffect(() => {
@@ -93,18 +113,23 @@ export default function DetalleEstadoCuenta() {
 
     const fechaActual = formatearFecha(today);
     const fechaAtras = formatearFecha(startOfMonth);
-    console.log("range: ", [fechaAtras, fechaActual]);
     setRange([fechaAtras, fechaActual]);
     terrenosService.getTerrenos(setTerrenos, onError);
+
+    recursosService.showTipoMovimiento(setDatos, onError).then(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   const onRangeChange = (dates, dateStrings) => {
     setRange(dateStrings);
-    console.log("Dates:", dates);
-    console.log("Date Strings:", dateStrings);
   };
   const layout = {
     labelCol: { span: 24 },
+    wrapperCol: { span: 24 },
+  };
+  const layoutResumen = {
+    labelCol: { span: 16 },
     wrapperCol: { span: 24 },
   };
 
@@ -199,22 +224,84 @@ export default function DetalleEstadoCuenta() {
       tipo: tipoSelected,
       proyecto: terrenoSelected,
     };
-    console.log("form:", form);
+    console.log("from: ", form);
     recursosService
-      .getDepositos(form, setMessage, setTablaAlonso, setTablaSucursal, onError)
+      .getDepositos(
+        form,
+        setMessage,
+        onTablaAlonsoSet,
+        setTablaAlonso,
+        onTablaSucursalSet,
+        setTablaSucursal,
+        onError
+      )
       .then(() => {
         setIsLoading(false);
       });
   }
 
-  function colorDinamico(statusConciliado) {
-    console.log("conciliado: ", statusConciliado);
-    if (statusConciliado === 1) {
-      return {
-        backgroundColor: "rgb(29, 105, 155)",
-      };
-    }
+  function onTablaAlonsoSet(response, responseResumen) {
+    // Inicializar formValues con los valores obtenidos
+    let initialValues = {};
+    response.forEach((item) => {
+      initialValues[`${item.id}`] = item.tipo_movimiento_id;
+    });
+    setFormValues(initialValues);
+    setDatos(responseResumen);
   }
+  function onTablaSucursalSet(response) {
+    // Inicializar formValues con los valores obtenidos
+    console.log("responseS: ", response);
+    let initialValues = {};
+    response.forEach((item) => {
+      initialValues[`${item.id}`] = item.tipo_movimiento_id;
+    });
+    setFormValuesSucursal(initialValues);
+  }
+
+  const handleChange = (value, name) => {
+    let params = {
+      id: name,
+      tipo_movimiento_id: value,
+    };
+    console.log(params);
+    recursosService.updateTipoMovimiento(onBuscar, params, onError);
+
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
+  };
+
+  const handleChangeSucursal = (value, name) => {
+    let params = {
+      id: name,
+      tipo_movimiento_id: value,
+    };
+    console.log(params);
+    recursosService.updateTipoMovimiento(onBuscar, params, onError);
+
+    setFormValuesSucursal((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
+  };
+
+  function colorDinamico(codigo_color) {
+    return {
+      backgroundColor: codigo_color,
+      color: "white",
+    };
+  }
+
+  // Títulos personalizados para los modales
+  const customTitle = (
+    <Row justify={"center"}>
+      <Typography.Title level={3}>
+        Administrar Tipos de Movimientos
+      </Typography.Title>
+    </Row>
+  );
 
   return (
     <div style={{ paddingBottom: 30 }}>
@@ -231,8 +318,6 @@ export default function DetalleEstadoCuenta() {
                 format="YYYY-MM-DD"
                 defaultValue={range}
                 onChange={(value, dateString) => {
-                  console.log("Selected Time: ", value);
-                  console.log("Formatted Selected Time: ", dateString);
                   onRangeChange(value, dateString);
                 }}
                 style={{ width: "100%" }}
@@ -290,7 +375,7 @@ export default function DetalleEstadoCuenta() {
             </Col>
           )}
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Form.Item name="range" label="Seleccion opcional">
+            <Form.Item name="movimientos" label="Seleccion opcional">
               <Checkbox
                 checked={movimientos}
                 onChange={() => setMovimientos(!movimientos)}
@@ -300,19 +385,89 @@ export default function DetalleEstadoCuenta() {
             </Form.Item>
           </Col>
         </Row>
-        <Row justify={"center"}>
+        <Row justify="space-between" gutter={16}>
+          <Col xs={24} sm={24} md={24} lg={10} xl={8} xxl={10}>
+            <Form {...layoutResumen} name="basic">
+              {datos.map((dato, index) => {
+                if (index % 2 === 0) {
+                  return (
+                    <Form.Item
+                      key={dato.id}
+                      name={`movimiento_${index}`}
+                      label={toTitleCase(dato.descripcion)}
+                    >
+                      <Input
+                        placeholder={
+                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                        }
+                        disabled
+                        value={dato.id}
+                      />
+                    </Form.Item>
+                  );
+                }
+                return null;
+              })}
+            </Form>
+          </Col>
+
+          <Col xs={24} sm={24} md={24} lg={10} xl={8} xxl={10}>
+            <Form {...layoutResumen} name="basic">
+              {datos.map((dato, index) => {
+                if (index % 2 !== 0) {
+                  return (
+                    <Form.Item
+                      key={dato.id}
+                      name={`movimiento_${index}`}
+                      label={toTitleCase(dato.descripcion)}
+                    >
+                      <Input
+                        placeholder={
+                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                        }
+                        disabled
+                        value={dato.id}
+                      />
+                    </Form.Item>
+                  );
+                }
+                return null;
+              })}
+            </Form>
+          </Col>
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Button
-              className="boton"
-              onClick={() => {
-                console.log("message: ", Object.keys(message).length);
-                onBuscar();
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                justifyContent: "space-between",
               }}
-              type="primary"
-              block
             >
-              Buscar
-            </Button>
+              <Button
+                className="boton"
+                style={{ alignSelf: "flex-start" }}
+                onClick={() => {
+                  setShowModal(true);
+                  console.log("datosResumen: ", datosResumen);
+                }}
+                type="primary"
+                block
+              >
+                Tipo Movimientos
+              </Button>
+              <Button
+                className="boton"
+                style={{ alignSelf: "flex-end" }}
+                onClick={() => {
+                  onBuscar();
+                }}
+                type="primary"
+                block
+              >
+                Buscar
+              </Button>
+            </div>
           </Col>
         </Row>
       </Form>
@@ -369,13 +524,17 @@ export default function DetalleEstadoCuenta() {
                   <TableCell>
                     <p>Saldos</p>
                   </TableCell>
+                  <TableCell style={{ width: 180 }}></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {stableSort(tablaAlonso, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((dato, index) => (
-                    <TableRow key={dato.id} style={colorDinamico(dato.status)}>
+                    <TableRow
+                      key={dato.id}
+                      style={colorDinamico(dato.codigo_color)}
+                    >
                       <TableCell>
                         {fechaFormateada(dato.fechaOperacion)}
                       </TableCell>
@@ -388,6 +547,24 @@ export default function DetalleEstadoCuenta() {
                       </TableCell>
                       <TableCell>
                         ${dato.saldo ? formatPrecio(dato.saldo) : "0.00"}
+                      </TableCell>
+                      <TableCell>
+                        <Form.Item>
+                          <Select
+                            value={formValues[`${dato.id}`]}
+                            style={{ width: "100%" }}
+                            placeholder={dato.tipo_movimiento_id}
+                            onChange={(value) =>
+                              handleChange(value, `${dato.id}`)
+                            }
+                          >
+                            {datos.map((option) => (
+                              <Option key={option.id} value={option.id}>
+                                {option.descripcion}
+                              </Option>
+                            ))}
+                          </Select>
+                        </Form.Item>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -438,6 +615,7 @@ export default function DetalleEstadoCuenta() {
                   <TableCell>
                     <p>Saldos</p>
                   </TableCell>
+                  <TableCell style={{ width: 180 }}></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -447,7 +625,10 @@ export default function DetalleEstadoCuenta() {
                     page2 * rowsPerPage2 + rowsPerPage2
                   )
                   .map((dato, index) => (
-                    <TableRow key={dato.id} style={colorDinamico(dato.status)}>
+                    <TableRow
+                      key={dato.id}
+                      style={colorDinamico(dato.codigo_color)}
+                    >
                       <TableCell>
                         {fechaFormateada(dato.fechaOperacion)}
                       </TableCell>
@@ -460,6 +641,24 @@ export default function DetalleEstadoCuenta() {
                       </TableCell>
                       <TableCell>
                         ${dato.saldo ? formatPrecio(dato.saldo) : "0.00"}
+                      </TableCell>
+                      <TableCell>
+                        <Form.Item>
+                          <Select
+                            value={formValuesSucursal[`${dato.id}`]}
+                            style={{ width: "100%" }}
+                            placeholder={dato.tipo_movimiento_id}
+                            onChange={(value) =>
+                              handleChangeSucursal(value, `${dato.id}`)
+                            }
+                          >
+                            {datos.map((option) => (
+                              <Option key={option.id} value={option.id}>
+                                {option.descripcion}
+                              </Option>
+                            ))}
+                          </Select>
+                        </Form.Item>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -481,6 +680,17 @@ export default function DetalleEstadoCuenta() {
           </TableContainer>
         </Col>
       </Row>
+      <Modal
+        title={customTitle}
+        footer={null}
+        width={600}
+        open={showModal}
+        destroyOnClose
+        onCancel={() => handleCloseModal()}
+      >
+        {/* Crud de tipo movimientos */}
+        <AdministrarTipoMovimiento></AdministrarTipoMovimiento>
+      </Modal>
     </div>
   );
 }

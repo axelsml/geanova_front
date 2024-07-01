@@ -189,3 +189,7 @@ export function formatDate(obj) {
 
   return year + "-" + month + "-" + day;
 }
+
+export function toTitleCase(str) {
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}

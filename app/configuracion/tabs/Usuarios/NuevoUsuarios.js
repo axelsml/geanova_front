@@ -1,6 +1,6 @@
 import { LoadingContext } from "@/contexts/loading";
 import configuracionService from "@/services/configuracionService";
-import { Button, Col, Form, Input, Row, Select, Typography } from "antd";
+import { Button, Col, Form, Input, Row, Select, Tooltip } from "antd";
 import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 /**
