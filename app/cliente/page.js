@@ -1,6 +1,5 @@
 "use client";
 import { formatPrecio, formatDate } from "@/helpers/formatters";
-import moment from "moment";
 import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
