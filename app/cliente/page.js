@@ -1,5 +1,6 @@
 "use client";
-import { formatPrecio, FormatDate } from "@/helpers/formatters";
+import { formatPrecio, formatDate } from "@/helpers/formatters";
+import moment from "moment";
 import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
@@ -98,6 +99,10 @@ export default function ClientesInfo() {
   const [tieneLuz, setTieneLuz] = useState(false);
   const [financiamientoId, setFinanciamientoId] = useState(null);
   const [financiamientoNombre, setFinanciamientoNombre] = useState(null);
+  const [fechaSolicitud, setFechaSolicitud] = useState(null);
+  const [modalKey, setModalKey] = useState(0);
+  const [cambiarFecha, setCambiarFecha] = useState(false);
+  const [newAmortizacion, setNewAmortizacion] = useState(false);
 
   const opcionFinanciamiento = [
     { index: 0, id: 1, nombre: "Mensual" },
@@ -135,8 +140,6 @@ export default function ClientesInfo() {
   };
 
   const BuscarInfoLote = () => {
-    // console.log(terrenoSelected)
-    // console.log(loteSelected)
     verImagenes(false);
     setInfoCliente(null);
     setInfoLote(null);
@@ -289,6 +292,10 @@ export default function ClientesInfo() {
     setShowModalEditar(false);
     setFinanciamientoId(null);
     setFinanciamientoNombre(null);
+    setFechaSolicitud(null);
+    setModalKey(modalKey + 1);
+    setCambiarFecha(false);
+    setNewAmortizacion(false);
   };
 
   const handleCancel = () => {
@@ -388,8 +395,9 @@ export default function ClientesInfo() {
       montoLuz: totalImpuestoLuz,
       tieneLuz: tieneLuz,
       financiamiento_id: financiamientoId,
+      fecha_solicitud: fechaSolicitud,
     };
-
+    debugger;
     await Swal.fire({
       title: "Guardar cambios en la información del cliente?",
       icon: "question",
@@ -402,6 +410,9 @@ export default function ClientesInfo() {
         console.log("form:", form);
         console.log("Boton Actualizar");
         lotesService.updateClienteByLote(form, onClienteActualizado, onError);
+        if (newAmortizacion) {
+          borrarAmortizacion();
+        }
       }
     });
   }
@@ -432,6 +443,7 @@ export default function ClientesInfo() {
       setNumeroInt(infoClienteDomicilio.numero_int);
       setCodigoPostal(infoClienteDomicilio.cp);
 
+      setFechaSolicitud(info_lote.fecha_solicitud);
       setMontoContrato(info_lote.monto_contrato);
       setCantidadPagos(info_lote.cantidad_pagos);
       setAnticipo(info_lote.anticipo);
@@ -525,9 +537,19 @@ export default function ClientesInfo() {
 
   const customTitle = (
     <Row justify={"center"}>
-      <Typography.Title level={3}>
-        Editar Información del Cliente
-      </Typography.Title>
+      <Col
+        xs={24}
+        sm={20}
+        md={16}
+        lg={12}
+        xl={8}
+        xxl={12}
+        className="titulo_pantallas"
+      >
+        <Typography.Title level={3} style={{ color: "white" }}>
+          Editar Información del Cliente
+        </Typography.Title>
+      </Col>
     </Row>
   );
 
@@ -1140,14 +1162,19 @@ export default function ClientesInfo() {
       </Modal>
 
       <Modal
+        key={modalKey}
         title={customTitle}
         footer={null}
-        width={1000}
+        width={800}
         open={showModalEditar}
         onCancel={() => handleCloseModalEditar()}
       >
-        <Form labelCol={{ span: 10 }} labelAlign={"right"}>
-          <Row style={{ paddingTop: 10 }}>
+        <Form
+          labelCol={{ span: 10 }}
+          labelAlign={"left"}
+          style={{ margin: "0 auto" }}
+        >
+          <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
             <Col
               xs={24}
               sm={20}
@@ -1156,7 +1183,7 @@ export default function ClientesInfo() {
               xl={14}
               xxl={14}
               style={{
-                maxWidth: 450,
+                maxWidth: 300,
               }}
             >
               <Form.Item label="Primer Nombre">
@@ -1206,6 +1233,7 @@ export default function ClientesInfo() {
                   min={0}
                   onChange={(e) => {
                     setMontoContrato(e);
+                    setNewAmortizacion(true);
                   }}
                 />
               </Form.Item>
@@ -1216,6 +1244,7 @@ export default function ClientesInfo() {
                   value={cantidadPagos}
                   onChange={(e) => {
                     setCantidadPagos(e);
+                    setNewAmortizacion(true);
                   }}
                 />
               </Form.Item>
@@ -1256,7 +1285,7 @@ export default function ClientesInfo() {
               xl={14}
               xxl={14}
               style={{
-                maxWidth: 450,
+                maxWidth: 300,
               }}
             >
               <Form.Item label="Calle">
@@ -1317,8 +1346,10 @@ export default function ClientesInfo() {
                     setAgregarLuz(!agregarLuz);
                     if (clienteInfo.tiene_luz) {
                       restarLuz(info_lote.superficie);
+                      setNewAmortizacion(false);
                     } else {
                       calcularLuz(info_lote.superficie);
+                      setNewAmortizacion(true);
                     }
                   }}
                 >
@@ -1360,6 +1391,42 @@ export default function ClientesInfo() {
                   ))}
                 </Select>
               </Form.Item>
+              <Form.Item
+                name="fecha"
+                label="Fecha Solicitud"
+                style={{ width: "100%" }}
+              >
+                <Row justify={"space-around"}>
+                  <Col>
+                    <span>
+                      <b>{fechaSolicitud}</b>
+                    </span>
+                  </Col>
+                  <Col>
+                    <Checkbox
+                      checked={cambiarFecha}
+                      onChange={() => {
+                        setCambiarFecha(!cambiarFecha);
+                      }}
+                    >
+                      <b style={{ color: "rgb(67, 141, 204)" }}>Cambiar</b>
+                    </Checkbox>
+                  </Col>
+                </Row>
+              </Form.Item>
+              {cambiarFecha && (
+                <Form.Item name="fecha" label="" style={{ width: "100%" }}>
+                  <Input
+                    type="date"
+                    onChange={(e) => {
+                      setFechaSolicitud(e.target.value);
+                      setNewAmortizacion(true);
+                    }}
+                    style={{ width: "60%", left: "40%" }}
+                    placeholder="Ingresar fecha"
+                  />
+                </Form.Item>
+              )}
             </Col>
           </Row>
 
