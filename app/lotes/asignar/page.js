@@ -29,6 +29,8 @@ export default function AsignarM2({ terrenoId }) {
   const [areaAsignada, setAreaAsignada] = useState(0);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [lotesData, setLotesData] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -69,33 +71,45 @@ export default function AsignarM2({ terrenoId }) {
     }
   }, [terrenoId, changeState]);
 
-  function Lote({ lote, setWatch, watch }) {
-    const { setIsLoading } = useContext(LoadingContext);
-    const [estatus, setEstatus] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [loteValue, setLote] = useState(lote);
+  const handleSuperficieChange = (id, event) => {
+    setErrorMessage("");
+    const value = event;
+    const index = lotes.findIndex((item) => item.id === id);
+    if (index !== -1) {
+      const updatedLotesData = [...lotes];
+      updatedLotesData[index].superficie = value;
+      setLotesData(updatedLotesData);
+    } else {
+      setErrorMessage("Superficie no válida");
+      setLotesData((prevState) => [
+        ...prevState,
+        { lote_id: id, superficie: value },
+      ]);
+    }
+  };
 
-    const isValidSurface = (surface) => {
-      const pattern = /^\d+(\.\d+)?$/;
-      return pattern.test(surface);
-    };
-
-    const handleSuperficieChange = (value) => {
-      if (isValidSurface(value)) {
-        setEstatus("");
-        setErrorMessage("");
-        setLote({ ...lote, superficie: value });
-      } else {
-        setEstatus("error");
-        setErrorMessage("Superficie no válida");
+  const validateSuperficie = () => {
+    for (let lote of lotesData) {
+      if (!lote.superficie) {
+        return false;
       }
-    };
+    }
+    return true;
+  };
 
-    const onGuardarSuperficie = () => {
+  const onGuardarSuperficie = () => {
+    if (!validateSuperficie()) {
+      Swal.fire({
+        title: "Error",
+        text: "Por favor, complete todas las superficies antes de guardar.",
+        icon: "error",
+        confirmButtonColor: "#ff4d4f",
+      });
+      return;
+    } else {
       Swal.fire({
         title: "Verifique que los datos sean correctos",
         icon: "info",
-        html: `Superficie: ${loteValue.superficie} m<sup>2</sup>`,
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
         showDenyButton: true,
@@ -106,65 +120,33 @@ export default function AsignarM2({ terrenoId }) {
         if (result.isConfirmed) {
           setIsLoading(true);
           lotesService.asignarSuperficie(
-            loteValue,
+            { data_lotes: lotesData },
             onSuperficieAsignada,
             onError
           );
         }
       });
-    };
+    }
+  };
 
-    const onSuperficieAsignada = (data) => {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 2000);
-      if (data.success) {
-        setWatch(!watch);
-      }
-    };
-
-    return (
-      <TableRow>
-        <TableCell>{lote.numero}</TableCell>
-
-        <TableCell align="center">
-          <span className="mb-4">
-            <InputNumber
-              placeholder="Ingrese la Superficie del Lote en M2"
-              className="m-0 w-3/4"
-              name="superficie"
-              label=""
-              suffix={"M2"}
-              status={estatus}
-              value={lote.superficie}
-              onChange={(e) => {
-                handleSuperficieChange(e);
-              }}
-            />
-            <p className="error-message">{errorMessage}</p>
-          </span>
-        </TableCell>
-        <TableCell align="center">
-          <Button
-            htmlType="submit"
-            size="large"
-            disabled={loteValue.superficie === null}
-            onClick={onGuardarSuperficie}
-          >
-            Asignar Superficie
-          </Button>
-        </TableCell>
-      </TableRow>
-    );
-  }
+  const onSuperficieAsignada = (data) => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    if (data.success) {
+      setWatch(!watch);
+    }
+  };
 
   return (
-    <div className="p-8 grid gap-8">
-      <Row justify={"start"}>
-        <h1>Asignación de Superficie</h1>
+    <div className="p-8 grid gap-8 asignacion-container">
+      <Row justify={"center"} style={{ backgroundColor: "rgb(66, 142, 202)" }}>
+        <h1 style={{ color: "white", padding: "4px", fontSize: "20px" }}>
+          Asignación de Superficie
+        </h1>
       </Row>
 
-      <Row justify={"space-between"}>
+      <Row justify={"space-between"} style={{ width: "80%", margin: "0 auto" }}>
         <Typography>
           Área Asignada: {formatPrecio(areaAsignada.toFixed(2))}
         </Typography>
@@ -176,42 +158,83 @@ export default function AsignarM2({ terrenoId }) {
 
       {lotes && (
         <Row justify={"center"}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>N° de Lote</TableCell>
-                  <TableCell>Superficie</TableCell>
-                  <TableCell>Acción</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {lotes
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((lote, index) => (
-                    <Lote
-                      key={index}
-                      lote={lote}
-                      setWatch={setChangeState}
-                      watch={changeState}
+          <Form
+            style={{ width: "100%" }}
+            initialValues={lotes.reduce((acc, lote) => {
+              acc[`superficie_${lote.id}`] = lote.superficie;
+              return acc;
+            }, {})}
+          >
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell style={{ textAlign: "center" }}>
+                      <b style={{ fontWeight: "bold" }}>N° de Lote</b>
+                    </TableCell>
+                    <TableCell style={{ textAlign: "center" }}>
+                      <b style={{ fontWeight: "bold" }}>Superficie en M2</b>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {lotes
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((lote, index) => (
+                      <TableRow key={index}>
+                        <TableCell style={{ textAlign: "center" }}>
+                          {lote.numero}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Form.Item
+                            name={`superficie_${lote.id}`}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Ingrese la Superficie del Lote",
+                              },
+                            ]}
+                          >
+                            <InputNumber
+                              placeholder="Ingrese la Superficie"
+                              className="m-0 w-2/4"
+                              suffix={"M2"}
+                              value={lote.superficie}
+                              onChange={(e) =>
+                                handleSuperficieChange(lote.id, e)
+                              }
+                            />
+                          </Form.Item>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <Button
+                      style={{ left: "100%", marginTop: "12px" }}
+                      htmlType="submit"
+                      size="large"
+                      onClick={onGuardarSuperficie}
+                    >
+                      Asignar Superficie
+                    </Button>
+                  </TableRow>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      count={lotes?.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                      labelRowsPerPage="Lotes por Página"
                     />
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={lotes?.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Lotes por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </TableContainer>
+          </Form>
         </Row>
       )}
     </div>

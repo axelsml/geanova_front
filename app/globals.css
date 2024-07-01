@@ -143,7 +143,7 @@
 
 .titulo_pantallas {
   background-color: rgb(67, 141, 204);
-  height: 50px;
+  height: 60px;
   border-radius: 30px;
   color: white;
   text-align: center;
@@ -397,4 +397,9 @@
   width: 40vw;
   display: flex;
   justify-content: space-around;
+}
+
+.asignacion-container {
+  margin: 0 auto;
+  width: 50%;
 }
