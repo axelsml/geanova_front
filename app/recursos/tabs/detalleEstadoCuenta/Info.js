@@ -287,11 +287,28 @@ export default function DetalleEstadoCuenta() {
     }));
   };
 
-  function colorDinamico(codigo_color) {
-    return {
-      backgroundColor: codigo_color,
-      color: "white",
-    };
+  function colorDinamicoRow(codigo_color, status) {
+    if (status === 1) {
+      return {
+        backgroundColor: "#438DCC",
+      };
+    } else {
+      return {
+        backgroundColor: codigo_color,
+      };
+    }
+  }
+
+  function colorDinamicoText(status) {
+    if (status === 1) {
+      return {
+        color: "white",
+      };
+    } else {
+      return {
+        color: "black",
+      };
+    }
   }
 
   // Títulos personalizados para los modales
@@ -449,7 +466,6 @@ export default function DetalleEstadoCuenta() {
                 style={{ alignSelf: "flex-start" }}
                 onClick={() => {
                   setShowModal(true);
-                  console.log("datosResumen: ", datosResumen);
                 }}
                 type="primary"
                 block
@@ -533,19 +549,21 @@ export default function DetalleEstadoCuenta() {
                   .map((dato, index) => (
                     <TableRow
                       key={dato.id}
-                      style={colorDinamico(dato.codigo_color)}
+                      style={colorDinamicoRow(dato.codigo_color, dato.status)}
                     >
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         {fechaFormateada(dato.fechaOperacion)}
                       </TableCell>
-                      <TableCell>{dato.concepto}</TableCell>
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
+                        {dato.concepto}
+                      </TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         ${dato.saldo ? formatPrecio(dato.saldo) : "0.00"}
                       </TableCell>
                       <TableCell>
@@ -627,19 +645,21 @@ export default function DetalleEstadoCuenta() {
                   .map((dato, index) => (
                     <TableRow
                       key={dato.id}
-                      style={colorDinamico(dato.codigo_color)}
+                      style={colorDinamicoRow(dato.codigo_color, dato.status)}
                     >
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         {fechaFormateada(dato.fechaOperacion)}
                       </TableCell>
-                      <TableCell>{dato.concepto}</TableCell>
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
+                        {dato.concepto}
+                      </TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={colorDinamicoText(dato.status)}>
                         ${dato.saldo ? formatPrecio(dato.saldo) : "0.00"}
                       </TableCell>
                       <TableCell>
