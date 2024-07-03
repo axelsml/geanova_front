@@ -61,6 +61,7 @@ export const fecha_mes_anterior = () => {
 
 export const formatPrecio = (value) => `${value.toLocaleString("es-MX")}`;
 
+//regresa fecha con 1 dia menos
 export const fechaFormateada = (value) => {
   let fecha = new Intl.DateTimeFormat("es-ES", {
     year: "numeric",
@@ -193,3 +194,16 @@ export function formatDate(obj) {
 export function toTitleCase(str) {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
+//regresa fecha con formato sin modificarla
+export const fechaFormateada2 = (value) => {
+  // Asegurarse de que 'value' se maneja como una fecha ISO
+  let date = new Date(value + "T00:00:00");
+
+  let fecha = new Intl.DateTimeFormat("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+
+  return fecha;
+};

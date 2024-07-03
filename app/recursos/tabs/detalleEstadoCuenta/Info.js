@@ -30,7 +30,7 @@ import Swal from "sweetalert2";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
 import recursosService from "@/services/recursosService";
 import {
-  fechaFormateada,
+  fechaFormateada2,
   formatPrecio,
   toTitleCase,
 } from "@/helpers/formatters";
@@ -65,7 +65,6 @@ export default function DetalleEstadoCuenta() {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [datos, setDatos] = useState([]);
-  const [datosResumen, setDatosResumen] = useState([]);
 
   const [formValues, setFormValues] = useState({});
   const [formValuesSucursal, setFormValuesSucursal] = useState({});
@@ -540,7 +539,9 @@ export default function DetalleEstadoCuenta() {
                   <TableCell>
                     <p>Saldos</p>
                   </TableCell>
-                  <TableCell style={{ width: 180 }}></TableCell>
+                  <TableCell style={{ width: 180 }}>
+                    <p>Tipo de movimiento</p>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -552,7 +553,7 @@ export default function DetalleEstadoCuenta() {
                       style={colorDinamicoRow(dato.codigo_color, dato.status)}
                     >
                       <TableCell sx={colorDinamicoText(dato.status)}>
-                        {fechaFormateada(dato.fechaOperacion)}
+                        {fechaFormateada2(dato.fechaOperacion)}
                       </TableCell>
                       <TableCell sx={colorDinamicoText(dato.status)}>
                         {dato.concepto}
@@ -571,6 +572,7 @@ export default function DetalleEstadoCuenta() {
                           <Select
                             value={formValues[`${dato.id}`]}
                             style={{ width: "100%" }}
+                            disabled={dato.status === 1}
                             placeholder={dato.tipo_movimiento_id}
                             onChange={(value) =>
                               handleChange(value, `${dato.id}`)
@@ -633,7 +635,9 @@ export default function DetalleEstadoCuenta() {
                   <TableCell>
                     <p>Saldos</p>
                   </TableCell>
-                  <TableCell style={{ width: 180 }}></TableCell>
+                  <TableCell style={{ width: 180 }}>
+                    <p>Tipo de movimiento</p>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -648,7 +652,7 @@ export default function DetalleEstadoCuenta() {
                       style={colorDinamicoRow(dato.codigo_color, dato.status)}
                     >
                       <TableCell sx={colorDinamicoText(dato.status)}>
-                        {fechaFormateada(dato.fechaOperacion)}
+                        {fechaFormateada2(dato.fechaOperacion)}
                       </TableCell>
                       <TableCell sx={colorDinamicoText(dato.status)}>
                         {dato.concepto}
@@ -667,6 +671,7 @@ export default function DetalleEstadoCuenta() {
                           <Select
                             value={formValuesSucursal[`${dato.id}`]}
                             style={{ width: "100%" }}
+                            disabled={dato.status === 1}
                             placeholder={dato.tipo_movimiento_id}
                             onChange={(value) =>
                               handleChangeSucursal(value, `${dato.id}`)
