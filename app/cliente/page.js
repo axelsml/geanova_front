@@ -1,6 +1,5 @@
 "use client";
 import { formatPrecio, formatDate } from "@/helpers/formatters";
-import moment from "moment";
 import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
 import ventasService from "@/services/ventasService";
@@ -42,6 +41,7 @@ import lotesService from "@/services/lotesService";
 import pagosService from "@/services/pagosService";
 import InputIn from "@/components/Input";
 import { InputNumber } from "antd";
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
@@ -106,6 +106,8 @@ export default function ClientesInfo() {
   const [cambiarFecha, setCambiarFecha] = useState(false);
   const [newAmortizacion, setNewAmortizacion] = useState(false);
 
+  const [cookiePermisos, setCookiePermisos] = useState([]);
+
   const opcionFinanciamiento = [
     { index: 0, id: 1, nombre: "Mensual" },
     { index: 1, id: 2, nombre: "Quincenal" },
@@ -116,6 +118,9 @@ export default function ClientesInfo() {
 
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
+    //funcion importable para traer el nivel de la pantalla (revisar home.js para la lista de nombres de pantallas)
+    // se necesita el nombre de la pantalla o un callback para setear el valor
+    getCookiePermisos("informacion del cliente", setCookiePermisos);
   }, []);
 
   let shouldSearch = false;
@@ -657,7 +662,6 @@ export default function ClientesInfo() {
                       <Button
                         className="boton renglon_otro_color"
                         onClick={() => {
-                          console.log("modal abierto");
                           datosModal();
                           setShowModalEditar(true);
                         }}

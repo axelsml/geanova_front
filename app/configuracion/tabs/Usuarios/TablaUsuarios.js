@@ -235,7 +235,7 @@ export default function TablaUsuarios() {
                 {stableSort(datos, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((dato, index) => (
-                    <TableRow key={index}>
+                    <TableRow key={dato.id}>
                       <TableCell>{dato.nombre}</TableCell>
                       <TableCell>{dato.nick}</TableCell>
                       <TableCell>{dato.nombreRol}</TableCell>
