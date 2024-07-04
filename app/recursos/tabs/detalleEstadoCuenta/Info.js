@@ -447,7 +447,6 @@ export default function DetalleEstadoCuenta() {
                 className="boton"
                 onClick={() => {
                   setShowModal(true);
-                  console.log("datos: ", datos);
                 }}
                 type="primary"
                 block
@@ -825,7 +824,6 @@ export default function DetalleEstadoCuenta() {
         footer={null}
         width={600}
         open={showModal}
-        destroyOnClose
         onCancel={() => handleCloseModal()}
       >
         {/* Crud de tipo movimientos */}

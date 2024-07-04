@@ -49,6 +49,8 @@ export default function AdministrarTipoMovimiento() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const [form] = Form.useForm();
+
   //Variables del modal
   const [showModal, setShowModal] = useState(false);
 
@@ -94,6 +96,7 @@ export default function AdministrarTipoMovimiento() {
 
   // Handlers para cerrar los modales
   const handleCloseModal = () => {
+    form.resetFields(); // Reset form fields when closing the modal
     setShowModal(false);
   };
 
@@ -218,12 +221,16 @@ export default function AdministrarTipoMovimiento() {
 
   async function handleSubmitNuevo() {
     setShowModal(false);
-    let form = {
+    let forms = {
       descripcion: descripcion,
       tipo_ingreso: tipoIngreso,
       codigo_color: color,
     };
-    console.log("form: ", form);
+    /* let formValues = form.getFieldsValue();
+    const movimiento = formValues.movimiento;
+    const tipoIngresos = formValues.tipoIngreso;
+    const colors = formValues.colorLinea; */
+
     await Swal.fire({
       title: "Guardar nuevo movimiento?",
       icon: "question",
@@ -235,9 +242,10 @@ export default function AdministrarTipoMovimiento() {
       if (result.isConfirmed) {
         recursosService.createTipoMovimiento(
           onMovimientoGuardado,
-          form,
+          forms,
           onError
         );
+        form.resetFields(); // Reset form fields when closing the modal
       }
     });
   }
@@ -385,6 +393,7 @@ export default function AdministrarTipoMovimiento() {
               labelCol={{ span: 10 }}
               layout="horizontal"
               name="usuarioForm"
+              form={form}
               onFinish={handleSubmitNuevo}
             >
               <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
