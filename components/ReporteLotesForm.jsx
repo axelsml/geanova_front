@@ -30,8 +30,10 @@ export default function ReporteLotes() {
   const { setIsLoading } = useContext(LoadingContext);
   const [lotes, setLotes] = useState(null);
   const [loteSelected, setLoteSelected] = useState(null);
+  const [loteAux, setLoteAux] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
+  const [terrenoAux, setTerrenoAux] = useState(null);
   const [info, setInfo] = useState(null);
   const [infoCliente, setInfoCliente] = useState(null);
   const [infoLote, setInfoLote] = useState(null);
@@ -54,6 +56,8 @@ export default function ReporteLotes() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isHovered, setIsHovered] = useState(false);
 
+  const [form] = Form.useForm();
+
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
   }, []);
@@ -68,8 +72,9 @@ export default function ReporteLotes() {
     setTotalMensual(0);
     setTotalLiquidados(0);
     setTotalCobranza(0);
+    setTerrenoAux(null);
     var params = {
-      lote_id: loteSelected.id,
+      lote_id: loteSelected ? loteSelected.id : 0,
       terreno_id: terrenoSelected.id,
     };
     lotesService.reporteLotes(params, onInfoClienteCargado, onError);
@@ -87,6 +92,7 @@ export default function ReporteLotes() {
       setTotalMensual(data.mensual);
       setTotalLiquidados(data.liquidados);
       setTotalCobranza(data.cobranza);
+      setTerrenoAux(terrenoSelected);
     } else {
       Swal.fire({
         title: "Error",
@@ -97,18 +103,25 @@ export default function ReporteLotes() {
         showDenyButton: true,
         confirmButtonText: "Aceptar",
       });
+      setInfo(null);
     }
   }
 
   const onBuscarLotes = (value) => {
-    setTerrenoSelected(terrenos.find((terreno) => terreno.id == value));
-    lotesService.getLotesAsignados(
-      value,
-      (data) => {
-        setLotes(data);
-      },
-      onError
-    );
+    if (value == 0) {
+      setTerrenoSelected(value);
+      form.resetFields();
+    } else {
+      setTerrenoSelected(terrenos.find((terreno) => terreno.id == value));
+      form.resetFields();
+      lotesService.getLotesAsignados(
+        value,
+        (data) => {
+          setLotes(data);
+        },
+        onError
+      );
+    }
   };
 
   const onError = (e) => {
@@ -149,7 +162,7 @@ export default function ReporteLotes() {
   };
 
   return (
-    <div className="p-8 grid gap-4">
+    <Row className="grid gap-4" style={{ width: "78vw", margin: "0 auto" }}>
       <Row justify={"center"}>
         <Col
           xs={24}
@@ -178,6 +191,12 @@ export default function ReporteLotes() {
               optionLabelProp="label"
               onChange={onBuscarLotes}
             >
+              {terrenos &&
+                opcion.map((item, index) => (
+                  <Option key={index} value={item.id} label={item.nombre}>
+                    {item?.nombre}
+                  </Option>
+                ))}
               {terrenos?.map((item, index) => (
                 <Option key={index} value={item.id} label={item.nombre}>
                   {item?.nombre}
@@ -187,39 +206,42 @@ export default function ReporteLotes() {
           </Form.Item>
         </Col>
         <Col>
-          <Form.Item
-            label={"Lote"}
-            name="lote_id"
-            style={{ width: "100%" }}
-            rules={[{ required: true, message: "Lote no seleccionado" }]}
-          >
-            <Select
-              showSearch
-              placeholder="Seleccione un Lote"
-              optionLabelProp="label"
-              onChange={(value) => {
-                const loteSelected = lotes.find((lote) => lote.id == value);
-                setLoteSelected(loteSelected || "0");
-              }}
+          <Form name="loteform" form={form}>
+            <Form.Item
+              label={"Lote"}
+              name="lote_id"
+              style={{ width: "100%" }}
+              rules={[{ required: true, message: "Lote no seleccionado" }]}
             >
-              {lotes &&
-                opcion.map((item, index) => (
-                  <Option key={index} value={item.id} label={item.nombre}>
-                    {item?.nombre}
+              <Select
+                showSearch
+                placeholder="Seleccione un Lote"
+                optionLabelProp="label"
+                disabled={terrenoSelected == 0}
+                value={loteSelected != null ? loteSelected.numero : undefined}
+                onChange={(value) => {
+                  const loteSelected = lotes.find((lote) => lote.id == value);
+                  setLoteSelected(loteSelected);
+                }}
+              >
+                {lotes && (
+                  <Option key="all" value={0} label="Todos">
+                    {"Todos"}
+                  </Option>
+                )}
+                {lotes?.map((item, index) => (
+                  <Option key={index} value={item.id} label={item.numero}>
+                    {item?.numero}
                   </Option>
                 ))}
-              {lotes?.map((item, index) => (
-                <Option key={index} value={item.id} label={item.numero}>
-                  {item?.numero}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+              </Select>
+            </Form.Item>
+          </Form>
         </Col>
         <Col>
           <Button
             className="boton"
-            disabled={terrenoSelected == null || loteSelected == null}
+            disabled={terrenoSelected == null}
             onClick={BuscarInfoLote}
           >
             Buscar
@@ -399,7 +421,7 @@ export default function ReporteLotes() {
         </Col>
       </div>
       {info != null && (
-        <Row justify={"center"} className="large tabla">
+        <Row justify={"center"} className="tabla">
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -407,6 +429,11 @@ export default function ReporteLotes() {
                   <TableCell>
                     <p>No.</p>
                   </TableCell>
+                  {terrenoAux == 0 && (
+                    <TableCell>
+                      <p>Terreno</p>
+                    </TableCell>
+                  )}
                   <TableCell>
                     <p>No. Lote</p>
                   </TableCell>
@@ -457,6 +484,9 @@ export default function ReporteLotes() {
                   .map((item, index) => (
                     <TableRow key={index}>
                       <TableCell>{index + 1}</TableCell>
+                      {terrenoAux == 0 && (
+                        <TableCell>{item["resumen_lote"]["terreno"]}</TableCell>
+                      )}
                       <TableCell>{item["resumen_lote"]["lote"]}</TableCell>
                       <TableCell>
                         {item["resumen_cliente"]["nombre_completo"]}
@@ -675,6 +705,6 @@ export default function ReporteLotes() {
           </table>
         </div>
       )}
-    </div>
+    </Row>
   );
 }
