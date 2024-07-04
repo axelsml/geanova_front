@@ -403,3 +403,10 @@
   margin: 0 auto;
   width: 50%;
 }
+
+/*------------------------------------------------------------------ */
+
+.hover__resaltar-texto:hover {
+  color: rgb(67, 141, 204);
+  cursor: pointer;
+}

@@ -19,6 +19,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { FaArrowCircleLeft, FaPrint, FaPencilAlt } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
+import queryString from "query-string";
 import { FaFilePdf } from "react-icons/fa6";
 import { SiOpslevel } from "react-icons/si";
 import { usuario_id } from "@/helpers/user";
@@ -56,6 +57,7 @@ export default function ClientesInfo() {
   const [lotes, setLotes] = useState(null);
   const [loteSelected, setLoteSelected] = useState(null);
 
+  const [clienteProp, setClienteProp] = useState(null);
   const [clienteInfo, setClienteInfo] = useState([]);
   const [info_cliente, setInfoCliente] = useState(null);
   const [imagenes, verImagenes] = useState(false);
@@ -120,6 +122,24 @@ export default function ClientesInfo() {
     // se necesita el nombre de la pantalla o un callback para setear el valor
     getCookiePermisos("informacion del cliente", setCookiePermisos);
   }, []);
+
+  let shouldSearch = false;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shouldSearch = params.get("shouldSearch");
+    if (shouldSearch) {
+      const terrenoId = params.get("terreno_id");
+      const loteId = params.get("lote_id");
+
+      lotesService.getClienteByLote(
+        terrenoId,
+        loteId,
+        onInfoClienteCargado,
+        onError
+      );
+    }
+  }, [shouldSearch]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

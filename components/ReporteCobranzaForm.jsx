@@ -503,7 +503,11 @@ export default function ReporteCobranza() {
         </Row>
       )}
       {data != null && (
-        <Row style={{ marginTop: "24px" }} justify={"center"} className="tabla">
+        <Row
+          style={{ marginTop: "24px" }}
+          justify={"center"}
+          className="w-3/4 m-auto tabla"
+        >
           <TableContainer component={Paper}>
             <Table>
               <TableHead>

@@ -19,8 +19,8 @@ export default function Reportes() {
 
   return (
     <div>
-      <Row justify={"center"}>
-        <Col xs={24} sm={20} md={16} lg={12} xl={16} xxl={16}>
+      <Row justify={"center"} style={{ marginTop: "1%" }}>
+        <Col xs={24} sm={20} md={16} lg={12} xl={16} xxl={20}>
           <Tabs defaultActiveKey="1">
             <TabPane tab="Lotes" key={"1"}>
               <ReporteLotes />
