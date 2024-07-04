@@ -122,7 +122,7 @@ export default function ReporteEstatusCobranza() {
     const shouldSearch = true;
 
     window.open(
-      `http://localhost:5000/cliente?terreno_id=${terrenoId}&lote_id=${loteId}&shouldSearch=${shouldSearch}`,
+      `https://king-prawn-app-9pkxd.ondigitalocean.app/cliente?terreno_id=${terrenoId}&lote_id=${loteId}&shouldSearch=${shouldSearch}`,
       "_blank"
     );
   };
