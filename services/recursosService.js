@@ -26,7 +26,6 @@ class RecursosService {
           error(response.data);
           return;
         }
-        console.log("data: ", response.data);
         return Promise.all([
           callbackMessage({
             type: response.data.type,
@@ -34,7 +33,10 @@ class RecursosService {
           }),
           callbackResumen(
             response.data.movimientosAlonso,
-            response.data.dataResumen
+            response.data.dataResumen,
+            response.data.resumenOtrosAbonos,
+            response.data.resumenOtrosCargos,
+            response.data.resumenConciliados
           ),
           callback(response.data.movimientosAlonso),
           callbackResumen2(response.data.movimientosSucursal),
@@ -78,7 +80,6 @@ class RecursosService {
           error(response.data);
           return;
         }
-        console.log("data: ", response.data);
         return Promise.all([callback(response.data)]);
       })
       .catch((response) => {
@@ -119,7 +120,6 @@ class RecursosService {
           error(response.data);
           return;
         }
-        console.log("data: ", response.data);
         return Promise.all([callback(response.data)]);
       })
       .catch((response) => {
@@ -188,7 +188,6 @@ class RecursosService {
     return http
       .delete(`destroyTipoMovimiento/${id}`, { cancelToken: call.token })
       .then((response) => {
-        console.log("response.data", response.data);
         return callback(response.data);
       })
       .catch((response) => {

@@ -9,6 +9,7 @@ import {
   Form,
   Checkbox,
   Select,
+  Card,
   Modal,
   Alert,
   Input,
@@ -35,6 +36,7 @@ import {
   toTitleCase,
 } from "@/helpers/formatters";
 import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
+import "./styles.css"; // Archivo CSS personalizado
 
 const { RangePicker } = DatePicker;
 export default function DetalleEstadoCuenta() {
@@ -65,6 +67,11 @@ export default function DetalleEstadoCuenta() {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [datos, setDatos] = useState([]);
+  const [otroAbonos, setOtroAbonos] = useState();
+  const [otroCargo, setOtroCargo] = useState();
+  const [resumenConciliados, setResumenConciliados] = useState();
+  const [totalAbono, setTotalAbono] = useState();
+  const [totalCargo, setTotalCargo] = useState();
 
   const [formValues, setFormValues] = useState({});
   const [formValuesSucursal, setFormValuesSucursal] = useState({});
@@ -223,7 +230,6 @@ export default function DetalleEstadoCuenta() {
       tipo: tipoSelected,
       proyecto: terrenoSelected,
     };
-    console.log("from: ", form);
     recursosService
       .getDepositos(
         form,
@@ -239,7 +245,13 @@ export default function DetalleEstadoCuenta() {
       });
   }
 
-  function onTablaAlonsoSet(response, responseResumen) {
+  function onTablaAlonsoSet(
+    response,
+    responseResumen,
+    responseOtrosAbono,
+    responseOtrosCargos,
+    responseConciliados
+  ) {
     // Inicializar formValues con los valores obtenidos
     let initialValues = {};
     response.forEach((item) => {
@@ -247,10 +259,21 @@ export default function DetalleEstadoCuenta() {
     });
     setFormValues(initialValues);
     setDatos(responseResumen);
+    setOtroAbonos(responseOtrosAbono);
+    setOtroCargo(responseOtrosCargos);
+    setResumenConciliados(responseConciliados);
+    const totalSumStatus1 = sumValuesByStatus(responseResumen, 1);
+    const totalSumStatus2 = sumValuesByStatus(responseResumen, 2);
+
+    let totalAbonos =
+      totalSumStatus1 + responseOtrosAbono + responseConciliados;
+    let totalCargo = totalSumStatus2 + responseOtrosCargos;
+
+    setTotalAbono(formatPrecio(totalAbonos));
+    setTotalCargo(formatPrecio(totalCargo));
   }
   function onTablaSucursalSet(response) {
     // Inicializar formValues con los valores obtenidos
-    console.log("responseS: ", response);
     let initialValues = {};
     response.forEach((item) => {
       initialValues[`${item.id}`] = item.tipo_movimiento_id;
@@ -258,12 +281,17 @@ export default function DetalleEstadoCuenta() {
     setFormValuesSucursal(initialValues);
   }
 
+  const sumValuesByStatus = (obj, tipo_ingreso) => {
+    return Object.values(obj)
+      .filter((item) => item.tipo_ingreso === tipo_ingreso)
+      .reduce((acc, item) => acc + item.total, 0);
+  };
+
   const handleChange = (value, name) => {
     let params = {
       id: name,
       tipo_movimiento_id: value,
     };
-    console.log(params);
     recursosService.updateTipoMovimiento(onBuscar, params, onError);
 
     setFormValues((prevValues) => ({
@@ -277,7 +305,6 @@ export default function DetalleEstadoCuenta() {
       id: name,
       tipo_movimiento_id: value,
     };
-    console.log(params);
     recursosService.updateTipoMovimiento(onBuscar, params, onError);
 
     setFormValuesSucursal((prevValues) => ({
@@ -318,6 +345,14 @@ export default function DetalleEstadoCuenta() {
       </Typography.Title>
     </Row>
   );
+  // Títulos personalizados para los cards
+  const customTitleCard = (title) => {
+    return (
+      <Row justify={"center"}>
+        <Typography.Title level={4}>{title}</Typography.Title>
+      </Row>
+    );
+  };
 
   return (
     <div style={{ paddingBottom: 30 }}>
@@ -401,79 +436,30 @@ export default function DetalleEstadoCuenta() {
             </Form.Item>
           </Col>
         </Row>
-        <Row justify="space-between" gutter={16}>
-          <Col xs={24} sm={24} md={24} lg={10} xl={8} xxl={10}>
-            <Form {...layoutResumen} name="basic">
-              {datos.map((dato, index) => {
-                if (index % 2 === 0) {
-                  return (
-                    <Form.Item
-                      key={dato.id}
-                      name={`movimiento_${index}`}
-                      label={toTitleCase(dato.descripcion)}
-                    >
-                      <Input
-                        placeholder={
-                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                        }
-                        disabled
-                        value={dato.id}
-                      />
-                    </Form.Item>
-                  );
-                }
-                return null;
-              })}
-            </Form>
-          </Col>
-
-          <Col xs={24} sm={24} md={24} lg={10} xl={8} xxl={10}>
-            <Form {...layoutResumen} name="basic">
-              {datos.map((dato, index) => {
-                if (index % 2 !== 0) {
-                  return (
-                    <Form.Item
-                      key={dato.id}
-                      name={`movimiento_${index}`}
-                      label={toTitleCase(dato.descripcion)}
-                    >
-                      <Input
-                        placeholder={
-                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                        }
-                        disabled
-                        value={dato.id}
-                      />
-                    </Form.Item>
-                  );
-                }
-                return null;
-              })}
-            </Form>
-          </Col>
+        <Row
+          justify="center"
+          gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
+          className="mb-5"
+        >
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                justifyContent: "space-between",
-              }}
-            >
+            <div>
               <Button
                 className="boton"
-                style={{ alignSelf: "flex-start" }}
                 onClick={() => {
                   setShowModal(true);
+                  console.log("datos: ", datos);
                 }}
                 type="primary"
                 block
               >
-                Tipo Movimientos
+                Administrar Movimientos
               </Button>
+            </div>
+          </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+            <div>
               <Button
                 className="boton"
-                style={{ alignSelf: "flex-end" }}
                 onClick={() => {
                   onBuscar();
                 }}
@@ -485,31 +471,160 @@ export default function DetalleEstadoCuenta() {
             </div>
           </Col>
         </Row>
+        {Object.keys(message).length > 0 && errorMessage.length == 0 && (
+          <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
+            <Alert
+              style={{ width: "100%" }}
+              message={message.type}
+              description={message.message}
+              type="success"
+              showIcon
+              closable
+            />
+          </Row>
+        )}
+        {errorMessage.length > 0 && (
+          <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
+            <Alert
+              style={{ width: "100%" }}
+              message={"Error"}
+              description={errorMessage}
+              showIcon
+              type="error"
+              closable
+            />
+          </Row>
+        )}
+        <Row justify="space-evenly" gutter={16}>
+          <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
+            <Card
+              className="custom-card"
+              title={customTitleCard("Abonos")}
+              hoverable
+              bordered={false}
+            >
+              <Form {...layoutResumen} name="basicForm">
+                <Form.Item name={`conciliados`} label={"Conciliados"}>
+                  <Input
+                    placeholder={
+                      `$ ` +
+                      (resumenConciliados
+                        ? formatPrecio(resumenConciliados)
+                        : 0)
+                    }
+                    readOnly
+                    value={
+                      `$ ` +
+                      (resumenConciliados
+                        ? formatPrecio(resumenConciliados)
+                        : 0)
+                    }
+                  />
+                  <p></p>
+                </Form.Item>
+                {datos.map((dato, index) => {
+                  if (dato.tipo_ingreso === 1) {
+                    return (
+                      <Form.Item
+                        key={dato.id}
+                        name={`movimiento_${index}`}
+                        label={toTitleCase(dato.descripcion)}
+                      >
+                        <Input
+                          placeholder={
+                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                          }
+                          readOnly
+                          value={
+                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                          }
+                        />
+                        <p></p>
+                      </Form.Item>
+                    );
+                  }
+                })}
+
+                <Form.Item name={`otrosAbonos`} label={"Otros"}>
+                  <Input
+                    placeholder={
+                      `$ ` + (otroAbonos ? formatPrecio(otroAbonos) : 0)
+                    }
+                    readOnly
+                    value={`$ ` + (otroAbonos ? formatPrecio(otroAbonos) : 0)}
+                  />
+                  <p></p>
+                </Form.Item>
+                <Form.Item name={`totalAbonos`} label={"Total"}>
+                  <Input
+                    placeholder={
+                      `$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)
+                    }
+                    readOnly
+                    value={`$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)}
+                  />
+                  <p></p>
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
+            <Card
+              className="custom-card"
+              title={customTitleCard("Cargos")}
+              hoverable
+              bordered={false}
+            >
+              <Form {...layoutResumen} name="basic">
+                {datos.map((dato, index) => {
+                  if (dato.tipo_ingreso === 2) {
+                    return (
+                      <Form.Item
+                        key={dato.id}
+                        name={`movimiento_${index}`}
+                        label={toTitleCase(dato.descripcion)}
+                      >
+                        <Input
+                          placeholder={
+                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                          }
+                          readOnly
+                          value={
+                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                          }
+                        />
+                        <p></p>
+                      </Form.Item>
+                    );
+                  }
+                })}
+                <Form.Item name={`otrosCargo`} label={"Otros"}>
+                  <Input
+                    placeholder={
+                      `$ ` + (otroCargo ? formatPrecio(otroCargo) : 0)
+                    }
+                    readOnly
+                    value={`$ ` + (otroCargo ? formatPrecio(otroCargo) : 0)}
+                  />
+                  <p></p>
+                </Form.Item>
+                <Form.Item name={`totalCargos`} label={"Total"}>
+                  <Input
+                    placeholder={
+                      `$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)
+                    }
+                    readOnly
+                    value={`$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)}
+                  />
+                  <p></p>
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
       </Form>
-      {Object.keys(message).length > 0 && errorMessage.length == 0 && (
-        <Row style={{ paddingTop: 10 }}>
-          <Alert
-            style={{ width: "100%" }}
-            message={message.type}
-            description={message.message}
-            type="success"
-            showIcon
-            closable
-          />
-        </Row>
-      )}
-      {errorMessage.length > 0 && (
-        <Row style={{ paddingTop: 10 }}>
-          <Alert
-            style={{ width: "100%" }}
-            message={"Error"}
-            description={errorMessage}
-            showIcon
-            type="error"
-            closable
-          />
-        </Row>
-      )}
+
       <Row
         gutter={[8, 8]}
         justify="center"

@@ -40,7 +40,7 @@ import lotesService from "@/services/lotesService";
 import pagosService from "@/services/pagosService";
 import InputIn from "@/components/Input";
 import { InputNumber } from "antd";
-import { getCookie, getCookieValue, getCookies } from "@/helpers/Cookies";
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
@@ -116,20 +116,9 @@ export default function ClientesInfo() {
 
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
-
-    getCookieValue("permisos")
-      .then((cookieValue) => {
-        let permisosParse = JSON.parse(cookieValue);
-        const item = permisosParse.find(
-          (item) => item.nombrePantalla === "informacion del cliente"
-        );
-
-        console.log("item: ", item.nivel_id);
-        setCookiePermisos(item.nivel_id);
-      })
-      .catch((error) => {
-        console.error("Error getting cookie value:", error);
-      });
+    //funcion importable para traer el nivel de la pantalla (revisar home.js para la lista de nombres de pantallas)
+    // se necesita el nombre de la pantalla o un callback para setear el valor
+    getCookiePermisos("informacion del cliente", setCookiePermisos);
   }, []);
 
   const handleChangePage = (event, newPage) => {
