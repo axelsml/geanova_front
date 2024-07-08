@@ -226,10 +226,6 @@ export default function AdministrarTipoMovimiento() {
       tipo_ingreso: tipoIngreso,
       codigo_color: color,
     };
-    /* let formValues = form.getFieldsValue();
-    const movimiento = formValues.movimiento;
-    const tipoIngresos = formValues.tipoIngreso;
-    const colors = formValues.colorLinea; */
 
     await Swal.fire({
       title: "Guardar nuevo movimiento?",

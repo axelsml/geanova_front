@@ -4,7 +4,17 @@ import { LoadingContext } from "@/contexts/loading";
 import { usuario_id } from "@/helpers/user";
 
 import { formatPrecio, formatDate } from "@/helpers/formatters";
-import { Button, Col, Row, Form, Select, Modal, Tabs, DatePicker } from "antd";
+import {
+  Button,
+  Col,
+  Row,
+  Form,
+  Select,
+  Modal,
+  Tabs,
+  DatePicker,
+  Typography,
+} from "antd";
 import {
   Paper,
   Table,
@@ -140,7 +150,10 @@ export default function ReporteCobranza() {
     console.log("salio del handleMouseEnter");
     setIsHovered(false);
   };
-
+  const layout = {
+    labelCol: { span: 24 },
+    wrapperCol: { span: 24 },
+  };
   return (
     <div>
       <Row justify={"center"}>
@@ -156,159 +169,150 @@ export default function ReporteCobranza() {
           <b>REPORTE DE COBRANZA</b>
         </Col>
       </Row>
-
-      <div className="reporte-cobranza__container--filtros">
-        <Row justify={"center"}>
-          <Col>
-            <Form.Item
-              name="fechaInicial"
-              label="Fecha Inicial"
-              style={{ width: "100%" }}
-            >
-              <DatePicker
-                allowClear={false}
-                onChange={(value) => {
-                  setFechaInicial(formatDate(value));
-                }}
-                style={{ width: "100%" }}
-                placeholder="Ingreser fecha"
-              />
-            </Form.Item>
-          </Col>
-          <Col>
-            <Form.Item
-              name="fechaFinal"
-              label="Fecha Final"
-              style={{ width: "100%" }}
-            >
-              <DatePicker
-                allowClear={false}
-                onChange={(value) => {
-                  setFechaFinal(formatDate(value));
-                }}
-                style={{ width: "100%" }}
-                placeholder="Ingresar fecha"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row justify={"center"}>
-          <Col>
-            <Form.Item
-              label={"Proyecto"}
-              name="terreno_id"
-              style={{ width: "100%" }}
-            >
-              <Select
-                showSearch
-                placeholder="Seleccionar Proyecto"
-                optionLabelProp="label"
-                onChange={(value) => {
-                  setTerrenoSelected(value || "0");
-                }}
-              >
-                {terrenos &&
-                  opcion.map((item, index) => (
-                    <Option key={index} value={item.id} label={item.nombre}>
-                      {item?.nombre}
-                    </Option>
-                  ))}
-                {terrenos?.map((item, index) => (
-                  <Option key={index} value={item.id} label={item.nombre}>
-                    {item?.nombre}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row justify={"center"}>
-          <Col>
-            <Form.Item
-              label={"Status pago"}
-              name="statuspago_id"
-              style={{ width: "100%" }}
-            >
-              <Select
-                showSearch
-                placeholder="Seleccionar Status Pago"
-                optionLabelProp="label"
-                onChange={(value) => {
-                  setStatusPagoId(value || "0");
-                }}
-              >
-                {opcionStatus.map((item, index) => (
-                  <Option key={index} value={item.id} label={item.nombre}>
-                    {item?.nombre}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col>
-            <Form.Item
-              label={"Sistema de Pago"}
-              name="sistemapago_id"
-              style={{ width: "100%" }}
-            >
-              <Select
-                showSearch
-                placeholder="Seleccionar Sistema de Pago"
-                optionLabelProp="label"
-                onChange={(value) => {
-                  setSistemaPagoSelected(value || "0");
-                }}
-              >
-                {sistemasPago &&
-                  opcion.map((item, index) => (
-                    <Option key={index} value={item.id} label={item.nombre}>
-                      {item?.nombre}
-                    </Option>
-                  ))}
-                {sistemasPago?.map((item, index) => (
-                  <Option key={index} value={item.id} label={item.Nombre}>
-                    {item?.Nombre}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          {sistemaPagoSelected == 2 && statusPagoId == 1 && (
-            <Col>
+      <Form {...layout}>
+        <div className="reporte-cobranza__container--filtros">
+          <Row justify="center" gutter={[14, 14]}>
+            <Col xs={24} sm={12} md={8} lg={4}>
               <Form.Item
-                label={"Cuentas Bancarias"}
-                name="cuentas_id"
+                name="fechaInicial"
+                label="Fecha Inicial"
                 style={{ width: "100%" }}
               >
+                <DatePicker
+                  allowClear={false}
+                  onChange={(value) => {
+                    setFechaInicial(formatDate(value));
+                  }}
+                  style={{ width: "100%" }}
+                  placeholder="Ingreser fecha"
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={4}>
+              <Form.Item
+                name="fechaFinal"
+                label="Fecha Final"
+                style={{ width: "100%" }}
+              >
+                <DatePicker
+                  allowClear={false}
+                  onChange={(value) => {
+                    setFechaFinal(formatDate(value));
+                  }}
+                  style={{ width: "100%" }}
+                  placeholder="Ingresar fecha"
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={12} md={8} lg={4}>
+              <Form.Item label="Proyecto" name="terreno_id">
                 <Select
                   showSearch
-                  placeholder="Seleccionar Cuenta"
+                  style={{ width: "100%" }}
+                  placeholder="Seleccionar Proyecto"
                   optionLabelProp="label"
                   onChange={(value) => {
-                    setCuentaBancariaSelected(value || "0");
+                    setTerrenoSelected(value || "0");
                   }}
                 >
-                  {cuentasBancarias &&
+                  {terrenos &&
                     opcion.map((item, index) => (
                       <Option key={index} value={item.id} label={item.nombre}>
                         {item?.nombre}
                       </Option>
                     ))}
-                  {cuentasBancarias?.map((item, index) => (
-                    <Option
-                      key={index}
-                      value={item.id}
-                      label={item.alias_nombre}
-                    >
-                      {item?.alias_nombre}
+                  {terrenos?.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.nombre}>
+                      {item?.nombre}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
             </Col>
-          )}
-        </Row>
-      </div>
+          </Row>
+          <Row justify="center" gutter={[14, 14]}>
+            <Col xs={24} sm={12} md={8} lg={4}>
+              <Form.Item label="Status pago" name="statuspago_id">
+                <Select
+                  showSearch
+                  style={{ width: "100%" }}
+                  placeholder="Seleccionar Status Pago"
+                  optionLabelProp="label"
+                  onChange={(value) => {
+                    setStatusPagoId(value || "0");
+                  }}
+                >
+                  {opcionStatus.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.nombre}>
+                      {item?.nombre}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={4}>
+              <Form.Item label="Sistema de Pago" name="sistemapago_id">
+                <Select
+                  showSearch
+                  style={{ width: "100%" }}
+                  placeholder="Seleccionar Sistema de Pago"
+                  optionLabelProp="label"
+                  onChange={(value) => {
+                    setSistemaPagoSelected(value || "0");
+                  }}
+                >
+                  {sistemasPago &&
+                    opcion.map((item, index) => (
+                      <Option key={index} value={item.id} label={item.nombre}>
+                        {item?.nombre}
+                      </Option>
+                    ))}
+                  {sistemasPago?.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.Nombre}>
+                      {item?.Nombre}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            {sistemaPagoSelected == 2 && statusPagoId == 1 ? (
+              <Col xs={24} sm={12} md={8} lg={4}>
+                <Form.Item label="Cuentas Bancarias" name="cuentas_id">
+                  <Select
+                    showSearch
+                    style={{ width: "100%" }}
+                    placeholder="Seleccionar Cuenta"
+                    optionLabelProp="label"
+                    onChange={(value) => {
+                      setCuentaBancariaSelected(value || "0");
+                    }}
+                  >
+                    {cuentasBancarias &&
+                      opcion.map((item, index) => (
+                        <Option key={index} value={item.id} label={item.nombre}>
+                          {item?.nombre}
+                        </Option>
+                      ))}
+                    {cuentasBancarias?.map((item, index) => (
+                      <Option
+                        key={index}
+                        value={item.id}
+                        label={item.alias_nombre}
+                      >
+                        {item?.alias_nombre}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            ) : (
+              <Col xs={24} sm={12} md={8} lg={4}></Col>
+            )}
+          </Row>
+        </div>
+      </Form>
+
       <Row justify={"center"}>
         <Button
           className="boton boton-margin-bottom"
@@ -321,268 +325,317 @@ export default function ReporteCobranza() {
         </Button>
       </Row>
       <div className="reporte-cobranza__labels-container">
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Anticipo
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="anticipo"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalAnticipo !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalAnticipo))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalAnticipo !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalAnticipo))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Pagado
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="pagado"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPagado !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagado))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPagado !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagado))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Contrato
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="contrato"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalContrato !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalContrato))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalContrato !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalContrato))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Pendiente
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="pendiente"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPendiente !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPendiente !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
+        <Row gutter={[16, 16]} justify="center">
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <Row justify="center">
+              <label className="reporte-lotes__label--input" htmlFor="anticipo">
+                Monto Anticipo
+              </label>
+            </Row>
+            <Row justify="center">
+              <input
+                id="anticipo"
+                className="reporte-lotes__input--realizado"
+                value={
+                  totalAnticipo !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalAnticipo))
+                    : "$ 0.0"
+                }
+                disabled
+                placeholder={
+                  totalAnticipo !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalAnticipo))
+                    : "$ 0.0"
+                }
+              />
+            </Row>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <Row justify="center">
+              <label className="reporte-lotes__label--input" htmlFor="pagado">
+                Monto Pagado
+              </label>
+            </Row>
+            <Row justify="center">
+              <input
+                id="pagado"
+                className="reporte-lotes__input--realizado"
+                value={
+                  totalPagado !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalPagado))
+                    : "$ 0.0"
+                }
+                disabled
+                placeholder={
+                  totalPagado !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalPagado))
+                    : "$ 0.0"
+                }
+              />
+            </Row>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <Row justify="center">
+              <label
+                className="reporte-lotes__label--input"
+                htmlFor="montoRecaudado"
+              >
+                Total Cobrado
+              </label>
+            </Row>
+            <Row justify="center">
+              <input
+                id="montoRecaudado"
+                className="reporte-lotes__input--realizado"
+                value={
+                  "$ " + formatPrecio(parseFloat(totalPagado + totalAnticipo))
+                }
+                disabled
+                placeholder={
+                  "$ " + formatPrecio(parseFloat(totalPagado + totalAnticipo))
+                }
+              />
+            </Row>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <Row justify="center">
+              <label className="reporte-lotes__label--input" htmlFor="contrato">
+                Monto Contrato
+              </label>
+            </Row>
+            <Row justify="center">
+              <input
+                id="contrato"
+                className="reporte-lotes__input--realizado"
+                value={
+                  totalContrato !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalContrato))
+                    : "$ 0.0"
+                }
+                disabled
+                placeholder={
+                  totalContrato !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalContrato))
+                    : "$ 0.0"
+                }
+              />
+            </Row>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <Row justify="center">
+              <label
+                className="reporte-lotes__label--input"
+                htmlFor="pendiente"
+              >
+                Monto Pendiente
+              </label>
+            </Row>
+            <Row justify="center">
+              <input
+                id="pendiente"
+                className="reporte-lotes__input--realizado"
+                value={
+                  totalPendiente !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalPendiente))
+                    : "$ 0.0"
+                }
+                disabled
+                placeholder={
+                  totalPendiente !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalPendiente))
+                    : "$ 0.0"
+                }
+              />
+            </Row>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8}></Col>
+        </Row>
       </div>
       {data != null && (
-        <Row justify={"center"} className="tabla">
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow className="tabla_encabezado">
-                  <TableCell>
-                    <p>Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Proyecto</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>No. Lote</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Folio Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Sistema de Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Status Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p
-                      className="hoover-target"
-                      onMouseEnter={handleMouseEnter}
-                      onMouseLeave={handleMouseLeave}
-                    >
-                      Status Solicitud
-                    </p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.nombre_cliente}</TableCell>
-                      <TableCell>{item.terreno}</TableCell>
-                      <TableCell>{item.no_lote}</TableCell>
-                      <TableCell>{item.folio}</TableCell>
-                      <TableCell>{item.sistema_pago}</TableCell>
-                      <TableCell>$ {formatPrecio(item.monto_pago)}</TableCell>
-                      <TableCell>{item.fecha_pago}</TableCell>
-                      <TableCell>{item.status_pago}</TableCell>
-                      <TableCell>
-                        <Button
-                          disabled
-                          size={"small"}
-                          shape="round"
-                          style={{
-                            backgroundColor: item.status_solicitud,
-                          }}
-                        ></Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={pagos}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Pagos por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Row>
+        <>
+          <Row justify={"center"}>
+            <Typography.Title level={2}>
+              Cobranza{" "}
+              {totalPagado !== 0
+                ? "$" + formatPrecio(parseFloat(totalPagado))
+                : "$0.0"}
+            </Typography.Title>
+          </Row>
+          <Row justify={"center"} className="tabla">
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow className="tabla_encabezado">
+                    <TableCell>
+                      <p>Cliente</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Proyecto</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>No. Lote</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Folio Pago</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Sistema de Pago</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Monto Pago</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Fecha Pago</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Status Pago</p>
+                    </TableCell>
+                    <TableCell>
+                      <p
+                        className="hoover-target"
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        Status Solicitud
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {data
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.nombre_cliente}</TableCell>
+                        <TableCell>{item.terreno}</TableCell>
+                        <TableCell>{item.no_lote}</TableCell>
+                        <TableCell>{item.folio}</TableCell>
+                        <TableCell>{item.sistema_pago}</TableCell>
+                        <TableCell>$ {formatPrecio(item.monto_pago)}</TableCell>
+                        <TableCell>{item.fecha_pago}</TableCell>
+                        <TableCell>{item.status_pago}</TableCell>
+                        <TableCell>
+                          <Button
+                            disabled
+                            size={"small"}
+                            shape="round"
+                            style={{
+                              backgroundColor: item.status_solicitud,
+                            }}
+                          ></Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      count={pagos}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                      labelRowsPerPage="Pagos por Página"
+                    />
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </TableContainer>
+          </Row>
+        </>
       )}
       {data != null && (
-        <Row
-          style={{ marginTop: "24px" }}
-          justify={"center"}
-          className="w-3/4 m-auto tabla"
-        >
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow className="tabla_encabezado">
-                  <TableCell>
-                    <p>Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Proyecto</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>No. Lote</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Anticipo</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Solicitud</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Status Solicitud</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dataSolicitudes
-                  .slice(
-                    page2 * rowsPerPage2,
-                    page2 * rowsPerPage2 + rowsPerPage2
-                  )
-                  .map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.cliente_nombre}</TableCell>
-                      <TableCell>{item.proyecto}</TableCell>
-                      <TableCell>{item.no_lote}</TableCell>
-                      <TableCell>$ {formatPrecio(item.anticipo)}</TableCell>
-                      <TableCell>{item.fecha}</TableCell>
-                      <TableCell>
-                        {" "}
-                        <Button
-                          disabled
-                          size={"small"}
-                          shape="round"
-                          style={{
-                            backgroundColor: item.status,
-                          }}
-                        ></Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={dataSolicitudes.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page2}
-                    onPageChange={handleChangePage2}
-                    onRowsPerPageChange={handleChangeRowsPerPage2}
-                    labelRowsPerPage="Solicitudes por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Row>
+        <>
+          <Row justify={"center"} className="mt-5 ">
+            <Typography.Title level={2}>
+              Anticipos{" "}
+              {totalAnticipo !== 0
+                ? "$" + formatPrecio(parseFloat(totalAnticipo))
+                : "$0.0"}
+            </Typography.Title>
+          </Row>
+          <Row
+            style={{ marginTop: "24px" }}
+            justify={"center"}
+            className="m-auto tabla mb-5"
+          >
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow className="tabla_encabezado">
+                    <TableCell>
+                      <p>Cliente</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Proyecto</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>No. Lote</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Anticipo</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Fecha Solicitud</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>Status Solicitud</p>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dataSolicitudes
+                    .slice(
+                      page2 * rowsPerPage2,
+                      page2 * rowsPerPage2 + rowsPerPage2
+                    )
+                    .map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.cliente_nombre}</TableCell>
+                        <TableCell>{item.proyecto}</TableCell>
+                        <TableCell>{item.no_lote}</TableCell>
+                        <TableCell>$ {formatPrecio(item.anticipo)}</TableCell>
+                        <TableCell>{item.fecha}</TableCell>
+                        <TableCell>
+                          {" "}
+                          <Button
+                            disabled
+                            size={"small"}
+                            shape="round"
+                            style={{
+                              backgroundColor: item.status,
+                            }}
+                          ></Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      count={dataSolicitudes.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page2}
+                      onPageChange={handleChangePage2}
+                      onRowsPerPageChange={handleChangeRowsPerPage2}
+                      labelRowsPerPage="Solicitudes por Página"
+                    />
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </TableContainer>
+          </Row>
+        </>
       )}
       {isHovered && (
         <div className="hover-container reporte-cobranza">
           <table className="hover-popup">
             <thead className="hover-popup-thead">
               <tr>
-                <td>Color</td>
-                <td>Estado</td>
+                <th>Color</th>
+                <th>Estado</th>
               </tr>
             </thead>
             <tbody>

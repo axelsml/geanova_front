@@ -162,7 +162,7 @@ export default function ReporteLotes() {
   };
 
   return (
-    <Row className="grid gap-4" style={{ width: "78vw", margin: "0 auto" }}>
+    <Row className="grid gap-4">
       <Row justify={"center"}>
         <Col
           xs={24}
