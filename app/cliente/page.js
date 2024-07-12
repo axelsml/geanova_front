@@ -431,7 +431,6 @@ export default function ClientesInfo() {
       financiamiento_id: financiamientoId,
       fecha_solicitud: fechaSolicitud,
     };
-    debugger;
     await Swal.fire({
       title: "Guardar cambios en la información del cliente?",
       icon: "question",
@@ -568,6 +567,35 @@ export default function ClientesInfo() {
       </Typography.Title>
     </Row>
   );
+
+  async function actualizarPerdonarInteres() {
+    let form = {
+      solicitud_id: info_lote.solicitud_id,
+    };
+    let titulo;
+    if (info_lote.perdonar_interes) {
+      titulo = "Aplicar interés de este cliente?";
+    } else {
+      titulo = "Perdonar interés de este cliente?";
+    }
+    await Swal.fire({
+      title: titulo,
+      icon: "question",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      confirmButtonText: "Aceptar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        lotesService
+          .updatePerdonarInteres(form, onClienteActualizado, onError)
+          .then(() => {
+            setIsLoading(false);
+          });
+      }
+    });
+  }
 
   return (
     <div className="p-8 grid gap-4">
@@ -758,6 +786,10 @@ export default function ClientesInfo() {
                       />
                     </Button>
                   </Col>
+                  <Col xs={24} sm={12} lg={12}>
+                    Monto Interés: $
+                    {info_lote.interes ? formatPrecio(info_lote.interes) : "0"}
+                  </Col>
                 </Row>
                 <Row gutter={[16]}>
                   <Col xs={24} sm={12} lg={12}>
@@ -891,6 +923,19 @@ export default function ClientesInfo() {
               size="large"
             >
               Ver Imagenes
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              className="boton"
+              onClick={() => {
+                actualizarPerdonarInteres();
+              }}
+              size="large"
+            >
+              {info_lote.perdonar_interes
+                ? `Aplicar Interés`
+                : `Perdonar Interés`}
             </Button>
           </Col>
         </Row>

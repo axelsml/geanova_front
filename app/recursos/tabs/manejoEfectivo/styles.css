@@ -1,0 +1,30 @@
+.custom-card:hover {
+  cursor: default; /* Cambia el cursor a default en hover */
+}
+
+.main-title {
+  font-size: 3rem;
+  color: #ffffff;
+  /* background: linear-gradient(0deg, #438dcc, #ffffff); */
+  background: #438dcc;
+  padding: 20px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2.5rem;
+    padding: 15px 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 2rem;
+    padding: 10px 20px;
+  }
+}

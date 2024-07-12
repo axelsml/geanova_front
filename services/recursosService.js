@@ -247,6 +247,265 @@ class RecursosService {
         }
       });
   }
+
+  getIManejo(params, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("getIManejo", { params }, { cancelToken: call.token })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled1: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled1", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled2: ${err}`,
+          });
+        }
+      });
+  }
+
+  showTipoMovimientoManejo(callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("showTipoMovimientoManejo", { cancelToken: call.token })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+  showTipoMovimientoManejoSearch(descripcion, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`showTipoMovimientoManejo/${descripcion}`, {
+        cancelToken: call.token,
+      })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  createTipoMovimientoManejo(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("createTipoMovimientoManejo", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  destroyTipoMovimientoManejo(callback, id, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .delete(`destroyTipoMovimientoManejo/${id}`, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  updateTipoMovimientoManejo(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("updateTipoMovimientoManejo", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback();
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  agregarCargo(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("agregarCargo", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
 }
 
 export default new RecursosService();

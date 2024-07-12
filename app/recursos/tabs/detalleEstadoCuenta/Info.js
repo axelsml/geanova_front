@@ -264,7 +264,6 @@ export default function DetalleEstadoCuenta() {
     setResumenConciliados(responseConciliados);
     const totalSumStatus1 = sumValuesByStatus(responseResumen, 1);
     const totalSumStatus2 = sumValuesByStatus(responseResumen, 2);
-
     let totalAbonos =
       totalSumStatus1 + responseOtrosAbono + responseConciliados;
     let totalCargo = totalSumStatus2 + responseOtrosCargos;

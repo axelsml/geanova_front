@@ -43,6 +43,8 @@ import {
 import terrenosService from "@/services/terrenosService";
 import lotesService from "@/services/lotesService";
 import DetalleEstadoCuenta from "./tabs/detalleEstadoCuenta/Info";
+import ManejoEfectivo from "./tabs/manejoEfectivo/info";
+import AgregarCargo from "./tabs/agregarCargo/info";
 export default function Recursos() {
   //   useEffect(() => {
 
@@ -1075,6 +1077,12 @@ export default function Recursos() {
             </TabPane>
             <TabPane tab="Dépositos" key="3">
               <DetalleEstadoCuenta />
+            </TabPane>
+            <TabPane tab="Manejo Efectivo" key="4">
+              <ManejoEfectivo />
+            </TabPane>
+            <TabPane tab="Agregar Cargo" key="5">
+              <AgregarCargo />
             </TabPane>
           </Tabs>
         </Col>
