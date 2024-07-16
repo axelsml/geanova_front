@@ -416,8 +416,10 @@ export default function Recursos() {
         showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
+      cargarMovimientosEfectivo()
       setMovimientosPendientes(data.pendientes);
       setMovimientosRecibidos(data.recibidos);
+
     } else {
       Swal.fire({
         title: "Error",
