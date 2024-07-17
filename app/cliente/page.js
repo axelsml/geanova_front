@@ -873,7 +873,7 @@ export default function ClientesInfo() {
             <Button
               className="boton"
               size={"large"}
-              disabled={cookiePermisos >= 2 ? false : true}
+              disabled={cookiePermisos >= 1 ? false : true}
               onClick={CreateNuevoPago}
             >
               Nuevo Pago
