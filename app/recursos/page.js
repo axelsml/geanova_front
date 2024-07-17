@@ -45,6 +45,7 @@ import lotesService from "@/services/lotesService";
 import DetalleEstadoCuenta from "./tabs/detalleEstadoCuenta/Info";
 import ManejoEfectivo from "./tabs/manejoEfectivo/info";
 import AgregarCargo from "./tabs/agregarCargo/info";
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 export default function Recursos() {
   //   useEffect(() => {
 
@@ -83,7 +84,7 @@ export default function Recursos() {
 
   const [pago_conciliar_id, setPagoConciliarId] = useState(0);
   const [show, setShow] = useState(false);
-
+  const [cookiePermisos, setCookiePermisos] = useState([]);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -114,6 +115,7 @@ export default function Recursos() {
     //     ventasService.getVentas(setVentas, Error);
     terrenosService.getTerrenos(setTerrenos, onError);
     //     BuscarInfoLote()
+    getCookiePermisos("efectivo", setCookiePermisos);
   }, []);
 
   const handleUpload = (file) => {
@@ -603,6 +605,7 @@ export default function Recursos() {
                               <TableCell>
                                 <Button
                                   key={pendiente}
+                                  disabled={cookiePermisos >= 2 ? false : true}
                                   onClick={() => {
                                     cambiar_a_recibido(pendiente);
                                   }}
@@ -724,7 +727,11 @@ export default function Recursos() {
                     }}
                     showUploadList={false}
                   >
-                    <Button className="boton" icon={<UploadOutlined />}>
+                    <Button
+                      className="boton"
+                      disabled={cookiePermisos >= 2 ? false : true}
+                      icon={<UploadOutlined />}
+                    >
                       Adjuntar Archivo
                     </Button>
                   </Upload>
@@ -901,6 +908,9 @@ export default function Recursos() {
                                   <TableCell>{pago.usuario_ingreso}</TableCell>
                                   <TableCell>
                                     <Button
+                                      disabled={
+                                        cookiePermisos >= 2 ? false : true
+                                      }
                                       className="boton"
                                       key={pago}
                                       onClick={() => {

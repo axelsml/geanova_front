@@ -37,6 +37,7 @@ import {
 } from "@/helpers/formatters";
 import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
 import "./styles.css"; // Archivo CSS personalizado
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 const { RangePicker } = DatePicker;
 export default function DetalleEstadoCuenta() {
@@ -75,7 +76,7 @@ export default function DetalleEstadoCuenta() {
 
   const [formValues, setFormValues] = useState({});
   const [formValuesSucursal, setFormValuesSucursal] = useState({});
-
+  const [cookiePermisos, setCookiePermisos] = useState([]);
   const { Option } = Select;
 
   const opcionTipo = [
@@ -108,7 +109,7 @@ export default function DetalleEstadoCuenta() {
       1
     );
     const today = new Date();
-
+    getCookiePermisos("depositos", setCookiePermisos);
     // Función para formatear la fecha en YYYY-MM-DD
     const formatearFecha = (fecha) => {
       const year = fecha.getFullYear();
@@ -353,6 +354,14 @@ export default function DetalleEstadoCuenta() {
     );
   };
 
+  function disableSelect(status) {
+    if (status === 1 || cookiePermisos < 2) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   return (
     <div style={{ paddingBottom: 30 }}>
       <Form {...layout}>
@@ -447,6 +456,7 @@ export default function DetalleEstadoCuenta() {
                 onClick={() => {
                   setShowModal(true);
                 }}
+                disabled={cookiePermisos >= 2 ? false : true}
                 type="primary"
                 block
               >
@@ -685,7 +695,7 @@ export default function DetalleEstadoCuenta() {
                           <Select
                             value={formValues[`${dato.id}`]}
                             style={{ width: "100%" }}
-                            disabled={dato.status === 1}
+                            disabled={disableSelect(dato.status)}
                             placeholder={dato.tipo_movimiento_id}
                             onChange={(value) =>
                               handleChange(value, `${dato.id}`)
@@ -784,7 +794,7 @@ export default function DetalleEstadoCuenta() {
                           <Select
                             value={formValuesSucursal[`${dato.id}`]}
                             style={{ width: "100%" }}
-                            disabled={dato.status === 1}
+                            disabled={disableSelect(dato.status)}
                             placeholder={dato.tipo_movimiento_id}
                             onChange={(value) =>
                               handleChangeSucursal(value, `${dato.id}`)

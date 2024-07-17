@@ -1,11 +1,10 @@
 import { getCookieValue } from "./Cookies";
 
-export const getCookiePermisos = async (cookie, pantalla, callback) => {
+export const getCookiePermisos = async (pantalla, callback) => {
   try {
     // Obtener el valor de la cookie
     const cookieValue = await getCookieValue("permisos");
     const permisosParse = JSON.parse(cookieValue);
-
     // Buscar el permiso específico
     const item = permisosParse.find((item) => item.nombrePantalla === pantalla);
 

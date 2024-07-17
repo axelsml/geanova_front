@@ -17,6 +17,7 @@ import Swal from "sweetalert2";
 import recursosService from "@/services/recursosService";
 import { formatDate } from "@/helpers/formatters";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function AgregarCargo() {
   const { setIsLoading } = useContext(LoadingContext);
@@ -25,7 +26,7 @@ export default function AgregarCargo() {
   const [form] = Form.useForm();
   const [errorMessage, setErrorMessage] = useState("");
   const storedUsuario = window.localStorage.getItem("usuario");
-
+  const [cookiePermisos, setCookiePermisos] = useState([]);
   const onError = (e) => {
     setIsLoading(false);
     console.log(e);
@@ -42,6 +43,8 @@ export default function AgregarCargo() {
     recursosService.showTipoMovimientoManejo(setDatos, onError).then(() => {
       setIsLoading(false);
     });
+
+    getCookiePermisos("agregar cargo", setCookiePermisos);
   }, []);
 
   const layout = {
@@ -232,7 +235,11 @@ export default function AgregarCargo() {
                 style={{ paddingBottom: 15 }}
               >
                 <span className="flex gap-2 justify-end">
-                  <Button className="boton" htmlType="submit">
+                  <Button
+                    className="boton"
+                    disabled={cookiePermisos >= 2 ? false : true}
+                    htmlType="submit"
+                  >
                     Guardar
                   </Button>
                 </span>

@@ -6,7 +6,7 @@ import TerrenoForm from "@/components/TerrenoForm";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
-import { Button, Col, Collapse, Row, Typography, Radio } from "antd";
+import { Button, Col, Collapse, Row, Typography, Radio, Tooltip } from "antd";
 import { useState, useEffect } from "react";
 import {
   Paper,
@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import TerrenoInfoForm from "@/components/TerrenoInfoForm";
 import ReporteProyectoForm from "@/components/ReporteProyectoForm";
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 export default function TerrenosCrear() {
   const [nuevoTerreno, setNuevoTerreno] = useState(false);
   const [infoTerreno, setInfoTerreno] = useState(false);
@@ -34,7 +35,7 @@ export default function TerrenosCrear() {
   const [value, setValue] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
+  const [cookiePermisos, setCookiePermisos] = useState([]);
   const empresas = [
     {
       id: 1,
@@ -48,6 +49,7 @@ export default function TerrenosCrear() {
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
+    getCookiePermisos("lista de terrenos", setCookiePermisos);
   }, [changeState]);
 
   async function onTerreno(terrenos) {
@@ -72,29 +74,48 @@ export default function TerrenosCrear() {
     <div className="p-8 grid gap-4">
       {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
         <>
-         <Row justify={"center"}>
-            <Col xs={24} sm={20} md={16} lg={12} xl={8} xxl={4} className="titulo_pantallas">
-            <b>LISTA DE TERRENOS</b>
+          <Row justify={"center"}>
+            <Col
+              xs={24}
+              sm={20}
+              md={16}
+              lg={12}
+              xl={8}
+              xxl={4}
+              className="titulo_pantallas"
+            >
+              <b>LISTA DE TERRENOS</b>
             </Col>
           </Row>
-                   
         </>
       )}
-  {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
+      {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
         <>
-          <Row style={{marginTop:"100px",marginRight:"12%"}} justify={"end"}>
+          <Row
+            style={{ marginTop: "100px", marginRight: "12%" }}
+            justify={"end"}
+          >
             <Col>
-              <Button className="boton" size={"large"} onClick={CreateNuevoTerreno}>
+              <Button
+                className="boton"
+                size={"large"}
+                disabled={cookiePermisos >= 2 ? false : true}
+                onClick={CreateNuevoTerreno}
+              >
                 Crear Nuevo Terreno
               </Button>
             </Col>
             <Col>
-              <Button className="boton" size={"large"} onClick={CreateReporteProyecto}>
+              <Button
+                className="boton"
+                disabled={cookiePermisos >= 1 ? false : true}
+                size={"large"}
+                onClick={CreateReporteProyecto}
+              >
                 Reporte general proyecto
               </Button>
             </Col>
           </Row>
-         
         </>
       )}
       <Row justify={"center"}>
@@ -148,12 +169,24 @@ export default function TerrenosCrear() {
                 <Table>
                   <TableHead>
                     <TableRow className="tabla_encabezado">
-                      <TableCell><p>Proyecto</p></TableCell>
-                      <TableCell><p>Propietario</p></TableCell>
-                      <TableCell><p>Domicilio</p></TableCell>
-                      <TableCell><p>Colonia/Localidad</p></TableCell>
-                      <TableCell><p>Ciudad</p></TableCell>
-                      <TableCell><p>Superficie</p></TableCell>
+                      <TableCell>
+                        <p>Proyecto</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Propietario</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Domicilio</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Colonia/Localidad</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Ciudad</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Superficie</p>
+                      </TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                   </TableHead>
@@ -169,18 +202,25 @@ export default function TerrenosCrear() {
                           {formatPrecio(terreno.superficie_total)}
                         </TableCell>
                         <TableCell>
-                          <Button className="boton"
-                            onClick={() => {
-                              setTerreno(terreno);
-                              setInfoTerreno(true);
-                            }}
-                            size="large"
+                          <Tooltip
+                            title={
+                              "Datos del terreno seleccionado " + terreno.nombre
+                            }
                           >
-                            <FaArrowUpRightFromSquare
-                              className="m-auto"
-                              size={"20px"}
-                            />
-                          </Button>
+                            <Button
+                              className="boton"
+                              onClick={() => {
+                                setTerreno(terreno);
+                                setInfoTerreno(true);
+                              }}
+                              size="large"
+                            >
+                              <FaArrowUpRightFromSquare
+                                className="m-auto"
+                                size={"20px"}
+                              />
+                            </Button>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     ))}

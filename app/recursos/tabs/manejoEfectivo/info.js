@@ -35,6 +35,7 @@ import {
 } from "@/helpers/formatters";
 import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
 import "./styles.css"; // Archivo CSS personalizado
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 const { RangePicker } = DatePicker;
 export default function ManejoEfectivo() {
@@ -71,7 +72,7 @@ export default function ManejoEfectivo() {
 
   const [formValues, setFormValues] = useState({});
   const [formValuesSucursal, setFormValuesSucursal] = useState({});
-
+  const [cookiePermisos, setCookiePermisos] = useState([]);
   const { Option } = Select;
 
   const opcionTipo = [
@@ -104,7 +105,7 @@ export default function ManejoEfectivo() {
       1
     );
     const today = new Date();
-
+    getCookiePermisos("manejo efectivo", setCookiePermisos);
     // Función para formatear la fecha en YYYY-MM-DD
     const formatearFecha = (fecha) => {
       const year = fecha.getFullYear();
@@ -347,6 +348,13 @@ export default function ManejoEfectivo() {
     );
   };
 
+  function disableSelect(status) {
+    if (status === 1 || cookiePermisos < 2) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   return (
     <div style={{ paddingBottom: 30 }}>
       <Form {...layout} name="busqueda">
@@ -404,6 +412,7 @@ export default function ManejoEfectivo() {
                 onClick={() => {
                   setShowModal(true);
                 }}
+                disabled={cookiePermisos >= 2 ? false : true}
                 type="primary"
                 block
               >
@@ -632,7 +641,7 @@ export default function ManejoEfectivo() {
                           <Select
                             value={formValues[`${dato.id}`]}
                             style={{ width: "100%" }}
-                            disabled={dato.status === 1}
+                            disabled={disableSelect(dato.status)}
                             placeholder={dato.tipo_movimiento_id}
                             onChange={(value) =>
                               handleChange(value, `${dato.id}`)

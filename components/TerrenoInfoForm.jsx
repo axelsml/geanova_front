@@ -23,6 +23,7 @@ import AsignarM2 from "@/app/lotes/asignar/page";
 import PlazosCrear from "@/app/plazos/crear/page";
 import TerrenoEdit from "@/app/lotes/editar/page";
 import Modal from "antd/es/modal/Modal";
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function TerrenoInfoForm({
   setTerrenoNuevo,
@@ -43,6 +44,7 @@ export default function TerrenoInfoForm({
   const [lotes, setAsignarLotes] = useState(false);
   const [plazos, setPlazos] = useState(false);
   const [terreno_info, setTerrenoInfo] = useState(null);
+  const [cookiePermisos, setCookiePermisos] = useState([]);
   //   useEffect(() => {
   //      lotesService.getLoteByTerrenoId(
   //        terrenoId,
@@ -53,6 +55,11 @@ export default function TerrenoInfoForm({
   //        onError
   //      );
   //    }, []);
+
+  useEffect(() => {
+    getCookiePermisos("lista de terrenos", setCookiePermisos);
+  }, []);
+
   const empresas = [
     {
       id: 1,
@@ -92,94 +99,112 @@ export default function TerrenoInfoForm({
               <FaArrowCircleLeft className="m-auto" size={"20px"} />
             </Button>
           </Col> */}
-        <Col xs={24} sm={20} md={16} lg={12} xl={8} xxl={4} className="titulo_pantallas">
-                <b> DATOS DEL TERRENO SELECCIONADO</b>
+        <Col
+          xs={24}
+          sm={20}
+          md={16}
+          lg={12}
+          xl={8}
+          xxl={4}
+          className="titulo_pantallas"
+        >
+          <b> DATOS DEL TERRENO SELECCIONADO</b>
         </Col>
       </Row>
 
-      <Row justify={"center"} gutter={[16]} style={{marginTop:"80px"}}>
+      <Row justify={"center"} gutter={[16]} style={{ marginTop: "80px" }}>
         <Col xs={24} sm={12} lg={12} className="formulario_alterno">
-            <Row gutter={[16]} >
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Nombre Proyecto:</b> <a>{terrenoSeleccionado.nombre}</a>
-              </Col>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Nombre Propietario:</b> <a>{terrenoSeleccionado.propietario}</a>
-              </Col>
-            </Row>
-            <Row gutter={[16]} className="renglon_otro_color">
-              <Col xs={24} sm={24} lg={24} className="informacion_col">
-                <b>Domicilio:</b> <a>{terrenoSeleccionado.domicilio}</a>
-              </Col>
-            </Row>
-            <Row gutter={[16]} >
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Colonia/Localidad:</b> <a>{terrenoSeleccionado.colonia}</a>
+          <Row gutter={[16]}>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Nombre Proyecto:</b> <a>{terrenoSeleccionado.nombre}</a>
+            </Col>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Nombre Propietario:</b>{" "}
+              <a>{terrenoSeleccionado.propietario}</a>
+            </Col>
+          </Row>
+          <Row gutter={[16]} className="renglon_otro_color">
+            <Col xs={24} sm={24} lg={24} className="informacion_col">
+              <b>Domicilio:</b> <a>{terrenoSeleccionado.domicilio}</a>
+            </Col>
+          </Row>
+          <Row gutter={[16]}>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Colonia/Localidad:</b> <a>{terrenoSeleccionado.colonia}</a>
+            </Col>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Ciudad:</b> <a>{terrenoSeleccionado.ciudad}</a>
+            </Col>
+          </Row>
+          <Row gutter={[16]} className="renglon_otro_color">
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Cantidad De Lotes:</b>{" "}
+              <a>{terrenoSeleccionado.cantidad_lotes}</a>
+            </Col>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Precio Venta Proyectado de contado: </b>{" "}
+              <a>{terrenoSeleccionado.precio_proyectado_contado}</a>
+            </Col>
+          </Row>
+          <Row gutter={[16]}>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Superficie Total: </b>{" "}
+              <a>{terrenoSeleccionado.superficie_total}</a>
+            </Col>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Area Reserva: </b> <a>{terrenoSeleccionado.area_reserva}</a>
+            </Col>
+          </Row>
 
-              </Col>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Ciudad:</b> <a>{terrenoSeleccionado.ciudad}</a>
-
-              </Col>
-            </Row>
-            <Row gutter={[16]} className="renglon_otro_color">
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Cantidad De Lotes:</b> <a>{terrenoSeleccionado.cantidad_lotes}</a>
-
-              </Col>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                
-                <b>Precio Venta Proyectado de contado: </b> <a>{terrenoSeleccionado.precio_proyectado_contado}</a>
-
-              </Col>
-            </Row>
-            <Row gutter={[16]}>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Superficie Total: </b> <a>{terrenoSeleccionado.superficie_total}</a>
-
-              </Col>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Area Reserva: </b> <a>{terrenoSeleccionado.area_reserva}</a>
-              </Col>
-            </Row>
-
-            <Row gutter={[16]} className="renglon_otro_color">
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Area Vendible: </b> <a>{terrenoSeleccionado.area_vendible}</a>
-
-              </Col>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Area Vialidad: </b> <a>{terrenoSeleccionado.area_vialidad}</a>
-
-              </Col>
-            </Row>
-            <Row gutter={[16]} >
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Precio De Compra: </b> <a>{terrenoSeleccionado.precio_compra}</a>
-
-              </Col>
-              <Col xs={24} sm={12} lg={12} className="informacion_col">
-                <b>Precio M2: </b> <a>{terrenoSeleccionado.precio_m2}</a>
-
-              </Col>
-            </Row>
+          <Row gutter={[16]} className="renglon_otro_color">
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Area Vendible: </b> <a>{terrenoSeleccionado.area_vendible}</a>
+            </Col>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Area Vialidad: </b> <a>{terrenoSeleccionado.area_vialidad}</a>
+            </Col>
+          </Row>
+          <Row gutter={[16]}>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Precio De Compra: </b>{" "}
+              <a>{terrenoSeleccionado.precio_compra}</a>
+            </Col>
+            <Col xs={24} sm={12} lg={12} className="informacion_col">
+              <b>Precio M2: </b> <a>{terrenoSeleccionado.precio_m2}</a>
+            </Col>
+          </Row>
         </Col>
       </Row>
 
       <Row style={{ paddingTop: "30px" }} justify={"center"} gutter={[16]}>
-        <Row gutter={[16]} >
+        <Row gutter={[16]}>
           <Col>
-            <Button className="boton" onClick={verTerrenos} size="large">
+            <Button
+              className="boton"
+              disabled={cookiePermisos >= 2 ? false : true}
+              onClick={verTerrenos}
+              size="large"
+            >
               Superficie
             </Button>
           </Col>
           <Col>
-            <Button className="boton" onClick={verPlazos} size="large">
+            <Button
+              className="boton"
+              disabled={cookiePermisos >= 2 ? false : true}
+              onClick={verPlazos}
+              size="large"
+            >
               Plazos
             </Button>
           </Col>
           <Col>
-            <Button className="boton" onClick={editarTerreno} size="large">
+            <Button
+              className="boton"
+              disabled={cookiePermisos >= 2 ? false : true}
+              onClick={editarTerreno}
+              size="large"
+            >
               Editar
             </Button>
           </Col>

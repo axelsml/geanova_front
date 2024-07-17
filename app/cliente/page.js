@@ -675,6 +675,7 @@ export default function ClientesInfo() {
                   <Col xs={24} sm={12} lg={12} style={{ textAlign: "right" }}>
                     <Button
                       className="boton renglon_otro_color"
+                      disabled={cookiePermisos >= 2 ? false : true}
                       onClick={() => {
                         datosModal();
                         setShowModalEditar(true);
@@ -869,13 +870,19 @@ export default function ClientesInfo() {
       {info_cliente != null && info_lote != null && (
         <Row justify={"center"} className="gap-10">
           <Col>
-            <Button className="boton" size={"large"} onClick={CreateNuevoPago}>
+            <Button
+              className="boton"
+              size={"large"}
+              disabled={cookiePermisos >= 2 ? false : true}
+              onClick={CreateNuevoPago}
+            >
               Nuevo Pago
             </Button>
           </Col>
           <Col>
             <Button
               className="boton"
+              disabled={cookiePermisos > 2 ? false : true}
               size={"large"}
               onClick={() => {
                 borrarAmortizacion();
@@ -887,6 +894,7 @@ export default function ClientesInfo() {
           <Col>
             <Button
               className="boton"
+              disabled={cookiePermisos >= 1 ? false : true}
               size="large"
               onClick={() => {
                 window.open(
@@ -900,6 +908,7 @@ export default function ClientesInfo() {
           <Col>
             <Button
               className="boton"
+              disabled={cookiePermisos >= 1 ? false : true}
               size="large"
               onClick={() => {
                 // terrenoSelected.id,loteSelected.id
@@ -914,6 +923,7 @@ export default function ClientesInfo() {
           <Col>
             <Button
               className="boton"
+              disabled={cookiePermisos >= 1 ? false : true}
               onClick={() => {
                 window.open(
                   // https://api.santamariadelaluz.com
@@ -931,6 +941,7 @@ export default function ClientesInfo() {
               onClick={() => {
                 actualizarPerdonarInteres();
               }}
+              disabled={cookiePermisos >= 2 ? false : true}
               size="large"
             >
               {info_lote.perdonar_interes
@@ -1013,6 +1024,7 @@ export default function ClientesInfo() {
                           <Tooltip title="Haz clic aquí para editar este pago">
                             <Button
                               className="boton"
+                              disabled={cookiePermisos >= 2 ? false : true}
                               key={pago}
                               onClick={() => {
                                 setShow(true);
@@ -1029,6 +1041,7 @@ export default function ClientesInfo() {
                         <Tooltip title="Haz clic aquí para generar recibo de este pago">
                           <Button
                             className="boton"
+                            disabled={cookiePermisos >= 1 ? false : true}
                             key={pago}
                             onClick={() => {
                               window.open(

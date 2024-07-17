@@ -25,6 +25,7 @@ import lotesService from "@/services/lotesService";
 import pagosService from "@/services/pagosService";
 import PagoForm from "./PagoForm";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
+import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function ReporteLotes() {
   const { setIsLoading } = useContext(LoadingContext);
@@ -56,10 +57,13 @@ export default function ReporteLotes() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isHovered, setIsHovered] = useState(false);
 
+  const [cookiePermisos, setCookiePermisos] = useState([]);
+
   const [form] = Form.useForm();
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
+    getCookiePermisos("lotes", setCookiePermisos);
   }, []);
 
   const BuscarInfoLote = () => {
@@ -540,6 +544,7 @@ export default function ReporteLotes() {
                       <TableCell>
                         <Button
                           className="boton"
+                          disabled={cookiePermisos >= 1 ? false : true}
                           size="large"
                           key={item}
                           onClick={() => {
@@ -554,6 +559,7 @@ export default function ReporteLotes() {
                       <TableCell>
                         <Button
                           className="boton"
+                          disabled={cookiePermisos >= 1 ? false : true}
                           size="large"
                           onClick={() => {
                             window.open(
@@ -569,6 +575,7 @@ export default function ReporteLotes() {
                           "blue" && (
                           <Button
                             className="boton"
+                            disabled={cookiePermisos >= 2 ? false : true}
                             size={"large"}
                             onClick={() => {
                               handleModalPago(

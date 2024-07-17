@@ -16,6 +16,7 @@ import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import PropTypes from "prop-types";
 import { toTitleCase } from "@/helpers/formatters";
+import "./styles.css"; // Archivo CSS personalizado
 
 /**
  * Component to edit permissions.
@@ -30,8 +31,6 @@ export default function EditarPermisos({ data, callback, recargarDatos }) {
     data: PropTypes.shape({
       id: PropTypes.number.isRequired,
       nombre: PropTypes.string.isRequired,
-      message: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
       rol_id: PropTypes.number.isRequired,
     }).isRequired,
     callback: PropTypes.func.isRequired,
@@ -46,7 +45,7 @@ export default function EditarPermisos({ data, callback, recargarDatos }) {
   const [datos, setDatos] = useState([]);
   const [niveles, setNiveles] = useState([]);
   const { Option } = Select;
- 
+
   // State para manejar los valores de cada select
   const [formValues, setFormValues] = useState({});
 
@@ -239,6 +238,7 @@ export default function EditarPermisos({ data, callback, recargarDatos }) {
                           <Form.Item>
                             <Select
                               value={formValues[`${dato.pantallaNombre}`]}
+                              className="select-responsive"
                               onChange={(value) =>
                                 handleChange(value, `${dato.pantallaNombre}`)
                               }

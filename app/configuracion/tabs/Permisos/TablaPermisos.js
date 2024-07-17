@@ -13,9 +13,10 @@ import {
   TableFooter,
 } from "@mui/material";
 import configuracionService from "@/services/configuracionService";
-import { FaUserCheck } from "react-icons/fa";
+import { FaDesktop, FaUserCheck, FaUserPlus } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
 import EditarPermisos from "./EditarPermisos";
+import NuevaPantalla from "./NuevaPantalla";
 /**
  * Tabla de Usuarios que muestra la lista de Permisoes con opciones de edición y eliminación.
  * @returns {JSX.Element} - Componente de React que renderiza la tabla de usuarios.
@@ -28,6 +29,8 @@ export default function TablaPermisos() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   //Variables del modal
+  const [showModal, setShowModal] = useState(false);
+
   const [showModalEditar, setShowModalEditar] = useState(false);
   //Variables del componente
   const [datos, setDatos] = useState([]);
@@ -35,6 +38,10 @@ export default function TablaPermisos() {
   const { setIsLoading } = useContext(LoadingContext);
 
   // Handlers para cerrar los modales
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   const handleCloseModalEditar = () => {
     setShowModalEditar(false);
   };
@@ -46,9 +53,9 @@ export default function TablaPermisos() {
   };
 
   // Títulos personalizados para los modales
-  const customTitleEditar = (
+  const customTitleEditar = (texto) => (
     <Row justify={"center"}>
-      <Typography.Title level={3}>Editar Permisos</Typography.Title>
+      <Typography.Title level={3}>{texto}</Typography.Title>
     </Row>
   );
 
@@ -119,21 +126,31 @@ export default function TablaPermisos() {
   return (
     <div style={{ paddingBottom: 30 }}>
       <Row
-        style={{
-          paddingTop: 20,
-          paddingBottom: 20,
-        }}
-        justify="end"
+        style={{ paddingTop: 20, paddingBottom: 20 }}
+        justify="space-between"
       >
-        <Input.Search
-          placeholder="Buscar Permiso"
-          style={{
-            width: "30%",
-          }}
-          enterButton="Buscar"
-          size="large"
-          onSearch={onSearch}
-        />
+        <Col>
+          <Tooltip title="Haz clic aquí para crear una nueva pantalla">
+            <Button
+              className="boton"
+              onClick={() => setShowModal(true)}
+              size="large"
+            >
+              <FaDesktop className="m-auto" size={"20px"} />
+            </Button>
+          </Tooltip>
+        </Col>
+        <Col xs={24} sm={20} md={16} lg={10} xl={8} xxl={6}>
+          <Input.Search
+            placeholder="Buscar Permiso"
+            style={{
+              width: "100%",
+            }}
+            enterButton="Buscar"
+            size="large"
+            onSearch={onSearch}
+          />
+        </Col>
       </Row>
       <Row justify={"center"}>
         <Col xs={24} sm={20} md={16} lg={24} xl={24} xxl={24}>
@@ -195,7 +212,7 @@ export default function TablaPermisos() {
         </Col>
       </Row>
       <Modal
-        title={customTitleEditar}
+        title={customTitleEditar("Editar Permisos")}
         footer={null}
         destroyOnClose
         width={600}
@@ -208,6 +225,16 @@ export default function TablaPermisos() {
           recargarDatos={cargarDatos}
           callback={handleCloseModalEditar}
         ></EditarPermisos>
+      </Modal>
+      <Modal
+        title={customTitleEditar("Administrar Pantallas")}
+        footer={null}
+        width={1000}
+        open={showModal}
+        destroyOnClose
+        onCancel={handleCloseModal}
+      >
+        <NuevaPantalla callback={handleCloseModal} />
       </Modal>
     </div>
   );

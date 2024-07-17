@@ -1,0 +1,16 @@
+.select-responsive {
+  width: 100%;
+  min-width: 150px;
+}
+
+@media (min-width: 768px) {
+  .select-responsive {
+    min-width: 150px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .select-responsive {
+    min-width: 150px;
+  }
+}
