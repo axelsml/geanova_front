@@ -73,34 +73,47 @@ export default function PagoForm({
     setPage(0);
   };
   const onGuardarPago = (values) => {
-    values["fecha"] = formatDate(values.fecha);
-    Swal.fire({
-      title: "Verifique que los datos sean correctos",
-      icon: "info",
-      html: `Cliente: ${cliente.nombre_completo}<br/><br/>Lote: ${
-        lote.lote
-      }<br/><br/>Monto de Pago:  $${formatPrecio(
-        values.monto_pagado
-      )}<br/><br/>Fecha: ${values.fecha}`,
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      showCancelButton: false,
-      allowOutsideClick: false,
-      confirmButtonText: "Aceptar",
-      denyButtonText: `Cancelar`,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        let params = {
-          ...values,
-          usuario_id: usuario_id,
-          solicitud_id: lote.solicitud_id,
-          conciliacion: movimiento_id_conciliar,
-        };
-        debugger;
-        pagosService.createPago({ pago: params }, onPagoGuardado, onError);
-      }
-    });
+    if(usuario_id == 0){
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No se pudo verificar al usuario. Favor de iniciar sesión nuevamente.",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }else{
+      values["fecha"] = formatDate(values.fecha);
+      Swal.fire({
+        title: "Verifique que los datos sean correctos",
+        icon: "info",
+        html: `Cliente: ${cliente.nombre_completo}<br/><br/>Lote: ${
+          lote.lote
+        }<br/><br/>Monto de Pago:  $${formatPrecio(
+          values.monto_pagado
+        )}<br/><br/>Fecha: ${values.fecha}`,
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        confirmButtonText: "Aceptar",
+        denyButtonText: `Cancelar`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          let params = {
+            ...values,
+            usuario_id: usuario_id,
+            solicitud_id: lote.solicitud_id,
+            conciliacion: movimiento_id_conciliar,
+          };
+          debugger;
+          pagosService.createPago({ pago: params }, onPagoGuardado, onError);
+        }
+      });
+    }
+
   };
 
   const handleCancel = async () => {
