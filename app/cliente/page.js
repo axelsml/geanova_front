@@ -997,6 +997,9 @@ export default function ClientesInfo() {
                   <TableCell>
                     <p>Sistema Pago</p>
                   </TableCell>
+                  <TableCell>
+                    <p>Estatus Pago</p>
+                  </TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>
                 </TableRow>
@@ -1019,6 +1022,7 @@ export default function ClientesInfo() {
                         ${formatPrecio(pago.saldo_pendiente)}
                       </TableCell>
                       <TableCell>{pago.sistema_pago}</TableCell>
+                      <TableCell>{pago.estatus_pago}</TableCell>
                       <TableCell>
                         {usuario_id <= 2 && (
                           <Tooltip title="Haz clic aquí para editar este pago">

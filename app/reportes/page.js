@@ -20,25 +20,25 @@ export default function Reportes() {
   return (
     <div>
       <Row justify={"center"} style={{ marginTop: "1%" }}>
-        <Col xs={24} sm={20} md={16} lg={18} xl={20} xxl={20}>
+        <Col xs={20} sm={22} md={22} lg={22} xl={22} xxl={22}>
           <Tabs defaultActiveKey="1">
             <TabPane tab="Lotes" key={"1"}>
               <Row justify={"center"} className="mb-5">
-                <Col xs={24} sm={20} md={16} lg={16} xl={24} xxl={12}>
+                <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
                   <ReporteLotes />
                 </Col>
               </Row>
             </TabPane>
             <TabPane tab="Cobranza" key={"2"}>
               <Row justify={"center"}>
-                <Col xs={24} sm={20} md={16} lg={16} xl={24} xxl={12}>
+                <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
                   <ReporteCobranza />
                 </Col>
               </Row>
             </TabPane>
             <TabPane tab="Estatús Cobranza" key={"3"}>
               <Row justify={"center"} className="mb-5">
-                <Col xs={24} sm={20} md={16} lg={16} xl={24} xxl={12}>
+                <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
                   <ReporteEstatusCobranza />
                 </Col>
               </Row>
