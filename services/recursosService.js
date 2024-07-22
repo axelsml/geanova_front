@@ -506,6 +506,81 @@ class RecursosService {
         }
       });
   }
+
+  getAnticipos(params, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("getAnticipos", { params }, { cancelToken: call.token })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled1: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled1", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled2: ${err}`,
+          });
+        }
+      });
+  }
+
+  cambiarAnticipo(params, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("cambiarAnticipo", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
 }
 
 export default new RecursosService();

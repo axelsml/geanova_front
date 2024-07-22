@@ -12,6 +12,23 @@ import TablaPermisos from "./tabs/Permisos/TablaPermisos";
  * @returns {JSX.Element}: un componente de React que representa la página de configuración.
  */
 export default function Configuracion() {
+  const items = [
+    {
+      key: "1",
+      label: "Usuarios",
+      children: <TablaUsuarios />,
+    },
+    {
+      key: "2",
+      label: "Roles",
+      children: <TablaRoles />,
+    },
+    {
+      key: "3",
+      label: "Permisos",
+      children: <TablaPermisos />,
+    },
+  ];
   return (
     <div>
       <Row justify="center">
@@ -19,17 +36,7 @@ export default function Configuracion() {
           <Row justify="center">
             <Typography.Title level={2}>Configuración</Typography.Title>
           </Row>
-          <Tabs>
-            <Tabs.TabPane tab="Usuarios" key="1">
-              <TablaUsuarios />
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="Roles" key="2">
-              <TablaRoles />
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="Permisos" key="3">
-              <TablaPermisos />
-            </Tabs.TabPane>
-          </Tabs>
+          <Tabs defaultActiveKey="1" items={items}></Tabs>
         </Col>
       </Row>
     </div>

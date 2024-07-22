@@ -46,6 +46,7 @@ import DetalleEstadoCuenta from "./tabs/detalleEstadoCuenta/Info";
 import ManejoEfectivo from "./tabs/manejoEfectivo/info";
 import AgregarCargo from "./tabs/agregarCargo/info";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
+import Anticipos from "./tabs/anticipos/info";
 export default function Recursos() {
   //   useEffect(() => {
 
@@ -418,10 +419,9 @@ export default function Recursos() {
         showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
-      cargarMovimientosEfectivo()
+      cargarMovimientosEfectivo();
       setMovimientosPendientes(data.pendientes);
       setMovimientosRecibidos(data.recibidos);
-
     } else {
       Swal.fire({
         title: "Error",
@@ -1087,13 +1087,16 @@ export default function Recursos() {
                 )}
               </Modal>
             </TabPane>
-            <TabPane tab="Dépositos" key="3">
+            <TabPane tab="Anticipos" key="3">
+              <Anticipos />
+            </TabPane>
+            <TabPane tab="Dépositos" key="4">
               <DetalleEstadoCuenta />
             </TabPane>
-            <TabPane tab="Manejo Efectivo" key="4">
+            <TabPane tab="Manejo Efectivo" key="5">
               <ManejoEfectivo />
             </TabPane>
-            <TabPane tab="Agregar Cargo" key="5">
+            <TabPane tab="Agregar Cargo" key="6">
               <AgregarCargo />
             </TabPane>
           </Tabs>
