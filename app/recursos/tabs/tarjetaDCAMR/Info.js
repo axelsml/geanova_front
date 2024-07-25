@@ -8,11 +8,13 @@ import {
   DatePicker,
   Form,
   Checkbox,
+  message as MessageAntd,
   Select,
   Card,
   Modal,
   Alert,
   Input,
+  Upload,
 } from "antd";
 import {
   Paper,
@@ -26,21 +28,23 @@ import {
   TableFooter,
 } from "@mui/material";
 import { LoadingContext } from "@/contexts/loading";
-import terrenosService from "@/services/terrenosService";
+import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
+import { UploadOutlined } from "@ant-design/icons";
 import recursosService from "@/services/recursosService";
 import {
-  fechaFormateada2,
   formatPrecio,
+  fechaFormateada,
   toTitleCase,
 } from "@/helpers/formatters";
 import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
+import AdministrarTarjetas from "./AdministrarTarjetas";
 import "./styles.css"; // Archivo CSS personalizado
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 const { RangePicker } = DatePicker;
-export default function DetalleEstadoCuenta() {
+export default function TarjetaDCAMR() {
   //Variables del funcionamiento de la Tabla
   const [orderBy] = useState("fechaOperacion");
   const [order] = useState("desc");
@@ -55,20 +59,21 @@ export default function DetalleEstadoCuenta() {
 
   //Variables del modal
   const [showModal, setShowModal] = useState(false);
+  const [showModalTarjetas, setShowModalTarjetas] = useState(false);
 
-  const [tablaAlonso, setTablaAlonso] = useState([]);
+  const [tabla, setTabla] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
   const { setIsLoading } = useContext(LoadingContext);
 
   const [range, setRange] = useState([]);
   const [movimientos, setMovimientos] = useState(false);
-  const [cargarCuenta, setCargarCuenta] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [tipoSelected, setTipoSelected] = useState(null);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [datos, setDatos] = useState([]);
+  const [datosTarjetas, setDatosTarjetas] = useState([]);
   const [otroAbonos, setOtroAbonos] = useState();
   const [otroCargo, setOtroCargo] = useState();
   const [resumenConciliados, setResumenConciliados] = useState();
@@ -79,12 +84,8 @@ export default function DetalleEstadoCuenta() {
   const [formValuesSucursal, setFormValuesSucursal] = useState({});
   const [cookiePermisos, setCookiePermisos] = useState([]);
   const { Option } = Select;
+  const [excelData, setExcelData] = useState([]);
 
-  const opcionTipo = [
-    { index: 0, id: 0, nombre: "Todos" },
-    { index: 1, id: 1, nombre: "Conciliado" },
-    { index: 2, id: 2, nombre: "No conciliado" },
-  ];
   const onError = (e) => {
     setIsLoading(false);
     console.log(e);
@@ -101,7 +102,9 @@ export default function DetalleEstadoCuenta() {
   const handleCloseModal = () => {
     setShowModal(false);
   };
-
+  const handleCloseModalTarjetas = () => {
+    setShowModalTarjetas(false);
+  };
   useEffect(() => {
     // Obtener la fecha actual
     const startOfMonth = new Date(
@@ -122,12 +125,20 @@ export default function DetalleEstadoCuenta() {
     const fechaActual = formatearFecha(today);
     const fechaAtras = formatearFecha(startOfMonth);
     setRange([fechaAtras, fechaActual]);
-    terrenosService.getTerrenos(setTerrenos, onError);
-
-    recursosService.showTipoMovimiento(setDatos, onError).then(() => {
+    setearMovimientos();
+    cargarTarjetas();
+  }, []);
+  function setearMovimientos(params) {
+    recursosService.showTipoMovimientoTarjeta(setDatos, onError).then(() => {
       setIsLoading(false);
     });
-  }, []);
+  }
+  function cargarTarjetas() {
+    console.log("cargar tarjetas");
+    recursosService.showTarjeta(setDatosTarjetas, onError).then(() => {
+      setIsLoading(false);
+    });
+  }
 
   const onRangeChange = (dates, dateStrings) => {
     setRange(dateStrings);
@@ -229,23 +240,107 @@ export default function DetalleEstadoCuenta() {
       fechaInicial: range[0],
       fechaFinal: range[1],
       movimientos: movimientos,
-      cargarCuenta: cargarCuenta,
-      tipo: tipoSelected,
-      proyecto: terrenoSelected,
+      tarjeta: tipoSelected,
     };
+    console.log("form", form);
     recursosService
-      .getDepositos(
-        form,
-        setMessage,
-        onTablaAlonsoSet,
-        setTablaAlonso,
-        onTablaSucursalSet,
-        setTablaSucursal,
-        onError
-      )
+      .getMovimientosTarjetas(form, Consultado, onError)
       .then(() => {
         setIsLoading(false);
       });
+  }
+
+  function Consultado(response) {
+    let { type, message, movimientos, resumenTipo } = response;
+    let totalSumStatus1;
+    let totalSumStatus2;
+    let tiposMovimientos = resumenTipo;
+    let totalAbonos;
+    let totalCargo;
+    let initialValues = {};
+
+    console.log("consultado", response);
+    setTabla(movimientos);
+    movimientos.forEach((item) => {
+      initialValues[`${item.id}`] = item.tipo_id;
+    });
+    setFormValues(initialValues);
+    setDatos(tiposMovimientos);
+
+    setMessage({
+      type: type,
+      message: message,
+    });
+
+    if (tiposMovimientos !== null) {
+      totalSumStatus1 = sumValuesByStatus(tiposMovimientos, 1);
+      totalSumStatus2 = sumValuesByStatus(tiposMovimientos, 2);
+      totalAbonos = parseFloat(totalSumStatus1);
+      totalCargo = parseFloat(totalSumStatus2);
+      setTotalAbono(formatPrecio(totalAbonos));
+      setTotalCargo(formatPrecio(totalCargo));
+    }
+  }
+
+  function onConsulta(response) {
+    let { type, message, movimientos } = response;
+
+    let totalSumStatus1;
+    let totalSumStatus2;
+    let tiposMovimientos = resumenTotal;
+    let totalAbonos;
+    let totalCargo;
+    let initialValues = {};
+    console.log("response:", response);
+    if (infoAnticipos !== null) {
+      setSolicitudes(infoAnticipos);
+    } else {
+      setSolicitudes([]);
+    }
+    if (infoCobranza !== null) {
+      setCobranza(infoCobranza);
+      infoCobranza.forEach((item) => {
+        initialValues[`${item.id}`] = item.tipo_movimiento_id;
+      });
+      setFormValues(initialValues);
+      setDatos(tiposMovimientos);
+    } else {
+      setCobranza([]);
+    }
+    // Inicializar formValues con los valores obtenidos
+    if (tipoSelected === 2) {
+      setCobranzaResumen(0);
+      setResumenAnticipo(parseFloat(sumaAnticipo));
+      setearMovimientos();
+    } else {
+      setCobranzaResumen(parseFloat(sumaCobranza));
+      setResumenAnticipo(parseFloat(sumaAnticipo));
+    }
+
+    setMessage({
+      type: type,
+      message: message,
+    });
+
+    if (tiposMovimientos !== null) {
+      totalSumStatus1 = sumValuesByStatus(tiposMovimientos, 1);
+      totalSumStatus2 = sumValuesByStatus(tiposMovimientos, 2);
+
+      if (tipoSelected === 0 || tipoSelected === null || tipoSelected === "0") {
+        totalAbonos =
+          Math.abs(totalSumStatus1) +
+          parseFloat(sumaAnticipo) +
+          parseFloat(sumaCobranza);
+      } else {
+        totalAbonos = Math.abs(totalSumStatus1) + parseFloat(sumaCobranza);
+      }
+      totalCargo = totalSumStatus2;
+    } else {
+      totalAbonos = parseFloat(sumaAnticipo);
+      totalCargo = 0;
+    }
+    setTotalAbono(formatPrecio(totalAbonos));
+    setTotalCargo(formatPrecio(totalCargo));
   }
 
   function onTablaAlonsoSet(
@@ -294,12 +389,13 @@ export default function DetalleEstadoCuenta() {
       id: name,
       tipo_movimiento_id: value,
     };
-    recursosService.updateTipoMovimiento(onBuscar, params, onError);
 
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: value,
     }));
+
+    recursosService.updateTipoMovimientoTarjeta(onBuscar, params, onError);
   };
 
   const handleChangeSucursal = (value, name) => {
@@ -307,7 +403,6 @@ export default function DetalleEstadoCuenta() {
       id: name,
       tipo_movimiento_id: value,
     };
-    recursosService.updateTipoMovimiento(onBuscar, params, onError);
 
     setFormValuesSucursal((prevValues) => ({
       ...prevValues,
@@ -315,16 +410,10 @@ export default function DetalleEstadoCuenta() {
     }));
   };
 
-  function colorDinamicoRow(codigo_color, status) {
-    if (status === 1) {
-      return {
-        backgroundColor: "#438DCC",
-      };
-    } else {
-      return {
-        backgroundColor: codigo_color,
-      };
-    }
+  function colorDinamicoRow(codigo_color) {
+    return {
+      backgroundColor: codigo_color,
+    };
   }
 
   function colorDinamicoText(status) {
@@ -340,21 +429,14 @@ export default function DetalleEstadoCuenta() {
   }
 
   // Títulos personalizados para los modales
-  const customTitle = (
-    <Row justify={"center"}>
-      <Typography.Title level={3}>
-        Administrar Tipos de Movimientos
-      </Typography.Title>
-    </Row>
-  );
-  // Títulos personalizados para los cards
-  const customTitleCard = (title) => {
+  const customTitle = (title, level) => {
     return (
       <Row justify={"center"}>
-        <Typography.Title level={4}>{title}</Typography.Title>
+        <Typography.Title level={level}>{title}</Typography.Title>
       </Row>
     );
   };
+  // Títulos personalizados para los cards
 
   function disableSelect(status) {
     if (status === 1 || cookiePermisos < 2) {
@@ -364,6 +446,96 @@ export default function DetalleEstadoCuenta() {
     }
   }
 
+  const handleUpload = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const dataArr = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      setExcelData(dataArr);
+      MessageAntd.success(`${file.name} Adjuntado`);
+      guardarEstadoCuenta(dataArr);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  function guardarEstadoCuenta(excel_data) {
+    const columns_aux =
+      excel_data.length > 0
+        ? excel_data[0].map((header, index) => ({
+            title: header,
+            dataIndex: index.toString(),
+          }))
+        : [];
+
+    //setIsLoading(true);
+    var datos = excel_data.slice(1);
+    var datos_formateados = [];
+    console.log("columns_aux: ", columns_aux);
+
+    for (let i = 0; i < datos.length; i++) {
+      console.log("datos[i][0]: ", datos[i][1]);
+      // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
+      var formattedDate = "";
+      if (typeof datos[i][0] === "number") {
+        let fecha = excelDateToJSDate(datos[i][0]);
+        formattedDate = fecha.toISOString().split("T")[0];
+        formattedDate = convertDateFormat(formattedDate);
+      } else {
+        formattedDate = formatDateString(datos[i][0]);
+      }
+      var info = {
+        tarjeta: datos[i][4],
+        fecha_operacion: formattedDate,
+        concepto: datos[i][1],
+        abono: parseFloat(datos[i][2]),
+        cargo: parseFloat(datos[i][3]),
+      };
+
+      datos_formateados.push(info);
+    }
+    console.log("datos: ", datos);
+    console.log("datos_formateados: ", datos_formateados);
+    var params = {
+      movimientos: datos_formateados,
+    };
+    recursosService.guardarMovimientosTarjetas(
+      params,
+      onMovimientosGuardados,
+      onError
+    );
+  }
+
+  async function onMovimientosGuardados(data) {
+    console.log("data: ", data);
+    setIsLoading(false);
+    Swal.fire({
+      title: "Info",
+      icon: "info",
+      text: "Cantidad De Registros Nuevos Guardados: " + data.datos,
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: false,
+      confirmButtonText: "Aceptar",
+    });
+  }
+  function excelDateToJSDate(serial) {
+    const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    const timezoneOffset = date.getTimezoneOffset() * 60000; // Compensa el desfase de la zona horaria
+    return new Date(date.getTime() + timezoneOffset);
+  }
+  function convertDateFormat(dateString) {
+    const [year, day, month] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  }
+  function formatDateString(dateString) {
+    const [day, month, year] = dateString.split("/").map(Number);
+    const date = new Date(year, month - 1, day); // Meses en JavaScript van de 0 a 11
+    const formattedDate = date.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+    return formattedDate;
+  }
   return (
     <div style={{ paddingBottom: 30 }}>
       <Form {...layout}>
@@ -387,7 +559,7 @@ export default function DetalleEstadoCuenta() {
           </Col>
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
             <Form.Item
-              label="Tipo"
+              label="Tarjeta"
               name="statuspago_id"
               style={{ width: "100%" }}
             >
@@ -400,41 +572,17 @@ export default function DetalleEstadoCuenta() {
                 }}
                 style={{ width: "100%" }}
               >
-                {opcionTipo.map((item) => (
-                  <Option key={item.id} value={item.id} label={item.nombre}>
-                    {item?.nombre}
+                <Option value={"0"} label={"Todos"}>
+                  Todos
+                </Option>
+                {datosTarjetas.map((item) => (
+                  <Option key={item.id} value={item.id} label={item.alias}>
+                    {item?.alias}
                   </Option>
                 ))}
               </Select>
             </Form.Item>
           </Col>
-          {tipoSelected === 1 && (
-            <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-              <Form.Item
-                label="Proyecto"
-                name="terreno"
-                style={{ width: "100%" }}
-              >
-                <Select
-                  placeholder="Todos"
-                  optionLabelProp="label"
-                  onChange={(data) => {
-                    setTerrenoSelected(data);
-                  }}
-                  style={{ width: "100%" }}
-                >
-                  <Option value={3} label="Todos">
-                    Todos
-                  </Option>
-                  {terrenos?.map((item) => (
-                    <Option key={item.id} value={item.id} label={item.nombre}>
-                      {item?.nombre}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          )}
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
             <Form.Item name="movimientos" label="Seleccion opcional">
               <Checkbox
@@ -467,26 +615,19 @@ export default function DetalleEstadoCuenta() {
             </div>
           </Col>
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Form.Item name="cuentas">
-              <Select
-                placeholder="Todas las cuentas"
-                optionLabelProp="label"
-                onChange={(data) => {
-                  setCargarCuenta(data);
+            <div>
+              <Button
+                className="boton"
+                onClick={() => {
+                  setShowModalTarjetas(true);
                 }}
-                style={{ width: "100%" }}
+                disabled={cookiePermisos >= 2 ? false : true}
+                type="primary"
+                block
               >
-                <Option value={0} label="Todas">
-                  Todos
-                </Option>
-                <Option value={1} label="Cuenta Alonso Morales">
-                  Cuenta Alonso Morales
-                </Option>
-                <Option value={2} label="Cuenta Sucursal Uno">
-                  Cuenta Sucursal Uno
-                </Option>
-              </Select>
-            </Form.Item>
+                Administrar Tarjetas
+              </Button>
+            </div>
           </Col>
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
             <div>
@@ -503,168 +644,158 @@ export default function DetalleEstadoCuenta() {
             </div>
           </Col>
         </Row>
-        {Object.keys(message).length > 0 && errorMessage.length == 0 && (
-          <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
-            <Alert
-              style={{ width: "100%" }}
-              message={message.type}
-              description={message.message}
-              type="success"
-              showIcon
-              closable
-            />
-          </Row>
-        )}
-        {errorMessage.length > 0 && (
-          <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
-            <Alert
-              style={{ width: "100%" }}
-              message={"Error"}
-              description={errorMessage}
-              showIcon
-              type="error"
-              closable
-            />
-          </Row>
-        )}
-        <Row justify="space-evenly" gutter={16}>
-          <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
-            <Card
-              className="custom-card"
-              title={customTitleCard("Abonos")}
-              hoverable
-              bordered={false}
-            >
-              <Form {...layoutResumen} name="basicForm">
-                <Form.Item name={`conciliados`} label={"Conciliados"}>
-                  <Input
-                    placeholder={
-                      `$ ` +
-                      (resumenConciliados
-                        ? formatPrecio(resumenConciliados)
-                        : 0)
-                    }
-                    readOnly
-                    value={
-                      `$ ` +
-                      (resumenConciliados
-                        ? formatPrecio(resumenConciliados)
-                        : 0)
-                    }
-                  />
-                  <p></p>
-                </Form.Item>
-                {datos.map((dato, index) => {
-                  if (dato.tipo_ingreso === 1) {
-                    return (
-                      <Form.Item
-                        key={dato.id}
-                        name={`movimiento_${index}`}
-                        label={toTitleCase(dato.descripcion)}
-                      >
-                        <Input
-                          placeholder={
-                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                          }
-                          readOnly
-                          value={
-                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                          }
-                        />
-                        <p></p>
-                      </Form.Item>
-                    );
-                  }
-                })}
 
-                <Form.Item name={`otrosAbonos`} label={"Otros"}>
-                  <Input
-                    placeholder={
-                      `$ ` + (otroAbonos ? formatPrecio(otroAbonos) : 0)
-                    }
-                    readOnly
-                    value={`$ ` + (otroAbonos ? formatPrecio(otroAbonos) : 0)}
-                  />
-                  <p></p>
-                </Form.Item>
-                <Form.Item name={`totalAbonos`} label={"Total"}>
-                  <Input
-                    placeholder={
-                      `$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)
-                    }
-                    readOnly
-                    value={`$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)}
-                  />
-                  <p></p>
-                </Form.Item>
-              </Form>
-            </Card>
+        <Row
+          justify="center"
+          gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
+          className="mb-5"
+        >
+          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+            <div>
+              <Upload
+                beforeUpload={(file) => {
+                  handleUpload(file);
+                  return false;
+                }}
+                showUploadList={false}
+              >
+                <Button
+                  block
+                  className="boton"
+                  icon={<UploadOutlined />}
+                  disabled={cookiePermisos >= 2 ? false : true}
+                >
+                  Adjuntar Archivo
+                </Button>
+              </Upload>
+            </div>
           </Col>
-
-          <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
-            <Card
-              className="custom-card"
-              title={customTitleCard("Cargos")}
-              hoverable
-              bordered={false}
-            >
-              <Form {...layoutResumen} name="basic">
-                {datos.map((dato, index) => {
-                  if (dato.tipo_ingreso === 2) {
-                    return (
-                      <Form.Item
-                        key={dato.id}
-                        name={`movimiento_${index}`}
-                        label={toTitleCase(dato.descripcion)}
-                      >
-                        <Input
-                          placeholder={
-                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                          }
-                          readOnly
-                          value={
-                            `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                          }
-                        />
-                        <p></p>
-                      </Form.Item>
-                    );
-                  }
-                })}
-                <Form.Item name={`otrosCargo`} label={"Otros"}>
-                  <Input
-                    placeholder={
-                      `$ ` + (otroCargo ? formatPrecio(otroCargo) : 0)
-                    }
-                    readOnly
-                    value={`$ ` + (otroCargo ? formatPrecio(otroCargo) : 0)}
-                  />
-                  <p></p>
-                </Form.Item>
-                <Form.Item name={`totalCargos`} label={"Total"}>
-                  <Input
-                    placeholder={
-                      `$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)
-                    }
-                    readOnly
-                    value={`$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)}
-                  />
-                  <p></p>
-                </Form.Item>
-              </Form>
-            </Card>
-          </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}></Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}></Col>
         </Row>
       </Form>
+
+      {Object.keys(message).length > 0 && errorMessage.length == 0 && (
+        <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
+          <Alert
+            style={{ width: "100%" }}
+            message={message.type}
+            description={message.message}
+            type="success"
+            showIcon
+            closable
+          />
+        </Row>
+      )}
+      {errorMessage.length > 0 && (
+        <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
+          <Alert
+            style={{ width: "100%" }}
+            message={"Error"}
+            description={errorMessage}
+            showIcon
+            type="error"
+            closable
+          />
+        </Row>
+      )}
+      <Row justify="space-evenly" gutter={16}>
+        <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
+          <Card
+            className="custom-card"
+            title={customTitle("Abonos", 4)}
+            hoverable
+            bordered={false}
+          >
+            <Form {...layoutResumen} name="basicForm">
+              {datos.map((dato, index) => {
+                if (dato.tipo_ingreso === 1) {
+                  return (
+                    <Form.Item
+                      key={dato.id}
+                      name={`movimiento_${index}`}
+                      label={toTitleCase(dato.descripcion)}
+                    >
+                      <Input
+                        placeholder={
+                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                        }
+                        readOnly
+                        value={
+                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                        }
+                      />
+                      <p></p>
+                    </Form.Item>
+                  );
+                }
+              })}
+
+              <Form.Item name={`totalAbonos`} label={"Total"}>
+                <Input
+                  placeholder={
+                    `$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)
+                  }
+                  readOnly
+                  value={`$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)}
+                />
+                <p></p>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
+          <Card
+            className="custom-card"
+            title={customTitle("Cargos", 4)}
+            hoverable
+            bordered={false}
+          >
+            <Form {...layoutResumen} name="basic">
+              {datos.map((dato, index) => {
+                if (dato.tipo_ingreso === 2) {
+                  return (
+                    <Form.Item
+                      key={dato.id}
+                      name={`movimiento_${index}`}
+                      label={toTitleCase(dato.descripcion)}
+                    >
+                      <Input
+                        placeholder={
+                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                        }
+                        readOnly
+                        value={
+                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
+                        }
+                      />
+                      <p></p>
+                    </Form.Item>
+                  );
+                }
+              })}
+              <Form.Item name={`totalCargos`} label={"Total"}>
+                <Input
+                  placeholder={
+                    `$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)
+                  }
+                  readOnly
+                  value={`$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)}
+                />
+                <p></p>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
 
       <Row
         gutter={[8, 8]}
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Typography.Title level={3}>
-          Estado de cuenta Alonso Morales
-        </Typography.Title>
+        <Typography.Title level={3}>Movimientos</Typography.Title>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">
@@ -675,6 +806,9 @@ export default function DetalleEstadoCuenta() {
                     <p>Fecha</p>
                   </TableCell>
                   <TableCell>
+                    <p>Tarjeta</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Concepto</p>
                   </TableCell>
                   <TableCell>
@@ -683,36 +817,29 @@ export default function DetalleEstadoCuenta() {
                   <TableCell>
                     <p>Abonos</p>
                   </TableCell>
-                  <TableCell>
-                    <p>Saldos</p>
-                  </TableCell>
                   <TableCell style={{ width: 180 }}>
                     <p>Tipo de movimiento</p>
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stableSort(tablaAlonso, getComparator(order, orderBy))
+                {stableSort(tabla, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((dato, index) => (
                     <TableRow
                       key={dato.id}
-                      style={colorDinamicoRow(dato.codigo_color, dato.status)}
+                      style={colorDinamicoRow(dato.codigo_color)}
                     >
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        {fechaFormateada2(dato.fechaOperacion)}
+                      <TableCell>
+                        {fechaFormateada(dato.fecha_operacion)}
                       </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        {dato.concepto}
-                      </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
+                      <TableCell>{dato.tarjeta}</TableCell>
+                      <TableCell>{dato.concepto}</TableCell>
+                      <TableCell>
                         ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
                       </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
+                      <TableCell>
                         ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
-                      </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        ${dato.saldo ? formatPrecio(dato.saldo) : "0.00"}
                       </TableCell>
                       <TableCell>
                         <Form.Item>
@@ -720,7 +847,7 @@ export default function DetalleEstadoCuenta() {
                             value={formValues[`${dato.id}`]}
                             style={{ width: "100%" }}
                             disabled={disableSelect(dato.status)}
-                            placeholder={dato.tipo_movimiento_id}
+                            placeholder={dato.tipo_id}
                             onChange={(value) =>
                               handleChange(value, `${dato.id}`)
                             }
@@ -740,7 +867,7 @@ export default function DetalleEstadoCuenta() {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={tablaAlonso.length}
+                    count={tabla.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -753,107 +880,9 @@ export default function DetalleEstadoCuenta() {
           </TableContainer>
         </Col>
       </Row>
-      <Row
-        gutter={[8, 8]}
-        justify="center"
-        style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
-      >
-        <Typography.Title level={3}>
-          Estado de cuenta sucursal uno de SFPSM #0496201440
-        </Typography.Title>
 
-        <Col xs={24}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Fecha</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Concepto</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Cargos</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Abonos</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Saldos</p>
-                  </TableCell>
-                  <TableCell style={{ width: 180 }}>
-                    <p>Tipo de movimiento</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort2(tablaSucursal, getComparator2(order2, orderBy2))
-                  .slice(
-                    page2 * rowsPerPage2,
-                    page2 * rowsPerPage2 + rowsPerPage2
-                  )
-                  .map((dato, index) => (
-                    <TableRow
-                      key={dato.id}
-                      style={colorDinamicoRow(dato.codigo_color, dato.status)}
-                    >
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        {fechaFormateada2(dato.fechaOperacion)}
-                      </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        {dato.concepto}
-                      </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
-                      </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
-                      </TableCell>
-                      <TableCell sx={colorDinamicoText(dato.status)}>
-                        ${dato.saldo ? formatPrecio(dato.saldo) : "0.00"}
-                      </TableCell>
-                      <TableCell>
-                        <Form.Item>
-                          <Select
-                            value={formValuesSucursal[`${dato.id}`]}
-                            style={{ width: "100%" }}
-                            disabled={disableSelect(dato.status)}
-                            placeholder={dato.tipo_movimiento_id}
-                            onChange={(value) =>
-                              handleChangeSucursal(value, `${dato.id}`)
-                            }
-                          >
-                            {datos.map((option) => (
-                              <Option key={option.id} value={option.id}>
-                                {option.descripcion}
-                              </Option>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={tablaSucursal.length}
-                    rowsPerPage={rowsPerPage2}
-                    page={page2}
-                    onPageChange={handleChangePage2}
-                    onRowsPerPageChange={handleChangeRowsPerPage2}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Col>
-      </Row>
       <Modal
-        title={customTitle}
+        title={customTitle("Administrar Tipos de Movimientos", 3)}
         footer={null}
         width={600}
         open={showModal}
@@ -861,6 +890,18 @@ export default function DetalleEstadoCuenta() {
       >
         {/* Crud de tipo movimientos */}
         <AdministrarTipoMovimiento></AdministrarTipoMovimiento>
+      </Modal>
+      <Modal
+        title={customTitle("Administrar Tarjetas", 3)}
+        footer={null}
+        width={600}
+        open={showModalTarjetas}
+        onCancel={() => handleCloseModalTarjetas()}
+      >
+        {/* Crud de tipo movimientos */}
+        <AdministrarTarjetas
+          cargarTarjetas={cargarTarjetas}
+        ></AdministrarTarjetas>
       </Modal>
     </div>
   );

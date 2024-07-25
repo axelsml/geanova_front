@@ -352,9 +352,7 @@ export default function Anticipos() {
                           }}
                           size="large"
                         >
-                          {dato.sistema_pago_id === 1
-                            ? "Recibir"
-                            : "Consolidar"}
+                          {dato.sistema_pago_id === 1 ? "Recibir" : "Conciliar"}
                         </Button>
                       </TableCell>
                     </TableRow>

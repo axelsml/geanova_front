@@ -47,6 +47,7 @@ import ManejoEfectivo from "./tabs/manejoEfectivo/info";
 import AgregarCargo from "./tabs/agregarCargo/info";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 import Anticipos from "./tabs/anticipos/info";
+import TarjetaDCAMR from "./tabs/tarjetaDCAMR/Info";
 export default function Recursos() {
   //   useEffect(() => {
 
@@ -342,7 +343,11 @@ export default function Recursos() {
           movimiento_id: movimiento.id,
           usuario_recibio: usuario_id,
         };
-        pagosService.cambiarRecibido(params, onMovimientoRecibido, onError);
+        pagosService
+          .cambiarRecibido(params, onMovimientoRecibido, onError)
+          .then(() => {
+            cargarMovimientosEfectivo();
+          });
       }
     });
   }
@@ -1098,6 +1103,9 @@ export default function Recursos() {
             </TabPane>
             <TabPane tab="Agregar Cargo" key="6">
               <AgregarCargo />
+            </TabPane>
+            <TabPane tab="Tarjeta de Crédito AMR" key="7">
+              <TarjetaDCAMR />
             </TabPane>
           </Tabs>
         </Col>

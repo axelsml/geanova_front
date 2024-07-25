@@ -581,6 +581,394 @@ class RecursosService {
         }
       });
   }
+
+  guardarMovimientosTarjetas(params, callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("guardarMovimientosTarjetas", params, {
+        cancelToken: call.token,
+      })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
+  agregarTarjeta(params, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("agregarTarjeta", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+  showTarjeta(callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("showTarjetas", { cancelToken: call.token })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+  showTarjetaSearch(descripcion, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`showTarjetas/${descripcion}`, {
+        cancelToken: call.token,
+      })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+  updateTarjeta(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("updateTarjeta", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  showTipoMovimientoTarjeta(callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("showTipoMovimientoTarjeta", { cancelToken: call.token })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+  showTipoMovimientoTarjetaSearch(descripcion, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get(`showTipoMovimientoTarjeta/${descripcion}`, {
+        cancelToken: call.token,
+      })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  createTipoMovimientoTarjeta(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("createTipoMovimientoTarjeta", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+  destroyTipoMovimientoTarjeta(callback, id, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .delete(`destroyTipoMovimientoTarjeta/${id}`, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+  getMovimientosTarjetas(params, callback, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("getMovimientosTarjetas", { params }, { cancelToken: call.token })
+      .then((response) => {
+        if (response.data.type === "error") {
+          error(response.data);
+          return;
+        }
+
+        return Promise.all([callback(response.data)]);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled1: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled1", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled2: ${err}`,
+          });
+        }
+      });
+  }
+
+  updateTipoMovimientoTarjeta(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("updateTipoMovimientoTarjeta", params, { cancelToken: call.token })
+      .then((response) => {
+        console.log("response; ", response);
+        return callback();
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
 }
 
 export default new RecursosService();

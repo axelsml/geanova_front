@@ -1,0 +1,7 @@
+.custom-card:hover {
+  cursor: default; /* Cambia el cursor a default en hover */
+}
+
+div.ant-upload {
+  width: 100%;
+}
