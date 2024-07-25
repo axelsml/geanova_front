@@ -81,6 +81,9 @@ export default function ReporteEstatusCobranza() {
       fecha: fecha,
       terreno_id: terrenoSelected,
       status_id: estatus,
+      semanal: semanal,
+      quincenal: quincenal,
+      mensual: mensual,
     };
     pagosService.getReporteEstatusCobranza(params, onReporte, onError);
   };

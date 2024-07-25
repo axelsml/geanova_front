@@ -73,7 +73,7 @@ export default function PagoForm({
     setPage(0);
   };
   const onGuardarPago = (values) => {
-    if(usuario_id == 0){
+    if (usuario_id == 0 || usuario_id == null) {
       Swal.fire({
         title: "Error",
         icon: "error",
@@ -83,7 +83,7 @@ export default function PagoForm({
         showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
-    }else{
+    } else {
       values["fecha"] = formatDate(values.fecha);
       Swal.fire({
         title: "Verifique que los datos sean correctos",
