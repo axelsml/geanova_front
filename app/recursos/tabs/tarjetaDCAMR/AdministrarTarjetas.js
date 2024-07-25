@@ -44,7 +44,7 @@ export default function AdministrarTarjetas({ cargarTarjetas }) {
   const [orderBy] = useState("created_at");
   const [order] = useState("asc");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [form] = Form.useForm();
 
@@ -63,11 +63,11 @@ export default function AdministrarTarjetas({ cargarTarjetas }) {
     setShowModal(false);
   };
 
-  // Handler para eliminar un rol
-  async function handleDesactivarTarjeta(id, nombre) {
+  // Handler para eliminar una tarjeta
+  async function handleEliminarTarjeta(id, nombre) {
     await Swal.fire({
-      title: "Desactivar esta tarjeta?",
-      text: `¿Estás seguro de desactivar '${nombre}' ? `,
+      title: "Eliminar esta tarjeta?",
+      text: `¿Estás seguro de eliminar '${nombre}' ? `,
       icon: "question",
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
@@ -75,12 +75,11 @@ export default function AdministrarTarjetas({ cargarTarjetas }) {
       confirmButtonText: "Aceptar",
     }).then((result) => {
       if (result.isConfirmed) {
-        recursosService
-          .updateTarjeta(onTarjetaActualizada, { id: id }, onError)
-          .then(() => {
-            cargarTarjetas();
-            cargarDatos();
-          });
+        recursosService.updateTarjeta(
+          onTarjetaActualizada,
+          { id: id },
+          onError
+        );
       }
     });
   }
@@ -90,8 +89,10 @@ export default function AdministrarTarjetas({ cargarTarjetas }) {
     console.log("data: ", data);
     setIsLoading(false);
     if (data.type == "success") {
+      cargarTarjetas();
+      cargarDatos();
       Swal.fire({
-        title: "Tarjeta desactivada con éxito",
+        title: "Tarjeta eliminada con éxito",
         icon: "success",
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
@@ -269,9 +270,6 @@ export default function AdministrarTarjetas({ cargarTarjetas }) {
                   <TableCell>
                     <p>Tarjeta</p>
                   </TableCell>
-                  <TableCell>
-                    <p>Estatus</p>
-                  </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               </TableHead>
@@ -284,15 +282,12 @@ export default function AdministrarTarjetas({ cargarTarjetas }) {
                       <TableCell>{dato.alias}</TableCell>
                       <TableCell>{dato.tarjeta}</TableCell>
                       <TableCell>
-                        {dato.active ? "Activa" : "Inactiva"}
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="Haz clic aquí para cambiar el estatus de esta tarjeta">
+                        <Tooltip title="Haz clic aquí para eliminar esta tarjeta">
                           <Button
                             className="boton-eliminar"
                             key={dato.id}
                             onClick={() => {
-                              handleDesactivarTarjeta(dato.id, dato.alias);
+                              handleEliminarTarjeta(dato.id, dato.alias);
                             }}
                             size="large"
                           >
