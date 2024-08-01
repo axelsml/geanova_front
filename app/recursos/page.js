@@ -880,6 +880,9 @@ export default function Recursos() {
                                 <p>Fecha Amortizacion</p>
                               </TableCell>
                               <TableCell>
+                                <p>Referencia de Transferencia</p>
+                              </TableCell>
+                              <TableCell>
                                 <p>Ingreso</p>
                               </TableCell>
                               <TableCell>
@@ -911,6 +914,9 @@ export default function Recursos() {
                                   </TableCell>
                                   <TableCell>
                                     {pago.fecha_amortizacion}
+                                  </TableCell>
+                                  <TableCell>
+                                    {pago.referencia_transferencia}
                                   </TableCell>
                                   <TableCell>{pago.usuario_ingreso}</TableCell>
                                   <TableCell>

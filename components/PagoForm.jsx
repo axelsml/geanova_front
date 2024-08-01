@@ -53,6 +53,7 @@ export default function PagoForm({
 
   const [valoresIniciales, setValoresIniciales] = useState({
     monto_pago: lote.monto_pago_requerido,
+    referenciaTransferencia: "",
   });
   const [valor, setValor] = useState(lote.monto_pago_requerido);
 
@@ -113,7 +114,6 @@ export default function PagoForm({
         }
       });
     }
-
   };
 
   const handleCancel = async () => {
@@ -369,6 +369,13 @@ export default function PagoForm({
                     style={{ width: "100%" }}
                     placeholder="Ingrese la Fecha en la que se Realizó la Transferencia"
                   />
+                </Form.Item>
+                <Form.Item
+                  name="referenciaTransferencia"
+                  label="Referencia de Transferencia"
+                  style={{ width: "100%" }}
+                >
+                  <InputIn placeholder="Ingrese Referencia de Transferencia" />
                 </Form.Item>
                 <Button
                   onClick={() => {
