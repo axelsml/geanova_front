@@ -10,25 +10,15 @@ import { useEffect, useState } from "react";
 import { getCookie, expiredCookie, removeCookies } from "@/helpers/Cookies";
 export default function Home() {
   const [cookieMenu, setCookieMenu] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    const loadMenu = async () => {
-      try {
-        const cookie = await getCookie("menu");
-        if (cookie?.value) {
-          setCookieMenu(JSON.parse(cookie.value));
-        } else {
-          console.error("Cookie 'menu' no encontrada");
-        }
-      } catch (error) {
-        console.error("Error al obtener la cookie:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMenu();
+    const cookieMenu = getCookie("menu");
+    cookieMenu
+      .then((cookie) => {
+        setCookieMenu(JSON.parse(cookie.value));
+      })
+      .catch((error) => {
+        console.error("Error al obtener la cookie1:", error); // Manejar cualquier error
+      });
   }, []);
 
   const terreno = cookieMenu.filter((item) => item.descripcion === "Terreno");

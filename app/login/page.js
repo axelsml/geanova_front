@@ -5,11 +5,10 @@ import InputIn from "@/components/Input";
 import { Form, Button, Row } from "antd";
 import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
-//import { assignCookie } from "./Cookie";
+import { assignCookie } from "./Cookie";
 import { LoadingContext } from "@/contexts/loading";
 import Image from "next/image";
 import { usuario_id } from "@/helpers/user";
-import { assignCookie } from "@/helpers/Cookies";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,28 +38,20 @@ export default function LoginPage() {
   const onUsuarioLoaded = async (data) => {
     setIsLoading(false);
     if (data.success) {
-      assignCookie("permisos", JSON.stringify(data.permisos));
-      assignCookie("menu", JSON.stringify(data.menu));
-      assignCookie("usuario", JSON.stringify(data.success));
-      localStorage.setItem("usuario", JSON.stringify(data.user));
-      Swal.fire({
-        title: "Success",
-        icon: "success",
-        text: "Sesión iniciada con exito.",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
+      await assignCookie("permisos", JSON.stringify(data.permisos));
+      await assignCookie("menu", JSON.stringify(data.menu));
+      await assignCookie("usuario", JSON.stringify(data.success));
+      await localStorage.setItem("usuario", JSON.stringify(data.user));
       router.push("/");
     } else {
+      setIsLoading(false);
       Swal.fire({
         title: "Error",
         icon: "error",
         text: data.message,
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
+        showDenyButton: true,
         confirmButtonText: "Aceptar",
       });
     }
