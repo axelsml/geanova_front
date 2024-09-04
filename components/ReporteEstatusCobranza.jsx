@@ -738,6 +738,9 @@ export default function ReporteEstatusCobranza() {
                   <b>Monto pagado</b>
                 </TableCell>
                 <TableCell style={{ textAlign: "center", color: "white" }}>
+                  <b>Monto Anticipo</b>
+                </TableCell>
+                <TableCell style={{ textAlign: "center", color: "white" }}>
                   <b>Sin Pagar</b>
                 </TableCell>
                 <TableCell style={{ textAlign: "center", color: "white" }}>
@@ -758,7 +761,7 @@ export default function ReporteEstatusCobranza() {
                     }
                   >
                     <TableCell style={{ textAlign: "center", color: "white" }}>
-                      Semana {index + 1}
+                      {item.semana}
                     </TableCell>
                     <TableCell style={{ textAlign: "center", color: "white" }}>
                       {item.clientes}
@@ -788,6 +791,10 @@ export default function ReporteEstatusCobranza() {
                     </TableCell>
                     <TableCell style={{ textAlign: "center", color: "white" }}>
                       $ {formatPrecio(item.suma_pagado)}
+                    </TableCell>
+                    
+                    <TableCell style={{ textAlign: "center", color: "white" }}>
+                      $ {formatPrecio(item.anticipo)}
                     </TableCell>
                     <TableCell
                       onClick={() => {
