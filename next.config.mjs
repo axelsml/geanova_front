@@ -1,18 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-     async headers() {
-       return [
-         {
-           source: '/:path*', // Aplica a todas las rutas
-           headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=60, stale-while-revalidate=300', // 1 minuto de caché, mientras actualiza en segundo plano durante 5 minutos
-            },
-           ],
-         },
-       ];
-     },
-   };
+  async headers() {
+    return [
+      {
+        // Aplica a todas las rutas
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+        ],
+      },
+    ];
+  },
+};
    
    export default nextConfig;
