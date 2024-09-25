@@ -896,10 +896,7 @@ export default function ClientesInfo() {
               className="boton"
               disabled={cookiePermisos >= 1 ? false : true}
               size="large"
-              onClick={() => {
-                window.open(
-                  `https://api.santamariadelaluz.com/iUsuarios/${info_lote.solicitud_id}.pdf`
-                );
+              onClick={() => {borrarAmortizacion();
               }}
             >
               Amortización
