@@ -74,17 +74,17 @@ export default function PagoForm({
     setPage(0);
   };
   const onGuardarPago = (values) => {
-    if (usuario_id == 0 || usuario_id == null) {
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: "No se pudo verificar al usuario. Favor de iniciar sesión nuevamente.",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    } else {
+    // if (usuario_id == 0 || usuario_id == null) {
+    //   Swal.fire({
+    //     title: "Error",
+    //     icon: "error",
+    //     text: "No se pudo verificar al usuario. Favor de iniciar sesión nuevamente.",
+    //     confirmButtonColor: "#4096ff",
+    //     cancelButtonColor: "#ff4d4f",
+    //     showDenyButton: false,
+    //     confirmButtonText: "Aceptar",
+    //   });
+    // } else {
       values["fecha"] = formatDate(values.fecha);
       Swal.fire({
         title: "Verifique que los datos sean correctos",
@@ -113,7 +113,7 @@ export default function PagoForm({
           pagosService.createPago({ pago: params }, onPagoGuardado, onError);
         }
       });
-    }
+    // }
   };
 
   const handleCancel = async () => {
