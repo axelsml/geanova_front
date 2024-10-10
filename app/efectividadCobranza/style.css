@@ -1,0 +1,16 @@
+.mesClass {
+  background-color: #15297c;
+  color: white !important; /* Usamos !important para asegurar que el estilo se aplique */
+  cursor: pointer;
+}
+.quincena1Class {
+  cursor: pointer;
+  background-color: #107acc;
+}
+.quincena2Class {
+  cursor: pointer;
+  background-color: #3267c9;
+}
+.normalClass {
+  cursor: pointer;
+}

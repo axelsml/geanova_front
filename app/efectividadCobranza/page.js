@@ -34,7 +34,13 @@ import { useContext, useEffect, useState } from "react";
 
 export default function EfectividadCobranza() {
   const { RangePicker } = DatePicker;
-  const [date, setDate] = useState();
+  const [totalClientes, setTotalClientes] = useState();
+  const [totalMontoEsperado, setTotalMontoEsperado] = useState();
+  const [totalMontoAnticipo, setTotalMontoAnticipo] = useState();
+  const [totalMontoCobrado, setTotalMontoCobrado] = useState();
+  const [totalPendienteCobrar, setTotalPendienteCobrar] = useState();
+  const [totalPorcentajeImporte, setTotalPorcentajeImporte] = useState();
+  const [totalPorcentajeClientes, setTotalPorcentajeClientes] = useState();
   const [range, setRange] = useState([]);
   const [mesSelected, setMesSelected] = useState(null);
   const [añoSelected, setAñoSelected] = useState(2024);
@@ -85,6 +91,7 @@ export default function EfectividadCobranza() {
 
   function handleCloseModal(params) {
     setShowModal(false);
+    setPage2(0);
   }
 
   const onError = (e) => {
@@ -150,14 +157,19 @@ export default function EfectividadCobranza() {
     );
   }
 
-  /* 
-    todo modal para mostrar registros
-  */
   function onEfectividadCargada(params) {
     console.log("params: ", params);
     console.log("filas: ", params.datos);
 
     setDatos(params.datos);
+    setTotalClientes(params.totalClientes);
+    setTotalMontoAnticipo(params.totalMontoAnticipo);
+    setTotalMontoCobrado(params.totalMontoCobrado);
+    setTotalMontoEsperado(params.totalMontoEsperado);
+    setTotalPendienteCobrar(params.totalPendienteCobrar);
+    setTotalPorcentajeImporte(params.totalPorcentajeImporte);
+    setTotalPorcentajeClientes(params.totalPorcentajeClientes);
+
     setIsLoading(false);
   }
 
@@ -166,6 +178,57 @@ export default function EfectividadCobranza() {
     setDatosModal(dato);
     setShowModal(true);
   };
+
+  function cambiarColor(lapso) {
+    if (lapso === "Mes") {
+      return {
+        backgroundColor: lapso === "Mes" ? "#15297c" : "default",
+        color: lapso === "Mes" ? "white" : "black",
+        cursor: "pointer",
+        "& .MuiTableCell-root": {
+          color: lapso === "Mes" ? "white" : "black",
+        },
+      };
+    }
+    if (lapso === "Quincena - 1") {
+      return {
+        backgroundColor: "#107acc",
+        cursor: "pointer",
+        "& .MuiTableCell-root": {
+          color: lapso === "Quincena - 1" ? "white" : "black",
+        },
+      };
+    }
+    if (lapso === "Quincena - 2") {
+      return {
+        backgroundColor: "#2898ee",
+        cursor: "pointer",
+        "& .MuiTableCell-root": {
+          color: lapso === "Quincena - 2" ? "white" : "black",
+        },
+      };
+    } else {
+      return {
+        cursor: "pointer",
+      };
+    }
+
+    /*  if (lapso === "Mes") {
+      //return styles.mesClass;
+      return "mesClass";
+    }
+    if (lapso === "Quincena - 1") {
+      //return styles.quincena1Class;
+      return "quincena1Class";
+    }
+    if (lapso === "Quincena - 2") {
+      //return styles.quincena2Class;
+      return "quincena2Class";
+    } else {
+      // return styles.normalClass;
+      return "normalClass";
+    } */
+  }
 
   return (
     <>
@@ -237,7 +300,10 @@ export default function EfectividadCobranza() {
                     <p>Monto Esperado</p>
                   </TableCell>
                   <TableCell>
-                    <p>Monto Cobrado</p>
+                    <p>Monto Anticipo</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Total Percibido</p>
                   </TableCell>
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Clientes Por Cobrar</p>
@@ -254,50 +320,87 @@ export default function EfectividadCobranza() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* {stableSort2(datos, getComparator2(order2, orderBy2))
-                  .slice(
-                    page2 * rowsPerPage2,
-                    page2 * rowsPerPage2 + rowsPerPage2
-                  )
-                  .map((dato, index) => ( */}
                 {datos.map((dato, index) => (
                   <TableRow
                     key={dato.id}
-                    hover
                     onClick={() => handleRowClick(dato.registros)}
-                    style={{ cursor: "pointer" }}
+                    sx={cambiarColor(dato.lapso)}
                   >
                     <TableCell>{dato.lapso}</TableCell>
                     <TableCell>{dato.fecha_considerada}</TableCell>
                     <TableCell>{dato.total_clientes}</TableCell>
-                    <TableCell>${formatPrecio2(dato.monto_esperado)}</TableCell>
-                    <TableCell>${formatPrecio2(dato.monto_cobrado)}</TableCell>
+                    <TableCell>
+                      ${formatPrecio(parseFloat(dato.monto_esperado))}
+                    </TableCell>
+                    <TableCell>
+                      ${formatPrecio(parseFloat(dato.monto_anticipo))}
+                    </TableCell>
+                    <TableCell>
+                      ${formatPrecio(parseFloat(dato.monto_cobrado))}
+                    </TableCell>
                     <TableCell>{dato.clientes_por_cobrar}</TableCell>
                     <TableCell>
-                      ${formatPrecio2(dato.pendiente_por_cobrar)}
+                      ${formatPrecio(parseFloat(dato.pendiente_por_cobrar))}
                     </TableCell>
                     <TableCell>
-                      {formatPrecio2(dato.porcentaje_importe)} %
+                      {isNaN(formatPrecio(parseFloat(dato.porcentaje_importe)))
+                        ? "0"
+                        : formatPrecio(parseFloat(dato.porcentaje_importe))}
+                      %
                     </TableCell>
                     <TableCell>
-                      {formatPrecio2(dato.porcentaje_clientes)} %
+                      {isNaN(formatPrecio(parseFloat(dato.porcentaje_clientes)))
+                        ? "0"
+                        : formatPrecio(parseFloat(dato.porcentaje_clientes))}
+                      %
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-              {/* <TableFooter>
                 <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datos.length}
-                    rowsPerPage={rowsPerPage2}
-                    page={page2}
-                    onPageChange={handleChangePage2}
-                    onRowsPerPageChange={handleChangeRowsPerPage2}
-                    labelRowsPerPage="Registros por Página"
-                  />
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell>Total: {totalClientes}</TableCell>
+                  <TableCell>
+                    Total: $
+                    {isNaN(totalMontoEsperado)
+                      ? "0"
+                      : formatPrecio(parseFloat(totalMontoEsperado))}
+                  </TableCell>
+                  <TableCell>
+                    Total: $
+                    {isNaN(totalMontoAnticipo)
+                      ? "0"
+                      : formatPrecio(parseFloat(totalMontoAnticipo))}
+                  </TableCell>
+                  <TableCell>
+                    Total: $
+                    {isNaN(totalMontoCobrado)
+                      ? "0"
+                      : formatPrecio(parseFloat(totalMontoCobrado))}
+                  </TableCell>
+                  <TableCell></TableCell>
+                  <TableCell>
+                    Total: $
+                    {isNaN(totalPendienteCobrar)
+                      ? "0"
+                      : formatPrecio(parseFloat(totalPendienteCobrar))}
+                  </TableCell>
+                  <TableCell>
+                    Total:
+                    {isNaN(totalPorcentajeImporte)
+                      ? "0"
+                      : formatPrecio(parseFloat(totalPorcentajeImporte))}
+                    %
+                  </TableCell>
+                  <TableCell>
+                    Total:
+                    {isNaN(totalPorcentajeClientes)
+                      ? "0"
+                      : formatPrecio(parseFloat(totalPorcentajeClientes))}
+                    %
+                  </TableCell>
                 </TableRow>
-              </TableFooter> */}
+              </TableBody>
             </Table>
           </TableContainer>
         </Col>
@@ -325,6 +428,9 @@ export default function EfectividadCobranza() {
                     <p>Fecha Pago</p>
                   </TableCell>
                   <TableCell>
+                    <p>Fecha Pagado</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Monto Pago</p>
                   </TableCell>
                   <TableCell>
@@ -333,9 +439,7 @@ export default function EfectividadCobranza() {
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Monto Pendiente</p>
                   </TableCell>
-                  <TableCell>
-                    <p>Fecha Pagado</p>
-                  </TableCell>
+
                   <TableCell>
                     <p>Terreno</p>
                   </TableCell>
@@ -352,10 +456,21 @@ export default function EfectividadCobranza() {
                       <TableCell>{dato.nombre_cliente}</TableCell>
                       <TableCell>{dato.no_pago}</TableCell>
                       <TableCell>{dato.fecha_pago}</TableCell>
-                      <TableCell>${dato.monto_pago}</TableCell>
-                      <TableCell>${dato.monto_pagado}</TableCell>
-                      <TableCell>${dato.monto_pendiente}</TableCell>
                       <TableCell>{dato.fecha_pagado}</TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_pago))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_pagado))}
+                      </TableCell>
+                      <TableCell>
+                        $
+                        {dato.monto_pago - dato.monto_pagado < 0
+                          ? 0
+                          : formatPrecio(
+                              parseFloat(dato.monto_pago - dato.monto_pagado)
+                            )}
+                      </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
                     </TableRow>
                   ))}
@@ -383,7 +498,7 @@ export default function EfectividadCobranza() {
         >
           <span className="flex gap-2 justify-end">
             <Button onClick={handleCloseModal} danger size="large">
-              Cancelar
+              Cerrar
             </Button>
           </span>
         </div>
