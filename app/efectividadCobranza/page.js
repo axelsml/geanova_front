@@ -50,10 +50,31 @@ export default function EfectividadCobranza() {
   const [order2] = useState("desc");
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
   const [page2, setPage2] = useState(0);
+
+  const [orderBy3] = useState("fechaOperacion");
+  const [order3] = useState("desc");
+  const [rowsPerPage3, setRowsPerPage3] = useState(5);
+  const [page3, setPage3] = useState(0);
+
+  const [orderBy4] = useState("fechaOperacion");
+  const [order4] = useState("desc");
+  const [rowsPerPage4, setRowsPerPage4] = useState(5);
+  const [page4, setPage4] = useState(0);
+
   const [showModal, setShowModal] = useState(false);
+  const [showModalClientesCobrados, setShowModalClientesCobrados] =
+    useState(false);
+  const [showModalClientesPorCobrar, setShowModalClientesPorCobrar] =
+    useState(false);
 
   const [datos, setDatos] = useState([]);
   const [datosModal, setDatosModal] = useState([]);
+  const [datosModalClientesPagados, setDatosModalClientesPagados] = useState(
+    []
+  );
+  const [datosModalClientesPorPagar, setDatosModalClientesPorPagar] = useState(
+    []
+  );
 
   const layout = {
     labelCol: { span: 24 },
@@ -94,16 +115,24 @@ export default function EfectividadCobranza() {
     setPage2(0);
   }
 
+  function handleCloseModalClientesCobrados(params) {
+    setShowModalClientesCobrados(false);
+    setPage2(0);
+  }
+
+  function handleCloseModalClientesPorCobrar(params) {
+    setShowModalClientesPorCobrar(false);
+    setPage2(0);
+  }
+
   const onError = (e) => {
     setIsLoading(false);
     console.log(e);
   };
 
-  const customTitle = (
+  const customTitle = (title, level) => (
     <Row justify={"center"}>
-      <Typography.Title level={3}>
-        Administrar Tipos de Movimientos
-      </Typography.Title>
+      <Typography.Title level={level}>{title}</Typography.Title>
     </Row>
   );
 
@@ -140,6 +169,76 @@ export default function EfectividadCobranza() {
     return order === "desc"
       ? (a, b) => descendingComparator2(a, b, orderBy)
       : (a, b) => -descendingComparator2(a, b, orderBy);
+  };
+
+  const handleChangePage3 = (event, newPage) => {
+    setPage3(newPage);
+  };
+
+  const handleChangeRowsPerPage3 = (event) => {
+    setRowsPerPage3(parseInt(event.target.value, 10));
+    setPage3(0);
+  };
+
+  const stableSort3 = (array, comparator) => {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const order2 = comparator(a[0], b[0]);
+      if (order2 !== 0) return order2;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  };
+
+  const descendingComparator3 = (a2, b2, orderBy2) => {
+    if (b2[orderBy2] < a2[orderBy2]) {
+      return -1;
+    }
+    if (b2[orderBy2] > a2[orderBy2]) {
+      return 1;
+    }
+    return 0;
+  };
+
+  const getComparator3 = (order, orderBy) => {
+    return order === "desc"
+      ? (a, b) => descendingComparator3(a, b, orderBy)
+      : (a, b) => -descendingComparator3(a, b, orderBy);
+  };
+
+  const handleChangePage4 = (event, newPage) => {
+    setPage4(newPage);
+  };
+
+  const handleChangeRowsPerPage4 = (event) => {
+    setRowsPerPage4(parseInt(event.target.value, 10));
+    setPage4(0);
+  };
+
+  const stableSort4 = (array, comparator) => {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const order2 = comparator(a[0], b[0]);
+      if (order2 !== 0) return order2;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  };
+
+  const descendingComparator4 = (a2, b2, orderBy2) => {
+    if (b2[orderBy2] < a2[orderBy2]) {
+      return -1;
+    }
+    if (b2[orderBy2] > a2[orderBy2]) {
+      return 1;
+    }
+    return 0;
+  };
+
+  const getComparator4 = (order, orderBy) => {
+    return order === "desc"
+      ? (a, b) => descendingComparator4(a, b, orderBy)
+      : (a, b) => -descendingComparator4(a, b, orderBy);
   };
 
   function cargarEfectividadCobranza() {
@@ -212,23 +311,17 @@ export default function EfectividadCobranza() {
         cursor: "pointer",
       };
     }
-
-    /*  if (lapso === "Mes") {
-      //return styles.mesClass;
-      return "mesClass";
-    }
-    if (lapso === "Quincena - 1") {
-      //return styles.quincena1Class;
-      return "quincena1Class";
-    }
-    if (lapso === "Quincena - 2") {
-      //return styles.quincena2Class;
-      return "quincena2Class";
-    } else {
-      // return styles.normalClass;
-      return "normalClass";
-    } */
   }
+
+  const handleClientesPagadosClick = (dato) => {
+    setDatosModalClientesPagados(dato);
+    setShowModalClientesCobrados(true);
+  };
+
+  const handleClientesPorPagarClick = (dato) => {
+    setDatosModalClientesPorPagar(dato);
+    setShowModalClientesPorCobrar(true);
+  };
 
   return (
     <>
@@ -303,6 +396,9 @@ export default function EfectividadCobranza() {
                     <p>Monto Anticipo</p>
                   </TableCell>
                   <TableCell>
+                    <p>Clientes Cobrados</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Total Percibido</p>
                   </TableCell>
                   <TableCell /* style={{ width: 180 }} */>
@@ -330,17 +426,49 @@ export default function EfectividadCobranza() {
                     <TableCell>{dato.fecha_considerada}</TableCell>
                     <TableCell>{dato.total_clientes}</TableCell>
                     <TableCell>
-                      ${formatPrecio(parseFloat(dato.monto_esperado))}
+                      $
+                      {formatPrecio(parseFloat(dato.monto_esperado.toFixed(2)))}
                     </TableCell>
                     <TableCell>
-                      ${formatPrecio(parseFloat(dato.monto_anticipo))}
+                      $
+                      {formatPrecio(parseFloat(dato.monto_anticipo.toFixed(2)))}
+                    </TableCell>
+                    <TableCell
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evita que el evento se propague al TableRow
+                        console.log(
+                          "clientes cobrados: ",
+                          dato.clientes_cobrados
+                        );
+                        handleClientesPagadosClick(
+                          dato.registros_clientes_cobrados
+                        );
+                      }}
+                    >
+                      {dato.clientes_cobrados}
                     </TableCell>
                     <TableCell>
-                      ${formatPrecio(parseFloat(dato.monto_cobrado))}
+                      ${formatPrecio(parseFloat(dato.monto_cobrado.toFixed(2)))}
                     </TableCell>
-                    <TableCell>{dato.clientes_por_cobrar}</TableCell>
+                    <TableCell
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evita que el evento se propague al TableRow
+                        console.log(
+                          "clientes por cobrar: ",
+                          dato.clientes_por_cobrar
+                        );
+                        handleClientesPorPagarClick(
+                          dato.registros_clientes_por_cobrar
+                        );
+                      }}
+                    >
+                      {dato.clientes_por_cobrar}
+                    </TableCell>
                     <TableCell>
-                      ${formatPrecio(parseFloat(dato.pendiente_por_cobrar))}
+                      $
+                      {formatPrecio(
+                        parseFloat(dato.pendiente_por_cobrar.toFixed(2))
+                      )}
                     </TableCell>
                     <TableCell>
                       {isNaN(formatPrecio(parseFloat(dato.porcentaje_importe)))
@@ -364,26 +492,29 @@ export default function EfectividadCobranza() {
                     Total: $
                     {isNaN(totalMontoEsperado)
                       ? "0"
-                      : formatPrecio(parseFloat(totalMontoEsperado))}
+                      : formatPrecio(parseFloat(totalMontoEsperado.toFixed(2)))}
                   </TableCell>
                   <TableCell>
                     Total: $
                     {isNaN(totalMontoAnticipo)
                       ? "0"
-                      : formatPrecio(parseFloat(totalMontoAnticipo))}
+                      : formatPrecio(parseFloat(totalMontoAnticipo.toFixed(2)))}
                   </TableCell>
+                  <TableCell></TableCell>
                   <TableCell>
                     Total: $
                     {isNaN(totalMontoCobrado)
                       ? "0"
-                      : formatPrecio(parseFloat(totalMontoCobrado))}
+                      : formatPrecio(parseFloat(totalMontoCobrado.toFixed(2)))}
                   </TableCell>
                   <TableCell></TableCell>
                   <TableCell>
                     Total: $
                     {isNaN(totalPendienteCobrar)
                       ? "0"
-                      : formatPrecio(parseFloat(totalPendienteCobrar))}
+                      : formatPrecio(
+                          parseFloat(totalPendienteCobrar.toFixed(2))
+                        )}
                   </TableCell>
                   <TableCell>
                     Total:
@@ -407,7 +538,7 @@ export default function EfectividadCobranza() {
       </Row>
 
       <Modal
-        title={customTitle}
+        title={customTitle("Registro de Clientes", 3)}
         footer={null}
         width="lg"
         open={showModal}
@@ -427,9 +558,9 @@ export default function EfectividadCobranza() {
                   <TableCell>
                     <p>Fecha Pago</p>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <p>Fecha Pagado</p>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>
                     <p>Monto Pago</p>
                   </TableCell>
@@ -439,9 +570,8 @@ export default function EfectividadCobranza() {
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Monto Pendiente</p>
                   </TableCell>
-
                   <TableCell>
-                    <p>Terreno</p>
+                    <p>Terreno/Lote</p>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -454,21 +584,23 @@ export default function EfectividadCobranza() {
                   .map((dato, index) => (
                     <TableRow key={dato.id}>
                       <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago}</TableCell>
-                      <TableCell>{dato.fecha_pago}</TableCell>
-                      <TableCell>{dato.fecha_pagado}</TableCell>
+                      <TableCell>{dato.no_pago.join(", ")}</TableCell>
+                      <TableCell>{dato.fechas_pago[0]}</TableCell>
+                      {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pago))}
+                        ${formatPrecio(parseFloat(dato.montos_pago))}
                       </TableCell>
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pagado))}
+                        ${formatPrecio(parseFloat(dato.monto_total_pagado))}
                       </TableCell>
                       <TableCell>
                         $
-                        {dato.monto_pago - dato.monto_pagado < 0
+                        {dato.montos_pago - dato.monto_total_pagado < 0
                           ? 0
                           : formatPrecio(
-                              parseFloat(dato.monto_pago - dato.monto_pagado)
+                              parseFloat(
+                                dato.montos_pago - dato.monto_total_pagado
+                              )
                             )}
                       </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
@@ -498,6 +630,218 @@ export default function EfectividadCobranza() {
         >
           <span className="flex gap-2 justify-end">
             <Button onClick={handleCloseModal} danger size="large">
+              Cerrar
+            </Button>
+          </span>
+        </div>
+      </Modal>
+
+      <Modal
+        title={customTitle("Clientes Cobrados", 3)}
+        footer={null}
+        width="lg"
+        open={showModalClientesCobrados}
+        onCancel={() => handleCloseModalClientesCobrados()}
+      >
+        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
+          <TableContainer component={Paper} className="tabla">
+            <Table>
+              <TableHead className="tabla_encabezado">
+                <TableRow>
+                  <TableCell>
+                    <p>Nombre Cliente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Num. Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Pago</p>
+                  </TableCell>
+                  {/* <TableCell>
+                    <p>Fecha Pagado</p>
+                  </TableCell> */}
+                  <TableCell>
+                    <p>Monto Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto Pagado</p>
+                  </TableCell>
+                  <TableCell /* style={{ width: 180 }} */>
+                    <p>Monto Pendiente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Terreno/Lote</p>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stableSort3(
+                  datosModalClientesPagados,
+                  getComparator3(order3, orderBy3)
+                )
+                  .slice(
+                    page3 * rowsPerPage3,
+                    page3 * rowsPerPage3 + rowsPerPage3
+                  )
+                  .map((dato, index) => (
+                    <TableRow key={dato.id}>
+                      <TableCell>{dato.nombre_cliente}</TableCell>
+                      <TableCell>{dato.no_pago.join(", ")}</TableCell>
+                      <TableCell>{dato.fechas_pago[0]}</TableCell>
+                      {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.montos_pago))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_total_pagado))}
+                      </TableCell>
+                      <TableCell>
+                        $
+                        {dato.montos_pago - dato.monto_total_pagado < 0
+                          ? 0
+                          : formatPrecio(
+                              parseFloat(
+                                dato.montos_pago - dato.monto_total_pagado
+                              )
+                            )}
+                      </TableCell>
+                      <TableCell>{dato.terreno}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={datosModalClientesPagados.length}
+                    rowsPerPage={rowsPerPage3}
+                    page={page3}
+                    onPageChange={handleChangePage3}
+                    onRowsPerPageChange={handleChangeRowsPerPage3}
+                    labelRowsPerPage="Registros por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Row>
+
+        <div
+          className="terreno-edit__botones-footer"
+          style={{ paddingBottom: 15 }}
+        >
+          <span className="flex gap-2 justify-end">
+            <Button
+              onClick={handleCloseModalClientesCobrados}
+              danger
+              size="large"
+            >
+              Cerrar
+            </Button>
+          </span>
+        </div>
+      </Modal>
+
+      <Modal
+        title={customTitle("Clientes Por Cobrar", 3)}
+        footer={null}
+        width="lg"
+        open={showModalClientesPorCobrar}
+        onCancel={() => handleCloseModalClientesPorCobrar()}
+      >
+        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
+          <TableContainer component={Paper} className="tabla">
+            <Table>
+              <TableHead className="tabla_encabezado">
+                <TableRow>
+                  <TableCell>
+                    <p>Nombre Cliente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Num. Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Pago</p>
+                  </TableCell>
+                  {/* <TableCell>
+                    <p>Fecha Pagado</p>
+                  </TableCell> */}
+                  <TableCell>
+                    <p>Monto Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto Pagado</p>
+                  </TableCell>
+                  <TableCell /* style={{ width: 180 }} */>
+                    <p>Monto Pendiente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Terreno/Lote</p>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stableSort4(
+                  datosModalClientesPorPagar,
+                  getComparator4(order4, orderBy4)
+                )
+                  .slice(
+                    page4 * rowsPerPage4,
+                    page4 * rowsPerPage4 + rowsPerPage4
+                  )
+                  .map((dato, index) => (
+                    <TableRow key={dato.id}>
+                      <TableCell>{dato.nombre_cliente}</TableCell>
+                      <TableCell>{dato.no_pago.join(", ")}</TableCell>
+                      <TableCell>{dato.fechas_pago[0]}</TableCell>
+                      {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.montos_pago))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_total_pagado))}
+                      </TableCell>
+                      <TableCell>
+                        $
+                        {dato.montos_pago - dato.monto_total_pagado < 0
+                          ? 0
+                          : formatPrecio(
+                              parseFloat(
+                                dato.montos_pago - dato.monto_total_pagado
+                              )
+                            )}
+                      </TableCell>
+                      <TableCell>{dato.terreno}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={datosModalClientesPorPagar.length}
+                    rowsPerPage={rowsPerPage4}
+                    page={page4}
+                    onPageChange={handleChangePage4}
+                    onRowsPerPageChange={handleChangeRowsPerPage4}
+                    labelRowsPerPage="Registros por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Row>
+
+        <div
+          className="terreno-edit__botones-footer"
+          style={{ paddingBottom: 15 }}
+        >
+          <span className="flex gap-2 justify-end">
+            <Button
+              onClick={handleCloseModalClientesPorCobrar}
+              danger
+              size="large"
+            >
               Cerrar
             </Button>
           </span>
