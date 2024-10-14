@@ -27,6 +27,31 @@ class CobranzaService {
       });
   }
 
+  borrarAmortizaciones(callback, error) {
+    var call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .get("borrarAmortizaciones", { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response.data);
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+        }
+      });
+  }
+
   /*  createPlazo(params, callback, error) {
     var call;
     if (call) {
