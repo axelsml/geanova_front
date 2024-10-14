@@ -31,6 +31,7 @@ import {
   Typography,
 } from "antd";
 import { useContext, useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function EfectividadCobranza() {
   const { RangePicker } = DatePicker;
@@ -323,6 +324,46 @@ export default function EfectividadCobranza() {
     setShowModalClientesPorCobrar(true);
   };
 
+  async function borrarAmortizacion() {
+    await Swal.fire({
+      title: "Eliminar todas las amortizaciones?",
+      text: `¿Estás seguro de eliminarlas? `,
+      icon: "question",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      confirmButtonText: "Aceptar",
+    }).then((result) => {
+      console.log("result: ", result);
+
+      if (result.isConfirmed) {
+        cobranzaService.borrarAmortizaciones(onAmortizacionBorrada, onError);
+      }
+    });
+  }
+  async function onAmortizacionBorrada(data) {
+    if (data.success) {
+      Swal.fire({
+        title: "Amortizaciones eliminadas con éxito",
+        icon: "success",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    } else {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No Se Pudieron Borrar las Amortizaciones",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
+  }
+
   return (
     <>
       <Row justify={"center"}>
@@ -368,6 +409,14 @@ export default function EfectividadCobranza() {
                   }}
                 >
                   Buscar
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    borrarAmortizacion();
+                  }}
+                >
+                  Borrar Amortizaciones
                 </Button>
               </Space>
             </Form.Item>
