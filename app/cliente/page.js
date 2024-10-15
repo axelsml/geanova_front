@@ -882,7 +882,7 @@ export default function ClientesInfo() {
           <Col>
             <Button
               className="boton"
-              disabled={cookiePermisos > 2 ? false : true}
+              //disabled={cookiePermisos > 2 ? false : true}
               size={"large"}
               onClick={() => {
                 borrarAmortizacion();

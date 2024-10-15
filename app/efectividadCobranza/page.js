@@ -7,6 +7,7 @@ import {
   formatPrecio2,
 } from "@/helpers/formatters";
 import cobranzaService from "@/services/cobranzaService";
+import terrenosService from "@/services/terrenosService";
 import {
   Paper,
   Table,
@@ -76,6 +77,8 @@ export default function EfectividadCobranza() {
   const [datosModalClientesPorPagar, setDatosModalClientesPorPagar] = useState(
     []
   );
+  const [terrenos, setTerrenos] = useState(null);
+  const [terrenoSelected, setTerrenoSelected] = useState(null);
 
   const layout = {
     labelCol: { span: 24 },
@@ -83,6 +86,8 @@ export default function EfectividadCobranza() {
   };
 
   const [form] = Form.useForm();
+  const { Option } = Select;
+  const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
   const years = [];
   for (let i = 2017; i <= 2030; i++) {
@@ -107,6 +112,15 @@ export default function EfectividadCobranza() {
   useEffect(() => {
     const fechaActual = new Date();
     const mesActual = fechaActual.getMonth() + 1;
+    const añoActual = fechaActual.getFullYear();
+    console.log("opciones: ", opcion[0]);
+    console.log("mesActual: ", mesActual);
+    console.log("añoActual: ", añoActual);
+
+    terrenosService.getTerrenos(setTerrenos, Error);
+    form.setFieldValue("mes", mesActual);
+    form.setFieldValue("año", añoActual);
+    form.setFieldValue("proyecto", 0);
 
     setMesSelected(mesActual);
   }, []);
@@ -243,15 +257,16 @@ export default function EfectividadCobranza() {
   };
 
   function cargarEfectividadCobranza() {
-    let form = {
+    let forms = {
       mes: mesSelected,
       año: añoSelected,
+      proyecto: terrenoSelected,
     };
     setIsLoading(true);
-    console.log("form:", form);
+    console.log("forms:", forms);
 
     cobranzaService.getIEfectividadCobranza(
-      form,
+      forms,
       onEfectividadCargada,
       onError
     );
@@ -364,6 +379,11 @@ export default function EfectividadCobranza() {
     }
   }
 
+  function handleTerrenos(params) {
+    console.log("params: ", params);
+    setTerrenoSelected(params);
+  }
+
   return (
     <>
       <Row justify={"center"}>
@@ -375,33 +395,77 @@ export default function EfectividadCobranza() {
           justify="center"
           style={{ paddingTop: 10 }}
         >
+          <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
+            <Form.Item
+              name="mes"
+              label="Seleccione mes"
+              style={{ width: "100%" }}
+            >
+              <Select
+                placeholder="Todos los meses"
+                optionLabelProp="label"
+                value={mesSelected}
+                onChange={(value) => {
+                  setMesSelected(value);
+                }}
+                options={months}
+                style={{ minWidth: 150 }}
+              ></Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
+            <Form.Item
+              name="año"
+              label="Seleccione año"
+              style={{ width: "100%" }}
+            >
+              <Select
+                placeholder="Todos los Años"
+                optionLabelProp="label"
+                value={añoSelected}
+                onChange={(value) => {
+                  setAñoSelected(value || "0");
+                }}
+                options={years}
+                style={{ minWidth: 150 }}
+              ></Select>
+            </Form.Item>
+          </Col>
           <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
             <Form.Item
-              name="fecha"
-              label="Selecciona fechas"
+              name="proyecto"
+              label="Seleccione un Proyecto"
               style={{ width: "100%" }}
             >
               <Space style={{ width: "100%" }}>
                 <Select
-                  placeholder="Todos los meses"
-                  optionLabelProp="label"
-                  value={mesSelected}
-                  onChange={(value) => {
-                    setMesSelected(value);
-                  }}
-                  options={months}
+                  showSearch
+                  placeholder="Seleccione un Proyecto"
                   style={{ minWidth: 150 }}
-                ></Select>
-                <Select
-                  placeholder="Todos los Años"
                   optionLabelProp="label"
-                  value={añoSelected}
-                  onChange={(value) => {
-                    setAñoSelected(value || "0");
+                  onChange={handleTerrenos}
+                >
+                  {terrenos &&
+                    opcion.map((item, index) => (
+                      <Option key={item.id} value={item.id} label={item.nombre}>
+                        {item?.nombre}
+                      </Option>
+                    ))}
+                  {terrenos?.map((item, index) => (
+                    <Option key={item.id} value={item.id} label={item.nombre}>
+                      {item?.nombre}
+                    </Option>
+                  ))}
+                </Select>
+
+                {/* <Button
+                  type="primary"
+                  onClick={() => {
+                    borrarAmortizacion();
                   }}
-                  options={years}
-                  style={{ minWidth: 150 }}
-                ></Select>
+                >
+                  Borrar Amortizaciones
+                </Button> */}
                 <Button
                   type="primary"
                   onClick={() => {
@@ -409,14 +473,6 @@ export default function EfectividadCobranza() {
                   }}
                 >
                   Buscar
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    borrarAmortizacion();
-                  }}
-                >
-                  Borrar Amortizaciones
                 </Button>
               </Space>
             </Form.Item>
