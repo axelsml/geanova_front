@@ -458,7 +458,7 @@ export default function EfectividadCobranza() {
                   ))}
                 </Select>
 
-                {/* <Button
+                {/*  <Button
                   type="primary"
                   onClick={() => {
                     borrarAmortizacion();
@@ -667,10 +667,10 @@ export default function EfectividadCobranza() {
                     <p>Fecha Pagado</p>
                   </TableCell> */}
                   <TableCell>
-                    <p>Monto Pago</p>
+                    <p>Monto a Pagar</p>
                   </TableCell>
                   <TableCell>
-                    <p>Monto Pagado</p>
+                    <p>Monto Amortización Pagado</p>
                   </TableCell>
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Monto Pendiente</p>
@@ -689,23 +689,22 @@ export default function EfectividadCobranza() {
                   .map((dato, index) => (
                     <TableRow key={dato.id}>
                       <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago.join(", ")}</TableCell>
-                      <TableCell>{dato.fechas_pago[0]}</TableCell>
+                      <TableCell>{dato.no_pago}</TableCell>
+                      {/* .join(", ") */}
+                      <TableCell>{dato.fecha_pago}</TableCell>
                       {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.montos_pago))}
+                        ${formatPrecio(parseFloat(dato.monto_pago))}
                       </TableCell>
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_total_pagado))}
+                        ${formatPrecio(parseFloat(dato.monto_pagado))}
                       </TableCell>
                       <TableCell>
                         $
-                        {dato.montos_pago - dato.monto_total_pagado < 0
+                        {dato.monto_pago - dato.monto_pagado < 0
                           ? 0
                           : formatPrecio(
-                              parseFloat(
-                                dato.montos_pago - dato.monto_total_pagado
-                              )
+                              parseFloat(dato.monto_pago - dato.monto_pagado)
                             )}
                       </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
@@ -766,10 +765,10 @@ export default function EfectividadCobranza() {
                     <p>Fecha Pagado</p>
                   </TableCell> */}
                   <TableCell>
-                    <p>Monto Pago</p>
+                    <p>Monto a Pagar</p>
                   </TableCell>
                   <TableCell>
-                    <p>Monto Pagado</p>
+                    <p>Monto Amortización Pagado</p>
                   </TableCell>
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Monto Pendiente</p>
@@ -791,23 +790,21 @@ export default function EfectividadCobranza() {
                   .map((dato, index) => (
                     <TableRow key={dato.id}>
                       <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago.join(", ")}</TableCell>
-                      <TableCell>{dato.fechas_pago[0]}</TableCell>
+                      <TableCell>{dato.no_pago}</TableCell> {/* .join(", ") */}
+                      <TableCell>{dato.fecha_pago}</TableCell>
                       {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.montos_pago))}
+                        ${formatPrecio(parseFloat(dato.monto_pago))}
                       </TableCell>
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_total_pagado))}
+                        ${formatPrecio(parseFloat(dato.monto_pagado))}
                       </TableCell>
                       <TableCell>
                         $
-                        {dato.montos_pago - dato.monto_total_pagado < 0
+                        {dato.monto_pago - dato.monto_pagado < 0
                           ? 0
                           : formatPrecio(
-                              parseFloat(
-                                dato.montos_pago - dato.monto_total_pagado
-                              )
+                              parseFloat(dato.monto_pago - dato.monto_pagado)
                             )}
                       </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
@@ -872,16 +869,22 @@ export default function EfectividadCobranza() {
                     <p>Fecha Pagado</p>
                   </TableCell> */}
                   <TableCell>
-                    <p>Monto Pago</p>
+                    <p>Monto a Pagar</p>
                   </TableCell>
                   <TableCell>
-                    <p>Monto Pagado</p>
+                    <p>Monto Amortización Pagado</p>
                   </TableCell>
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Monto Pendiente</p>
                   </TableCell>
+                  <TableCell /* style={{ width: 180 }} */>
+                    <p>Intereses</p>
+                  </TableCell>
                   <TableCell>
                     <p>Terreno/Lote</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Telefóno</p>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -897,26 +900,34 @@ export default function EfectividadCobranza() {
                   .map((dato, index) => (
                     <TableRow key={dato.id}>
                       <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago.join(", ")}</TableCell>
-                      <TableCell>{dato.fechas_pago[0]}</TableCell>
+                      <TableCell>{dato.no_pago}</TableCell>
+                      {/* //.join(", ") */}
+                      <TableCell>{dato.fecha_pago}</TableCell>
                       {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.montos_pago))}
+                        ${formatPrecio(parseFloat(dato.monto_pago))}
                       </TableCell>
                       <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_total_pagado))}
+                        ${formatPrecio(parseFloat(dato.monto_pagado))}
                       </TableCell>
                       <TableCell>
                         $
-                        {dato.montos_pago - dato.monto_total_pagado < 0
+                        {dato.monto_pago - dato.monto_pagado < 0
                           ? 0
                           : formatPrecio(
-                              parseFloat(
-                                dato.montos_pago - dato.monto_total_pagado
-                              )
+                              parseFloat(dato.monto_pago - dato.monto_pagado)
                             )}
                       </TableCell>
+                      <TableCell>
+                        $
+                        {formatPrecio(
+                          isNaN(parseFloat(dato.monto_interes))
+                            ? 0
+                            : parseFloat(dato.monto_interes)
+                        )}
+                      </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
+                      <TableCell>{dato.telefono}</TableCell>
                     </TableRow>
                   ))}
               </TableBody>
