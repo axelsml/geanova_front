@@ -31,6 +31,7 @@ import queryString from "query-string";
 import { FaFilePdf } from "react-icons/fa6";
 import { SiOpslevel } from "react-icons/si";
 import { usuario_id } from "@/helpers/user";
+import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
 
 import {
   Paper,
@@ -50,6 +51,8 @@ import pagosService from "@/services/pagosService";
 import InputIn from "@/components/Input";
 import { InputNumber } from "antd";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
+import { getCookie } from "@/helpers/Cookies";
+import cobranzaService from "@/services/cobranzaService";
 
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
@@ -73,6 +76,8 @@ export default function ClientesInfo() {
 
   const [show, setShow] = useState(false);
   const [showModalEditar, setShowModalEditar] = useState(false);
+  const [showCongelar, setShowCongelar] = useState(false);
+  const [congelarFecha, setCongelarFecha] = useState(null);
 
   const [selectedPago, setSelectedPago] = useState({
     pago_id: null,
@@ -115,6 +120,7 @@ export default function ClientesInfo() {
   const [newAmortizacion, setNewAmortizacion] = useState(false);
 
   const [cookiePermisos, setCookiePermisos] = useState([]);
+  const [clienteCongelado, setClienteCongelado] = useState([]);
 
   const opcionFinanciamiento = [
     { index: 0, id: 1, nombre: "Mensual" },
@@ -123,6 +129,8 @@ export default function ClientesInfo() {
   ];
 
   const { Option } = Select;
+
+  const [forms] = Form.useForm();
 
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
@@ -169,7 +177,19 @@ export default function ClientesInfo() {
   };
 
   const CreateNuevoPago = () => {
-    setNuevoPago(!nuevoPago);
+    const cookieUsuario = getCookie("usuario");
+
+    cookieUsuario
+      .then((cookie) => {
+        if (cookie.value) {
+          setNuevoPago(!nuevoPago);
+        }
+
+        // setCookieMenu(JSON.parse(cookie.value));
+      })
+      .catch((error) => {
+        console.error("Error al obtener la cookie1:", error); // Manejar cualquier error
+      });
   };
 
   const BuscarInfoLote = () => {
@@ -332,6 +352,11 @@ export default function ClientesInfo() {
     setNewAmortizacion(false);
   };
 
+  function handleCloseCongelar() {
+    setShowCongelar(false);
+    forms.resetFields();
+  }
+
   const handleCancel = () => {
     Swal.fire({
       title: "¿Cancelar cambios?",
@@ -474,6 +499,9 @@ export default function ClientesInfo() {
       setNumeroInt(infoClienteDomicilio.numero_int);
       setCodigoPostal(infoClienteDomicilio.cp);
 
+      //congelar_cliente
+      setClienteCongelado(info_lote.congelar_cliente);
+
       setFechaSolicitud(info_lote.fecha_solicitud);
       setMontoContrato(info_lote.monto_contrato);
       setCantidadPagos(info_lote.cantidad_pagos);
@@ -568,6 +596,12 @@ export default function ClientesInfo() {
     </Row>
   );
 
+  const customTitleCongelar = (
+    <Row justify={"center"}>
+      <Typography.Title level={3}>Congelar Cliente</Typography.Title>
+    </Row>
+  );
+
   async function actualizarPerdonarInteres() {
     let form = {
       solicitud_id: info_lote.solicitud_id,
@@ -595,6 +629,108 @@ export default function ClientesInfo() {
           });
       }
     });
+  }
+  const dateFormat = "DD/MM/YYYY";
+
+  function congelarCliente() {
+    // setIsLoading(true);
+    if (info_lote.fecha_congelamiento != null) {
+      Swal.fire({
+        title: "¿Desea descongelar este cliente?",
+        icon: "warning",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        confirmButtonText: "Aceptar",
+        denyButtonText: `Cancelar`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsLoading(true);
+          let data = {
+            solicitud_id: info_lote.solicitud_id,
+          };
+          console.log("data: ", data);
+
+          cobranzaService
+            .descongelarCliente(data, onClienteCongelado, onError)
+            .then((result) => {
+              setIsLoading(false);
+            });
+        }
+      });
+    } else {
+      // ! modal congelar
+      setShowCongelar(true);
+    }
+
+    // cobranzaService.congelarCliente(params, onClienteActualizado, onError);
+  }
+
+  function handleSubmitCongelar(values) {
+    // Obtener el valor de fecha del objeto
+    let fechaCongelar = values.fechaCongelar;
+    let today = new Date();
+
+    // Asegurarse de que el valor de fechaCongelar sea un objeto de tipo Date
+    let fecha = new Date(fechaCongelar);
+
+    // Formatear la fecha en DD/MM/YYYY
+    let dia = String(fecha.getDate()).padStart(2, "0");
+    let mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses empiezan en 0
+    let año = fecha.getFullYear();
+
+    let fechaFormateada = `${dia}/${mes}/${año}`;
+    let datos = {
+      fechaCongelar: today,
+      fechaTerminaCongelamiento: fechaFormateada,
+      solicitud_id: info_lote.solicitud_id,
+    };
+
+    cobranzaService
+      .congelarCliente(datos, onClienteCongelado, onError)
+      .then((result) => {
+        setIsLoading(false);
+        handleCloseCongelar();
+      });
+  }
+
+  const validarFecha = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error("Debe ingresar una fecha."));
+    }
+
+    // Fecha actual
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Establecer la hora en 00:00:00 para comparar solo las fechas
+
+    // Fecha límite (3 meses desde hoy)
+    const limite = new Date();
+    limite.setMonth(limite.getMonth() + 3);
+
+    // Validar si la fecha seleccionada es menor o igual a hoy
+    if (value.toDate() <= today) {
+      return Promise.reject(
+        new Error("La fecha debe ser mayor a la fecha actual.")
+      );
+    }
+
+    // Validar si la fecha seleccionada es mayor que la fecha límite (3 meses)
+    if (value.toDate() > limite) {
+      return Promise.reject(
+        new Error("La fecha no puede ser mayor a 3 meses desde hoy.")
+      );
+    }
+
+    // Si la fecha está dentro del rango permitido
+    return Promise.resolve();
+  };
+
+  function onClienteCongelado(params) {
+    BuscarInfoLote();
+
+    console.log("congela2");
   }
 
   return (
@@ -896,7 +1032,8 @@ export default function ClientesInfo() {
               className="boton"
               disabled={cookiePermisos >= 1 ? false : true}
               size="large"
-              onClick={() => {borrarAmortizacion();
+              onClick={() => {
+                borrarAmortizacion();
               }}
             >
               Amortización
@@ -944,6 +1081,20 @@ export default function ClientesInfo() {
               {info_lote.perdonar_interes
                 ? `Aplicar Interés`
                 : `Perdonar Interés`}
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              className="boton"
+              onClick={() => {
+                congelarCliente();
+              }}
+              // disabled={cookiePermisos >= 2 ? false : true}
+              size="large"
+            >
+              {info_lote.fecha_congelamiento != null
+                ? `Descongelar Cliente`
+                : `Congelar Cliente`}
             </Button>
           </Col>
         </Row>
@@ -1543,6 +1694,77 @@ export default function ClientesInfo() {
               </Button>
 
               <Button onClick={handleCloseModalEditar} danger size="large">
+                Cancelar
+              </Button>
+            </span>
+          </div>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={customTitleCongelar}
+        footer={null}
+        //width={800}
+        size="md"
+        open={showCongelar}
+        onCancel={() => handleCloseCongelar()}
+      >
+        <Form
+          labelCol={{ span: 10 }}
+          layout="horizontal"
+          name="congelarForm"
+          form={forms}
+          onFinish={handleSubmitCongelar}
+        >
+          <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
+            <Col
+              xs={24}
+              sm={20}
+              md={16}
+              lg={14}
+              xl={14}
+              xxl={14}
+              style={{
+                maxWidth: 300,
+              }}
+            >
+              <Form.Item
+                name="fechaCongelar"
+                label="Fecha Congelar"
+                rules={[
+                  {
+                    required: true,
+                    message: "Debe ingresar una fecha del congelar.",
+                  },
+                  { validator: validarFecha }, // Aquí la validación personalizada
+                ]}
+              >
+                <DatePicker
+                  format={dateFormat}
+                  locale={locale}
+                  style={{
+                    width: "100%",
+                  }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <div
+            className="terreno-edit__botones-footer"
+            style={{ paddingBottom: 15 }}
+          >
+            <span className="flex gap-2 justify-end">
+              <Button
+                onClick={handleSubmitCongelar}
+                className="boton"
+                htmlType="submit"
+                size="large"
+              >
+                Guardar
+              </Button>
+
+              <Button onClick={handleCloseCongelar} danger size="large">
                 Cancelar
               </Button>
             </span>
