@@ -60,7 +60,7 @@ class CobranzaService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .post("congelarCliente", { params }, { cancelToken: call.token })
+      .get("congelarCliente", { params }, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -84,7 +84,7 @@ class CobranzaService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .post("descongelarCliente", { params }, { cancelToken: call.token })
+      .get("descongelarCliente", { params }, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })

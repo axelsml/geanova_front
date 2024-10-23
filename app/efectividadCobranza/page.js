@@ -68,8 +68,10 @@ export default function EfectividadCobranza() {
     useState(false);
   const [showModalClientesPorCobrar, setShowModalClientesPorCobrar] =
     useState(false);
+  const [showModalEfectivo, setShowModalEfectivo] = useState(false);
 
   const [datos, setDatos] = useState([]);
+  const [datosClientesCongelados, setDatosClientesCongelados] = useState([]);
   const [datosModal, setDatosModal] = useState([]);
   const [datosModalClientesPagados, setDatosModalClientesPagados] = useState(
     []
@@ -77,6 +79,7 @@ export default function EfectividadCobranza() {
   const [datosModalClientesPorPagar, setDatosModalClientesPorPagar] = useState(
     []
   );
+  const [datosModalEfectivo, setDatosModalEfectivo] = useState([]);
   const [terrenos, setTerrenos] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
 
@@ -132,11 +135,16 @@ export default function EfectividadCobranza() {
 
   function handleCloseModalClientesCobrados(params) {
     setShowModalClientesCobrados(false);
-    setPage2(0);
+    setPage3(0);
   }
 
   function handleCloseModalClientesPorCobrar(params) {
     setShowModalClientesPorCobrar(false);
+    setPage4(0);
+  }
+
+  function handleCloseModalEfectivo(params) {
+    setShowModalEfectivo(false);
     setPage2(0);
   }
 
@@ -277,6 +285,7 @@ export default function EfectividadCobranza() {
     console.log("filas: ", params.datos);
 
     setDatos(params.datos);
+    setDatosClientesCongelados(params.clientesCongelados);
     setTotalClientes(params.totalClientes);
     setTotalMontoAnticipo(params.totalMontoAnticipo);
     setTotalMontoCobrado(params.totalMontoCobrado);
@@ -290,8 +299,14 @@ export default function EfectividadCobranza() {
 
   const handleRowClick = (dato) => {
     console.log("Fila clickeada:", dato);
-    setDatosModal(dato);
-    setShowModal(true);
+    if (dato.lapso == "Otros") {
+      console.log("Fila clickeada Otros:", dato);
+      setDatosModalEfectivo(dato.registros);
+      setShowModalEfectivo(true);
+    } else {
+      setDatosModal(dato.registros);
+      setShowModal(true);
+    }
   };
 
   function cambiarColor(lapso) {
@@ -524,7 +539,7 @@ export default function EfectividadCobranza() {
                 {datos.map((dato, index) => (
                   <TableRow
                     key={dato.id}
-                    onClick={() => handleRowClick(dato.registros)}
+                    onClick={() => handleRowClick(dato)}
                     sx={cambiarColor(dato.lapso)}
                   >
                     <TableCell>{dato.lapso}</TableCell>
@@ -637,6 +652,82 @@ export default function EfectividadCobranza() {
                   </TableCell>
                 </TableRow>
               </TableBody>
+            </Table>
+          </TableContainer>
+        </Col>
+      </Row>
+
+      <Row justify={"center"}>
+        <Typography.Title level={3}>Clientes Congelados</Typography.Title>
+      </Row>
+
+      <Row justify={"center"} className="mb-5 mt-2">
+        <Col xs={24} sm={12} md={22} lg={22} xl={22} xxl={22}>
+          <TableContainer component={Paper} className="tabla">
+            <Table>
+              <TableHead className="tabla_encabezado">
+                <TableRow>
+                  <TableCell>
+                    <p>Terreno/Lote</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Nombre Cliente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Importe Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Saldo</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Ultimo Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Congelo</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Termina</p>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stableSort2(
+                  datosClientesCongelados,
+                  getComparator2(order2, orderBy2)
+                )
+                  .slice(
+                    page2 * rowsPerPage2,
+                    page2 * rowsPerPage2 + rowsPerPage2
+                  )
+                  .map((dato, index) => (
+                    <TableRow key={dato.id}>
+                      <TableCell>{dato.lote}</TableCell>
+                      <TableCell>{dato.nombre_completo}</TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.importe_vencido))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.saldo))}
+                      </TableCell>
+                      <TableCell>{dato.ultimo_pago}</TableCell>
+                      <TableCell>{dato.fecha_congelado}</TableCell>
+                      <TableCell>{dato.fecha_termina}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={datosClientesCongelados.length}
+                    rowsPerPage={rowsPerPage2}
+                    page={page2}
+                    onPageChange={handleChangePage2}
+                    onRowsPerPageChange={handleChangeRowsPerPage2}
+                    labelRowsPerPage="Registros por Página"
+                  />
+                </TableRow>
+              </TableFooter>
             </Table>
           </TableContainer>
         </Col>
@@ -958,6 +1049,86 @@ export default function EfectividadCobranza() {
               danger
               size="large"
             >
+              Cerrar
+            </Button>
+          </span>
+        </div>
+      </Modal>
+
+      <Modal
+        title={customTitle("Clientes En Efectivo", 3)}
+        footer={null}
+        width="lg"
+        open={showModalEfectivo}
+        onCancel={() => handleCloseModalEfectivo()}
+      >
+        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
+          <TableContainer component={Paper} className="tabla">
+            <Table>
+              <TableHead className="tabla_encabezado">
+                <TableRow>
+                  <TableCell>
+                    <p>Nombre Cliente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Solicitud</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto Pagado</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto Pendiente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Terreno/Lote</p>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stableSort4(
+                  datosModalEfectivo,
+                  getComparator4(order4, orderBy4)
+                )
+                  .slice(
+                    page4 * rowsPerPage4,
+                    page4 * rowsPerPage4 + rowsPerPage4
+                  )
+                  .map((dato, index) => (
+                    <TableRow key={dato.id}>
+                      <TableCell>{dato.nombre_cliente}</TableCell>
+                      <TableCell>{dato.fecha_solicitud}</TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_pagado))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.pendiente))}
+                      </TableCell>
+                      <TableCell>{dato.terreno}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={datosModalEfectivo.length}
+                    rowsPerPage={rowsPerPage4}
+                    page={page4}
+                    onPageChange={handleChangePage4}
+                    onRowsPerPageChange={handleChangeRowsPerPage4}
+                    labelRowsPerPage="Registros por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Row>
+        <div
+          className="terreno-edit__botones-footer"
+          style={{ paddingBottom: 15 }}
+        >
+          <span className="flex gap-2 justify-end">
+            <Button onClick={handleCloseModalEfectivo} danger size="large">
               Cerrar
             </Button>
           </span>
