@@ -473,14 +473,14 @@ export default function EfectividadCobranza() {
                   ))}
                 </Select>
 
-                {/* <Button
+                <Button
                   type="primary"
                   onClick={() => {
                     borrarAmortizacion();
                   }}
                 >
                   Borrar Todas Las Amortizaciones
-                </Button> */}
+                </Button>
                 <Button
                   type="primary"
                   onClick={() => {
