@@ -560,9 +560,11 @@ export default function EfectividadCobranza() {
                           "clientes cobrados: ",
                           dato.clientes_cobrados
                         );
-                        handleClientesPagadosClick(
-                          dato.registros_clientes_cobrados
-                        );
+                        if (dato.lapso != "Otros") {
+                          handleClientesPagadosClick(
+                            dato.registros_clientes_cobrados
+                          );
+                        }
                       }}
                     >
                       {dato.clientes_cobrados}
@@ -577,9 +579,11 @@ export default function EfectividadCobranza() {
                           "clientes por cobrar: ",
                           dato.clientes_por_cobrar
                         );
-                        handleClientesPorPagarClick(
-                          dato.registros_clientes_por_cobrar
-                        );
+                        if (dato.lapso != "Otros") {
+                          handleClientesPorPagarClick(
+                            dato.registros_clientes_por_cobrar
+                          );
+                        }
                       }}
                     >
                       {dato.clientes_por_cobrar}
