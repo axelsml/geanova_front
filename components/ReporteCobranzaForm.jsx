@@ -52,6 +52,7 @@ export default function ReporteCobranza() {
   const [totalContrato, setTotalContrato] = useState(0);
   const [totalPendiente, setTotalPendiente] = useState(0);
   const [totalAnticipo, setTotalAnticipo] = useState(0);
+  const [totalInteres, setTotalInteres] = useState(0);
 
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
@@ -88,6 +89,7 @@ export default function ReporteCobranza() {
     setTotalContrato(0);
     setTotalPendiente(0);
     setTotalAnticipo(0);
+    setTotalInteres(0);
     var params = {
       fecha_inicial: fechaInicial,
       fecha_final: fechaFinal,
@@ -108,6 +110,7 @@ export default function ReporteCobranza() {
       setTotalContrato(data.contrato);
       setTotalPendiente(data.pendiente);
       setTotalAnticipo(data.anticipo);
+      setTotalInteres(data.monto_interes);
       setPagos(data.pagos);
     } else {
       Swal.fire({
@@ -448,7 +451,33 @@ export default function ReporteCobranza() {
               />
             </Row>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8}></Col>
+          <Col xs={24} sm={12} md={8} lg={8}>
+            <Row justify="center">
+              <label
+                className="reporte-lotes__label--input"
+                htmlFor="pendiente"
+              >
+                Monto Interes
+              </label>
+            </Row>
+            <Row justify="center">
+              <input
+                id="pendiente"
+                className="reporte-lotes__input--realizado"
+                value={
+                  totalInteres !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalInteres))
+                    : "$ 0.0"
+                }
+                disabled
+                placeholder={
+                  totalInteres !== 0
+                    ? "$ " + formatPrecio(parseFloat(totalInteres))
+                    : "$ 0.0"
+                }
+              />
+            </Row>
+          </Col>
         </Row>
       </div>
       {data != null && (
