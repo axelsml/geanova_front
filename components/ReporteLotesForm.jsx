@@ -48,6 +48,21 @@ export default function ReporteLotes() {
   const [totalMensual, setTotalMensual] = useState(0);
   const [totalLiquidados, setTotalLiquidados] = useState(0);
   const [totalCobranza, setTotalCobranza] = useState(0);
+
+  const [info2, setInfo2] = useState(null);
+  const [infoCliente2, setInfoCliente2] = useState(null);
+  const [infoLote2, setInfoLote2] = useState(null);
+  const [infoFecha2, setInfoFecha2] = useState(null);
+  const [nuevoPago2, setNuevoPago2] = useState(false);
+  const [totalLotes2, setTotalLotes2] = useState(0);
+  const [totalPagados2, setTotalPagados2] = useState(0);
+  const [totalVencidos2, setTotalVencidos2] = useState(0);
+  const [totalPendiente2, setTotalPendiente2] = useState(0);
+  const [totalSemanal2, setTotalSemanal2] = useState(0);
+  const [totalMensual2, setTotalMensual2] = useState(0);
+  const [totalLiquidados2, setTotalLiquidados2] = useState(0);
+  const [totalCobranza2, setTotalCobranza2] = useState(0);
+
   const { Option } = Select;
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
@@ -55,6 +70,8 @@ export default function ReporteLotes() {
   const [show, setShow] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page2, setPage2] = useState(0);
+  const [rowsPerPage2, setRowsPerPage2] = useState(5);
   const [isHovered, setIsHovered] = useState(false);
 
   const [cookiePermisos, setCookiePermisos] = useState([]);
@@ -80,6 +97,7 @@ export default function ReporteLotes() {
     var params = {
       lote_id: loteSelected ? loteSelected.id : 0,
       terreno_id: terrenoSelected.id,
+      bandera:1
     };
     lotesService.reporteLotes(params, onInfoClienteCargado, onError);
   };
@@ -97,6 +115,14 @@ export default function ReporteLotes() {
       setTotalLiquidados(data.liquidados);
       setTotalCobranza(data.cobranza);
       setTerrenoAux(terrenoSelected);
+      setIsLoading(true);
+
+      var params = {
+        lote_id: loteSelected ? loteSelected.id : 0,
+        terreno_id: terrenoSelected.id,
+        bandera:2
+      };
+      lotesService.reporteLotes(params, onInfoClienteCargado2, onError);
     } else {
       Swal.fire({
         title: "Error",
@@ -108,6 +134,33 @@ export default function ReporteLotes() {
         confirmButtonText: "Aceptar",
       });
       setInfo(null);
+    }
+  }
+  async function onInfoClienteCargado2(data) {
+    setIsLoading(false);
+    if (data.encontrado) {
+      setInfo2(data.response);
+      setTotalLotes2(data.lotes);
+      setTotalPagados2(data.pagados);
+      setTotalVencidos2(data.vencidos);
+      setTotalPendiente2(data.pendiente);
+      setTotalSemanal2(data.semanal);
+      setTotalMensual2(data.mensual);
+      setTotalLiquidados2(data.liquidados);
+      setTotalCobranza2(data.cobranza);
+      setTerrenoAux2(terrenoSelected);
+
+    } else {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No Se Pudo Encontrar La Informacion",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+      });
+      setInfo2(null);
     }
   }
 
@@ -150,9 +203,16 @@ export default function ReporteLotes() {
     setPage(newPage);
   };
 
+  const handleChangePage2 = (event, newPage) => {
+    setPage2(newPage);
+  };
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+  const handleChangeRowsPerPage2 = (event) => {
+    setRowsPerPage2(parseInt(event.target.value, 10));
+    setPage2(0);
   };
 
   const handleMouseEnter = () => {
@@ -252,6 +312,9 @@ export default function ReporteLotes() {
           </Button>
         </Col>
       </Row>
+
+  <b>CLIENTES SIN CONGELADOS</b>
+
       <div className="reporte-lotes__labels-container">
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
@@ -604,6 +667,367 @@ export default function ReporteLotes() {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Amortizaciones por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Row>
+      )}
+<b>CLIENTES CONGELADOS</b>
+<div className="reporte-lotes__labels-container">
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="lotes"
+              className="reporte-lotes__input--realizado"
+              value={totalLotes2 !== 0 ? totalLotes2 : 0}
+              disabled={true}
+              placeholder={totalLotes2 !== 0 ? totalLotes2 : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Pagado
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="pagados"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalPagados2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalPagados2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Vencido
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="vencidos"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalVencidos2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalVencidos2))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalVencidos2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalVencidos2))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Pendiente
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="pendiente"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalPendiente2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalPendiente2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+      </div>
+      <div className="reporte-lotes__labels-container">
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes liquidados
+            </label>
+          </Row>
+          <Row justify={"liquidados"}>
+            <input
+              id="liquidados"
+              className="reporte-lotes__input--realizado"
+              value={totalLiquidados2 !== 0 ? totalLiquidados2 : 0}
+              disabled={true}
+              placeholder={totalLiquidados2 !== 0 ? totalLiquidados2 : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes en cobranza
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="cobranza"
+              className="reporte-lotes__input--realizado"
+              value={totalCobranza2 !== 0 ? totalCobranza2 : 0}
+              disabled={true}
+              placeholder={totalCobranza2 !== 0 ? totalCobranza2 : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto semanal
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="semanal"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalSemanal2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalSemanal2))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalSemanal2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalSemanal2))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto mensual
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="mensual"
+              className="reporte-lotes__input--realizado"
+              value={
+                totalMensual2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalMensual2))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                totalMensual2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalMensual2))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+      </div>
+      {info2 != null && (
+        <Row justify={"center"} className="tabla">
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow className="tabla_encabezado">
+                  <TableCell>
+                    <p>No.</p>
+                  </TableCell>
+                  {terrenoAux == 0 && (
+                    <TableCell>
+                      <p>Terreno</p>
+                    </TableCell>
+                  )}
+                  <TableCell>
+                    <p>No. Lote</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Nombre</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Telefono</p>
+                  </TableCell>
+                  <TableCell>
+                    <p
+                      className="hoover-target"
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      Estado
+                    </p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Anticipo</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto Contrato</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Pagado al momento</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Saldo Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Estado de cuenta</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Amortizacion</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Realizar pago</p>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {info2
+                  .slice(page2 * rowsPerPage2, page2 * rowsPerPage2 + rowsPerPage2)
+                  .map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      {terrenoAux == 0 && (
+                        <TableCell>{item["resumen_lote"]["terreno"]}</TableCell>
+                      )}
+                      <TableCell>{item["resumen_lote"]["lote"]}</TableCell>
+                      <TableCell>
+                        {item["resumen_cliente"]["nombre_completo"]}
+                      </TableCell>
+                      <TableCell>
+                        {item["resumen_cliente"]["telefono_celular"]}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          disabled
+                          size={"small"}
+                          shape="round"
+                          style={{
+                            backgroundColor:
+                              item["resumen_lote"]["situacion_solicitud_color"],
+                          }}
+                        ></Button>
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(
+                            item["resumen_lote"]["monto_pago_requerido"]
+                          )
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["anticipo"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["monto_contrato"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["monto_pagado"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        ${" "}
+                        {formatPrecio(
+                          parseFloat(item["resumen_lote"]["monto_vencido"])
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="boton"
+                          disabled={cookiePermisos >= 1 ? false : true}
+                          size="large"
+                          key={item}
+                          onClick={() => {
+                            window.open(
+                              `https://api.santamariadelaluz.com/getClienteByLote/${terrenoSelected.id}/${item["resumen_lote"]["lote_id"]}.pdf`
+                            );
+                          }}
+                        >
+                          <FaFilePdf className="m-auto" size={"20px"} />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="boton"
+                          disabled={cookiePermisos >= 1 ? false : true}
+                          size="large"
+                          onClick={() => {
+                            window.open(
+                              `https://api.santamariadelaluz.com/iUsuarios/${item["resumen_lote"]["amortizaciones"][0]["solicitud_id"]}.pdf`
+                            );
+                          }}
+                        >
+                          <FaFilePdf className="m-auto" size={"20px"} />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        {item["resumen_lote"]["situacion_solicitud_color"] !==
+                          "blue" && (
+                          <Button
+                            className="boton"
+                            disabled={cookiePermisos >= 2 ? false : true}
+                            size={"large"}
+                            onClick={() => {
+                              handleModalPago(
+                                item["resumen_lote"],
+                                item["resumen_cliente"],
+                                item["fecha_proximo_pago"]
+                              );
+                            }}
+                          >
+                            <FaMoneyCheckDollar
+                              className="m-auto"
+                              size={"20px"}
+                            />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={totalLotes2}
+                    rowsPerPage={rowsPerPage2}
+                    page={page2}
+                    onPageChange={handleChangePage2}
+                    onrowsPerPage2Change={handleChangeRowsPerPage2}
                     labelRowsPerPage="Amortizaciones por Página"
                   />
                 </TableRow>
