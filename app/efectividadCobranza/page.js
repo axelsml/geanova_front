@@ -681,7 +681,10 @@ export default function EfectividadCobranza() {
                     <p>Importe Vencido</p>
                   </TableCell>
                   <TableCell>
-                    <p>Saldo</p>
+                    <p>Saldo Pagado</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Percibido</p>
                   </TableCell>
                   <TableCell>
                     <p>Ultimo Pago</p>
@@ -712,6 +715,9 @@ export default function EfectividadCobranza() {
                       </TableCell>
                       <TableCell>
                         ${formatPrecio(parseFloat(dato.saldo))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.pago_fechas))}
                       </TableCell>
                       <TableCell>{dato.ultimo_pago}</TableCell>
                       <TableCell>{dato.fecha_congelado}</TableCell>
