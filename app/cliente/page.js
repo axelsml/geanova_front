@@ -58,7 +58,7 @@ export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
   const [nuevoPago, setNuevoPago] = useState(false);
   const [errorNuevoPago, setErrorNuevoPago] = useState(false);
-  const [ventas, setVentas] = useState(null);
+  const [usuarioInfo, setUsuarioInfo] = useState(null);
   const [changeState, setChangeState] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -133,7 +133,10 @@ export default function ClientesInfo() {
 
   const [forms] = Form.useForm();
 
+  const storedUsuario = window.localStorage.getItem("usuario");
   useEffect(() => {
+    let info = JSON.parse(storedUsuario);
+    setUsuarioInfo(info);
     pagosService.getSistemasPago(setSistemasPago, onError);
     //funcion importable para traer el nivel de la pantalla (revisar home.js para la lista de nombres de pantallas)
     // se necesita el nombre de la pantalla o un callback para setear el valor
@@ -828,7 +831,7 @@ export default function ClientesInfo() {
                   <Col xs={24} sm={12} lg={12} style={{ textAlign: "right" }}>
                     <Button
                       className="boton renglon_otro_color"
-                      disabled={cookiePermisos >= 2 ? false : true}
+                      disabled={usuarioInfo.id != 2}
                       onClick={() => {
                         datosModal();
                         setShowModalEditar(true);
@@ -1092,7 +1095,7 @@ export default function ClientesInfo() {
               onClick={() => {
                 actualizarPerdonarInteres();
               }}
-              disabled={cookiePermisos >= 2 ? false : true}
+              disabled={usuarioInfo.id != 2}
               size="large"
             >
               {info_lote.perdonar_interes
@@ -1106,7 +1109,7 @@ export default function ClientesInfo() {
               onClick={() => {
                 congelarCliente();
               }}
-              // disabled={cookiePermisos >= 2 ? false : true}
+              disabled={usuarioInfo.id != 2}
               size="large"
             >
               {info_lote.fecha_congelamiento != null
