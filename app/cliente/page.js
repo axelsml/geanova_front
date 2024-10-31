@@ -57,6 +57,7 @@ import cobranzaService from "@/services/cobranzaService";
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
   const [nuevoPago, setNuevoPago] = useState(false);
+  const [errorNuevoPago, setErrorNuevoPago] = useState(false);
   const [ventas, setVentas] = useState(null);
   const [changeState, setChangeState] = useState(false);
   const [page, setPage] = useState(0);
@@ -172,6 +173,20 @@ export default function ClientesInfo() {
     //     BuscarInfoLote()
   }, [changeState]);
 
+  useEffect(() => {
+    if (errorNuevoPago) {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No se pudo encontrar la sesión, favor de iniciar sesión antes de continuar.",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Aceptar",
+      });
+    }
+  }, [errorNuevoPago]);
+
   const CreateNuevaVenta = () => {
     setNuevaVenta(!nuevaVenta);
   };
@@ -181,14 +196,16 @@ export default function ClientesInfo() {
 
     cookieUsuario
       .then((cookie) => {
-        if (cookie.value) {
+        if (!cookie || !cookie.value) {
+          // Si cookie.value es null o false, activar nuevoPago
+          setErrorNuevoPago(!errorNuevoPago);
+        } else {
+          // Si cookie.value es true, desactivar nuevoPago
           setNuevoPago(!nuevoPago);
         }
-
-        // setCookieMenu(JSON.parse(cookie.value));
       })
       .catch((error) => {
-        console.error("Error al obtener la cookie1:", error); // Manejar cualquier error
+        console.error("Error al obtener la cookie:", error); // Manejar cualquier error
       });
   };
 
