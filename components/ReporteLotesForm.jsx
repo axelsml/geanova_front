@@ -34,6 +34,7 @@ export default function ReporteLotes() {
   const [loteAux, setLoteAux] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
+  const [periodoPagoSelected, setPeriodoPagoSelected] = useState(null);
   const [terrenoAux, setTerrenoAux] = useState(null);
   const [info, setInfo] = useState(null);
   const [infoCliente, setInfoCliente] = useState(null);
@@ -78,6 +79,29 @@ export default function ReporteLotes() {
 
   const [form] = Form.useForm();
 
+  let periodos = [
+    {
+      id: 0,
+      label: "Todos",
+      value: 0,
+    },
+    {
+      id: 1,
+      label: "Mes",
+      value: 1,
+    },
+    {
+      id: 2,
+      label: "Quincenal",
+      value: 2,
+    },
+    {
+      id: 3,
+      label: "Semanal",
+      value: 3,
+    },
+  ];
+
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
     getCookiePermisos("lotes", setCookiePermisos);
@@ -97,7 +121,8 @@ export default function ReporteLotes() {
     var params = {
       lote_id: loteSelected ? loteSelected.id : 0,
       terreno_id: terrenoSelected.id,
-      bandera:1
+      periodoPago: periodoPagoSelected,
+      bandera: 1,
     };
     lotesService.reporteLotes(params, onInfoClienteCargado, onError);
   };
@@ -120,7 +145,7 @@ export default function ReporteLotes() {
       var params = {
         lote_id: loteSelected ? loteSelected.id : 0,
         terreno_id: terrenoSelected.id,
-        bandera:2
+        bandera: 2,
       };
       lotesService.reporteLotes(params, onInfoClienteCargado2, onError);
     } else {
@@ -149,7 +174,6 @@ export default function ReporteLotes() {
       setTotalLiquidados2(data.liquidados);
       setTotalCobranza2(data.cobranza);
       setTerrenoAux2(terrenoSelected);
-
     } else {
       Swal.fire({
         title: "Error",
@@ -240,8 +264,13 @@ export default function ReporteLotes() {
           <b>REPORTE DE LOTES</b>
         </Col>
       </Row>
-      <Row justify={"center"} style={{ marginTop: "15px" }}>
-        <Col>
+      <Row
+        gutter={[16, 16]}
+        wrap
+        justify={"center"}
+        style={{ marginTop: "15px" }}
+      >
+        <Col span={5}>
           <Form.Item
             label={"Proyecto"}
             name={"terreno"}
@@ -269,7 +298,7 @@ export default function ReporteLotes() {
             </Select>
           </Form.Item>
         </Col>
-        <Col>
+        <Col span={5}>
           <Form name="loteform" form={form}>
             <Form.Item
               label={"Lote"}
@@ -302,7 +331,37 @@ export default function ReporteLotes() {
             </Form.Item>
           </Form>
         </Col>
-        <Col>
+        <Col span={5}>
+          <Form.Item
+            label={"Periodo"}
+            name={"periodoPago"}
+            style={{ width: "100%" }}
+            // rules={[{ required: true, message: "Periodo no seleccionado" }]}
+          >
+            <Select
+              //showSearch
+              placeholder="Seleccione un Periodo"
+              optionLabelProp="label"
+              onChange={(data) => {
+                setPeriodoPagoSelected(data);
+              }}
+            >
+              {lotes &&
+                periodos.map((periodo, index) => {
+                  return (
+                    <Option
+                      key={periodo.id}
+                      value={periodo.value}
+                      label={periodo.label}
+                    >
+                      {periodo.label}
+                    </Option>
+                  );
+                })}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={1}>
           <Button
             className="boton"
             disabled={terrenoSelected == null}
@@ -313,7 +372,7 @@ export default function ReporteLotes() {
         </Col>
       </Row>
 
-  <b>CLIENTES SIN CONGELADOS</b>
+      <b>CLIENTES SIN CONGELADOS</b>
 
       <div className="reporte-lotes__labels-container">
         <Col xs={12} sm={6} lg={5}>
@@ -675,8 +734,8 @@ export default function ReporteLotes() {
           </TableContainer>
         </Row>
       )}
-<b>CLIENTES CONGELADOS</b>
-<div className="reporte-lotes__labels-container">
+      <b>CLIENTES CONGELADOS</b>
+      <div className="reporte-lotes__labels-container">
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
@@ -908,7 +967,10 @@ export default function ReporteLotes() {
               </TableHead>
               <TableBody>
                 {info2
-                  .slice(page2 * rowsPerPage2, page2 * rowsPerPage2 + rowsPerPage2)
+                  .slice(
+                    page2 * rowsPerPage2,
+                    page2 * rowsPerPage2 + rowsPerPage2
+                  )
                   .map((item, index) => (
                     <TableRow key={index}>
                       <TableCell>{index + 1}</TableCell>
