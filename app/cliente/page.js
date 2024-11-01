@@ -135,11 +135,18 @@ export default function ClientesInfo() {
 
   const storedUsuario = window.localStorage.getItem("usuario");
   useEffect(() => {
-    let info = JSON.parse(storedUsuario);
-    setUsuarioInfo(info);
+    let info = null;
+
+    if (storedUsuario) {
+      try {
+        info = JSON.parse(storedUsuario);
+        setUsuarioInfo(info);
+      } catch (error) {
+        console.error("Error al analizar el usuario almacenado:", error);
+      }
+    }
     pagosService.getSistemasPago(setSistemasPago, onError);
-    //funcion importable para traer el nivel de la pantalla (revisar home.js para la lista de nombres de pantallas)
-    // se necesita el nombre de la pantalla o un callback para setear el valor
+
     getCookiePermisos("informacion del cliente", setCookiePermisos);
   }, []);
 
