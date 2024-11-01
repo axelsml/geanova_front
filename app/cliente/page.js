@@ -137,14 +137,13 @@ export default function ClientesInfo() {
   useEffect(() => {
     let info = null;
 
-    if (storedUsuario) {
-      try {
-        info = JSON.parse(storedUsuario);
-        setUsuarioInfo(info);
-      } catch (error) {
-        console.error("Error al analizar el usuario almacenado:", error);
-      }
+    try {
+      info = JSON.parse(storedUsuario);
+      setUsuarioInfo(info);
+    } catch (error) {
+      console.error("Error al analizar el usuario almacenado:", error);
     }
+
     pagosService.getSistemasPago(setSistemasPago, onError);
 
     getCookiePermisos("informacion del cliente", setCookiePermisos);
