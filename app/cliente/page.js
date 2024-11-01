@@ -132,20 +132,20 @@ export default function ClientesInfo() {
   const { Option } = Select;
 
   const [forms] = Form.useForm();
-
-  const storedUsuario = window.localStorage.getItem("usuario");
   useEffect(() => {
-    let info = null;
-
-    try {
-      info = JSON.parse(storedUsuario);
-      setUsuarioInfo(info);
-    } catch (error) {
-      console.error("Error al analizar el usuario almacenado:", error);
+    // Verifica que se esté ejecutando en el lado del cliente
+    if (typeof window !== "undefined") {
+      const storedUsuario = localStorage.getItem("usuario");
+      if (storedUsuario) {
+        setUsuarioInfo(JSON.parse(storedUsuario));
+      }
     }
+  }, []);
 
+  useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
 
+    // se necesita el nombre de la pantalla o un callback para setear el valor
     getCookiePermisos("informacion del cliente", setCookiePermisos);
   }, []);
 
