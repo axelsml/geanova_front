@@ -147,7 +147,7 @@ export default function ClientesInfo() {
 
     // se necesita el nombre de la pantalla o un callback para setear el valor
     getCookiePermisos("informacion del cliente", setCookiePermisos);
-  }, [storedUsuario]);
+  }, []);
 
   let shouldSearch = false;
 
