@@ -147,7 +147,7 @@ export default function ClientesInfo() {
     pagosService.getSistemasPago(setSistemasPago, onError);
 
     getCookiePermisos("informacion del cliente", setCookiePermisos);
-  }, []);
+  }, [storedUsuario]);
 
   let shouldSearch = false;
 
