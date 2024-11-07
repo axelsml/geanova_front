@@ -43,6 +43,10 @@ export default function ReporteLotes() {
   const [nuevoPago, setNuevoPago] = useState(false);
   const [totalLotes, setTotalLotes] = useState(0);
   const [totalPagados, setTotalPagados] = useState(0);
+  const [montoTotalContrato, setMontoTotalContrato] = useState(0);
+  const [montoTotalAmortizaciones, setMontoTotalAmortizaciones] = useState(0);
+  const [pendientePorContratar, setPendientePorContratar] = useState(0);
+  const [lotesDisponibles, setLotesDisponibles] = useState(0);
   const [totalVencidos, setTotalVencidos] = useState(0);
   const [totalPendiente, setTotalPendiente] = useState(0);
   const [totalSemanal, setTotalSemanal] = useState(0);
@@ -57,6 +61,9 @@ export default function ReporteLotes() {
   const [nuevoPago2, setNuevoPago2] = useState(false);
   const [totalLotes2, setTotalLotes2] = useState(0);
   const [totalPagados2, setTotalPagados2] = useState(0);
+  const [montoTotalContrato2, setMontoTotalContrato2] = useState(0);
+  const [montoTotalAmortizaciones2, setMontoTotalAmortizaciones2] = useState(0);
+  const [pendientePorContratar2, setPendientePorContratar2] = useState(0);
   const [totalVencidos2, setTotalVencidos2] = useState(0);
   const [totalPendiente2, setTotalPendiente2] = useState(0);
   const [totalSemanal2, setTotalSemanal2] = useState(0);
@@ -116,6 +123,10 @@ export default function ReporteLotes() {
     setTotalSemanal(0);
     setTotalMensual(0);
     setTotalLiquidados(0);
+    setMontoTotalContrato(0);
+    setMontoTotalAmortizaciones(0);
+    setPendientePorContratar(0);
+    setLotesDisponibles(0);
     setTotalCobranza(0);
     setTerrenoAux(null);
     var params = {
@@ -136,6 +147,10 @@ export default function ReporteLotes() {
       setTotalVencidos(data.vencidos);
       setTotalPendiente(data.pendiente);
       setTotalSemanal(data.semanal);
+      setMontoTotalContrato(data.monto_contrato);
+      setMontoTotalAmortizaciones(data.cobro_total_mensual);
+      setPendientePorContratar(data.pendiente_por_contratar);
+      setLotesDisponibles(data.lotes_disponibles);
       setTotalMensual(data.mensual);
       setTotalLiquidados(data.liquidados);
       setTotalCobranza(data.cobranza);
@@ -170,6 +185,8 @@ export default function ReporteLotes() {
       setTotalVencidos2(data.vencidos);
       setTotalPendiente2(data.pendiente);
       setTotalSemanal2(data.semanal);
+      setMontoTotalContrato2(data.monto_contrato);
+      setMontoTotalAmortizaciones2(data.cobro_total_mensual);
       setTotalMensual2(data.mensual);
       setTotalLiquidados2(data.liquidados);
       setTotalCobranza2(data.cobranza);
@@ -394,7 +411,89 @@ export default function ReporteLotes() {
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Pagado
+              Lotes Cobrados
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="cobranza"
+              className="reporte-lotes__input--realizado"
+              value={totalCobranza !== 0 ? totalCobranza : 0}
+              disabled={true}
+              placeholder={totalCobranza !== 0 ? totalCobranza : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes liquidados
+            </label>
+          </Row>
+          <Row justify={"liquidados"}>
+            <input
+              id="liquidados"
+              className="reporte-lotes__input--realizado"
+              value={totalLiquidados !== 0 ? totalLiquidados : 0}
+              disabled={true}
+              placeholder={totalLiquidados !== 0 ? totalLiquidados : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Cobro Total Mensual
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="vencidos"
+              className="reporte-lotes__input--realizado"
+              value={
+                montoTotalAmortizaciones !== 0
+                  ? "$ " + formatPrecio(parseFloat(montoTotalAmortizaciones))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                montoTotalAmortizaciones !== 0
+                  ? "$ " + formatPrecio(parseFloat(montoTotalAmortizaciones))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+      </div>
+      <div className="reporte-lotes__labels-container">
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Contratado
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="semanal"
+              className="reporte-lotes__input--realizado"
+              value={
+                montoTotalContrato !== 0
+                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato))
+                  : "$ 0.0"
+              }
+              disabled={true}
+              placeholder={
+                montoTotalContrato !== 0
+                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato))
+                  : "$ 0.0"
+              }
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Monto Cobrado
             </label>
           </Row>
           <Row justify={"center"}>
@@ -418,31 +517,7 @@ export default function ReporteLotes() {
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Vencido
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="vencidos"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalVencidos !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalVencidos))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalVencidos !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalVencidos))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Pendiente
+              Pend. Por Cobrar
             </label>
           </Row>
           <Row justify={"center"}>
@@ -463,83 +538,32 @@ export default function ReporteLotes() {
             />
           </Row>
         </Col>
-      </div>
-      <div className="reporte-lotes__labels-container">
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes liquidados
-            </label>
-          </Row>
-          <Row justify={"liquidados"}>
-            <input
-              id="liquidados"
-              className="reporte-lotes__input--realizado"
-              value={totalLiquidados !== 0 ? totalLiquidados : 0}
-              disabled={true}
-              placeholder={totalLiquidados !== 0 ? totalLiquidados : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes en cobranza
+              Pend. Por Contratar
             </label>
           </Row>
           <Row justify={"center"}>
-            <input
-              id="cobranza"
-              className="reporte-lotes__input--realizado"
-              value={totalCobranza !== 0 ? totalCobranza : 0}
-              disabled={true}
-              placeholder={totalCobranza !== 0 ? totalCobranza : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto semanal
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="semanal"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalSemanal !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalSemanal))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalSemanal !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalSemanal))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto mensual
-            </label>
-          </Row>
-          <Row justify={"center"}>
+            {/* <div>{lotesDisponibles}</div> */}
             <input
               id="mensual"
               className="reporte-lotes__input--realizado"
               value={
-                totalMensual !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalMensual))
+                pendientePorContratar !== 0
+                  ? "(" +
+                    lotesDisponibles +
+                    "),$" +
+                    formatPrecio(parseFloat(pendientePorContratar))
                   : "$ 0.0"
               }
               disabled={true}
               placeholder={
-                totalMensual !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalMensual))
+                pendientePorContratar !== 0
+                  ? "(" +
+                    lotesDisponibles +
+                    "),$" +
+                    formatPrecio(parseFloat(pendientePorContratar))
                   : "$ 0.0"
               }
             />
@@ -632,7 +656,7 @@ export default function ReporteLotes() {
                         ></Button>
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(
                             item["resumen_lote"]["monto_pago_requerido"]
@@ -640,25 +664,25 @@ export default function ReporteLotes() {
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["anticipo"])
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["monto_contrato"])
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["monto_pagado"])
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["monto_vencido"])
                         )}
@@ -755,7 +779,39 @@ export default function ReporteLotes() {
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Pagado
+              Lotes Cobrados {/* // ! falta aclaracion de esto */}
+            </label>
+          </Row>
+          <Row justify={"center"}>
+            <input
+              id="cobranza"
+              className="reporte-lotes__input--realizado"
+              value={totalCobranza2 !== 0 ? totalCobranza2 : 0}
+              disabled={true}
+              placeholder={totalCobranza2 !== 0 ? totalCobranza2 : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Lotes liquidados
+            </label>
+          </Row>
+          <Row justify={"liquidados"}>
+            <input
+              id="liquidados"
+              className="reporte-lotes__input--realizado"
+              value={totalLiquidados2 !== 0 ? totalLiquidados2 : 0}
+              disabled={true}
+              placeholder={totalLiquidados2 !== 0 ? totalLiquidados2 : "$ 0.0"}
+            />
+          </Row>
+        </Col>
+        <Col xs={12} sm={6} lg={5}>
+          <Row justify={"center"}>
+            <label className="reporte-lotes__label--input" htmlFor="">
+              Cobro Total Mensual
             </label>
           </Row>
           <Row justify={"center"}>
@@ -776,10 +832,12 @@ export default function ReporteLotes() {
             />
           </Row>
         </Col>
+      </div>
+      <div className="reporte-lotes__labels-container">
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Vencido
+              Monto Contratado
             </label>
           </Row>
           <Row justify={"center"}>
@@ -787,14 +845,14 @@ export default function ReporteLotes() {
               id="vencidos"
               className="reporte-lotes__input--realizado"
               value={
-                totalVencidos2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalVencidos2))
+                montoTotalContrato2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato2))
                   : "$ 0.0"
               }
               disabled={true}
               placeholder={
-                totalVencidos2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalVencidos2))
+                montoTotalContrato2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato2))
                   : "$ 0.0"
               }
             />
@@ -803,7 +861,7 @@ export default function ReporteLotes() {
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Pendiente
+              Monto Cobrado
             </label>
           </Row>
           <Row justify={"center"}>
@@ -811,57 +869,23 @@ export default function ReporteLotes() {
               id="pendiente"
               className="reporte-lotes__input--realizado"
               value={
-                totalPendiente2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
+                totalPagados2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
                   : "$ 0.0"
               }
               disabled={true}
               placeholder={
-                totalPendiente2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
+                totalPagados2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
                   : "$ 0.0"
               }
             />
           </Row>
         </Col>
-      </div>
-      <div className="reporte-lotes__labels-container">
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes liquidados
-            </label>
-          </Row>
-          <Row justify={"liquidados"}>
-            <input
-              id="liquidados"
-              className="reporte-lotes__input--realizado"
-              value={totalLiquidados2 !== 0 ? totalLiquidados2 : 0}
-              disabled={true}
-              placeholder={totalLiquidados2 !== 0 ? totalLiquidados2 : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes en cobranza
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="cobranza"
-              className="reporte-lotes__input--realizado"
-              value={totalCobranza2 !== 0 ? totalCobranza2 : 0}
-              disabled={true}
-              placeholder={totalCobranza2 !== 0 ? totalCobranza2 : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto semanal
+              Pend. Por Cobrar
             </label>
           </Row>
           <Row justify={"center"}>
@@ -869,14 +893,14 @@ export default function ReporteLotes() {
               id="semanal"
               className="reporte-lotes__input--realizado"
               value={
-                totalSemanal2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalSemanal2))
+                totalPendiente2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
                   : "$ 0.0"
               }
               disabled={true}
               placeholder={
-                totalSemanal2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalSemanal2))
+                totalPendiente2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
                   : "$ 0.0"
               }
             />
@@ -885,7 +909,7 @@ export default function ReporteLotes() {
         <Col xs={12} sm={6} lg={5}>
           <Row justify={"center"}>
             <label className="reporte-lotes__label--input" htmlFor="">
-              Monto mensual
+              Pend. Por Contratar
             </label>
           </Row>
           <Row justify={"center"}>
@@ -893,14 +917,14 @@ export default function ReporteLotes() {
               id="mensual"
               className="reporte-lotes__input--realizado"
               value={
-                totalMensual2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalMensual2))
+                pendientePorContratar2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
                   : "$ 0.0"
               }
               disabled={true}
               placeholder={
-                totalMensual2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalMensual2))
+                pendientePorContratar2 !== 0
+                  ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
                   : "$ 0.0"
               }
             />
@@ -996,7 +1020,7 @@ export default function ReporteLotes() {
                         ></Button>
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(
                             item["resumen_lote"]["monto_pago_requerido"]
@@ -1004,25 +1028,25 @@ export default function ReporteLotes() {
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["anticipo"])
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["monto_contrato"])
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["monto_pagado"])
                         )}
                       </TableCell>
                       <TableCell>
-                        ${" "}
+                        $
                         {formatPrecio(
                           parseFloat(item["resumen_lote"]["monto_vencido"])
                         )}
