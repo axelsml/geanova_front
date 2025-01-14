@@ -126,6 +126,7 @@ export default function EfectividadCobranza() {
     form.setFieldValue("proyecto", 0);
 
     setMesSelected(mesActual);
+    setAñoSelected(añoActual)
   }, []);
 
   function handleCloseModal(params) {
