@@ -11,6 +11,7 @@ class RecursosService {
     callback,
     callbackResumen2,
     callback2,
+    callbackResumenId,
     error
   ) {
     let call;
@@ -41,6 +42,12 @@ class RecursosService {
           callback(response.data.movimientosAlonso),
           callbackResumen2(response.data.movimientosSucursal),
           callback2(response.data.movimientosSucursal),
+          callbackResumenId(
+            response.data.resumenMovimientosId,
+            response.data.resumenOtrosAbonosId,
+            response.data.resumenOtrosCargosId,
+            response.data.resumenConciliadosId
+          ),
         ]);
       })
       .catch((response) => {

@@ -27,6 +27,7 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
+import { FaCircleExclamation } from "react-icons/fa6";
 import { LoadingContext } from "@/contexts/loading";
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
@@ -60,10 +61,14 @@ export default function TarjetaDCAMR() {
   //Variables del modal
   const [showModal, setShowModal] = useState(false);
   const [showModalTarjetas, setShowModalTarjetas] = useState(false);
+  const [showModalDetalles, setShowModalDetalles] = useState(false);
 
   const [tabla, setTabla] = useState([]);
+  const [tablaDetalles, setTablaDetalles] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
   const { setIsLoading } = useContext(LoadingContext);
+
+  const [titleDetalles, setTitleDetalles] = useState("");
 
   const [range, setRange] = useState([]);
   const [movimientos, setMovimientos] = useState(false);
@@ -105,6 +110,12 @@ export default function TarjetaDCAMR() {
   const handleCloseModalTarjetas = () => {
     setShowModalTarjetas(false);
   };
+  const handleCloseModalDetalles = () => {
+    setShowModalDetalles(false);
+    setTablaDetalles([]);
+    setTitleDetalles("");
+  };
+
   useEffect(() => {
     // Obtener la fecha actual
     const startOfMonth = new Date(
@@ -222,6 +233,14 @@ export default function TarjetaDCAMR() {
     return order === "desc"
       ? (a, b) => descendingComparator2(a, b, orderBy)
       : (a, b) => -descendingComparator2(a, b, orderBy);
+  };
+
+  const filtrarTabla = (movimientos, tipoId) => {
+    let filtrarTabla;
+    if (tipoId) {
+      filtrarTabla = movimientos.filter((dato) => dato.tipo_id === tipoId);
+      setTablaDetalles(filtrarTabla);
+    }
   };
 
   // Funcion para buscar datos en base a los filtros
@@ -436,6 +455,12 @@ export default function TarjetaDCAMR() {
       </Row>
     );
   };
+
+  const customTitleDetalles = (
+    <Row justify={"center"} style={{ color: "#438dcc", margin: "0 auto" }}>
+      <Typography.Title level={2}>{titleDetalles}</Typography.Title>
+    </Row>
+  );
   // Títulos personalizados para los cards
 
   function disableSelect(status) {
@@ -714,7 +739,27 @@ export default function TarjetaDCAMR() {
                     <Form.Item
                       key={dato.id}
                       name={`movimiento_${index}`}
-                      label={toTitleCase(dato.descripcion)}
+                      label={
+                        <span
+                          style={{ cursor: "pointer" }}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.color = "#4096ff")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.color = "initial")
+                          }
+                          onClick={() => {
+                            setTablaDetalles(tabla);
+                            filtrarTabla(tabla, dato.id);
+                            setTitleDetalles(
+                              "Detalles de" + " " + dato.descripcion
+                            );
+                            setShowModalDetalles(true);
+                          }}
+                        >
+                          {dato.descripcion}
+                        </span>
+                      }
                     >
                       <Input
                         placeholder={
@@ -759,7 +804,27 @@ export default function TarjetaDCAMR() {
                     <Form.Item
                       key={dato.id}
                       name={`movimiento_${index}`}
-                      label={toTitleCase(dato.descripcion)}
+                      label={
+                        <span
+                          style={{ cursor: "pointer" }}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.color = "#4096ff")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.color = "initial")
+                          }
+                          onClick={() => {
+                            setTablaDetalles(tabla);
+                            filtrarTabla(tabla, dato.id);
+                            setTitleDetalles(
+                              "Detalles de" + " " + dato.descripcion
+                            );
+                            setShowModalDetalles(true);
+                          }}
+                        >
+                          {dato.descripcion}
+                        </span>
+                      }
                     >
                       <Input
                         placeholder={
@@ -902,6 +967,124 @@ export default function TarjetaDCAMR() {
         <AdministrarTarjetas
           cargarTarjetas={cargarTarjetas}
         ></AdministrarTarjetas>
+      </Modal>
+
+      <Modal
+        title={customTitleDetalles}
+        footer={null}
+        width={900}
+        open={showModalDetalles}
+        onCancel={() => handleCloseModalDetalles()}
+      >
+        <div>
+          {tablaDetalles.length === 0 && (
+            <Row
+              justify={"center"}
+              style={{ margin: 16, flexDirection: "column" }}
+            >
+              <Row>
+                <Typography.Title
+                  level={3}
+                  style={{
+                    color: "orange",
+                    textAlign: "center",
+                    margin: "0 auto",
+                  }}
+                >
+                  No hay {titleDetalles} disponibles con la información
+                  solicitada
+                </Typography.Title>
+              </Row>
+              <Row style={{ margin: "24px" }}>
+                <FaCircleExclamation
+                  className="m-auto"
+                  size={"60px"}
+                  color="orange"
+                />
+              </Row>
+            </Row>
+          )}
+          {tablaDetalles.length > 0 && (
+            <Row
+              gutter={[8, 8]}
+              justify="center"
+              style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
+            >
+              <Typography.Title level={3}>Movimientos</Typography.Title>
+
+              <Col xs={24}>
+                <TableContainer component={Paper} className="tabla">
+                  <Table>
+                    <TableHead className="tabla_encabezado">
+                      <TableRow>
+                        <TableCell>
+                          <p>Fecha</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Tarjeta</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Concepto</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Cargos</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Abonos</p>
+                        </TableCell>
+                        <TableCell style={{ width: 180 }}>
+                          <p>Tipo de movimiento</p>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {stableSort2(
+                        tablaDetalles,
+                        getComparator2(order2, orderBy2)
+                      )
+                        .slice(
+                          page2 * rowsPerPage2,
+                          page2 * rowsPerPage2 + rowsPerPage2
+                        )
+                        .map((dato, index) => (
+                          <TableRow
+                            key={dato.id}
+                            style={colorDinamicoRow(dato.codigo_color)}
+                          >
+                            <TableCell>
+                              {fechaFormateada(dato.fecha_operacion)}
+                            </TableCell>
+                            <TableCell>{dato.tarjeta}</TableCell>
+                            <TableCell>{dato.concepto}</TableCell>
+                            <TableCell>
+                              ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
+                            </TableCell>
+                            <TableCell>
+                              ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
+                            </TableCell>
+                            <TableCell>{dato.descripcion}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                    <TableFooter>
+                      <TableRow>
+                        <TablePagination
+                          rowsPerPageOptions={[5, 10, 25]}
+                          count={tablaDetalles.length}
+                          rowsPerPage={rowsPerPage2}
+                          page={page2}
+                          onPageChange={handleChangePage2}
+                          onRowsPerPageChange={handleChangeRowsPerPage2}
+                          labelRowsPerPage="Registros por Página"
+                        />
+                      </TableRow>
+                    </TableFooter>
+                  </Table>
+                </TableContainer>
+              </Col>
+            </Row>
+          )}
+        </div>
       </Modal>
     </div>
   );

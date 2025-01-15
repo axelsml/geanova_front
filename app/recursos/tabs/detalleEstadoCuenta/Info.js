@@ -25,6 +25,7 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
+import { FaCircleExclamation } from "react-icons/fa6";
 import { LoadingContext } from "@/contexts/loading";
 import terrenosService from "@/services/terrenosService";
 import Swal from "sweetalert2";
@@ -53,11 +54,30 @@ export default function DetalleEstadoCuenta() {
   const [page2, setPage2] = useState(0);
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
 
+  const [orderBy3] = useState("fechaOperacion");
+  const [order3] = useState("desc");
+  const [page3, setPage3] = useState(0);
+  const [rowsPerPage3, setRowsPerPage3] = useState(5);
+
+  const [orderBy4] = useState("fechaOperacion");
+  const [order4] = useState("desc");
+  const [page4, setPage4] = useState(0);
+  const [rowsPerPage4, setRowsPerPage4] = useState(5);
+
   //Variables del modal
   const [showModal, setShowModal] = useState(false);
+  const [showModalDetalles, setShowModalDetalles] = useState(false);
+  const [titleDetalles, setTitleDetalles] = useState("");
+
+  const [movimientosGenerales, setMovimientosGenerales] = useState([]);
+  const [movimientosConciliados, setMovimientosConciliados] = useState([]);
+  const [movimientosAbonos, setMovimientosAbonos] = useState([]);
+  const [movimientosCargos, setMovimientosCargos] = useState([]);
 
   const [tablaAlonso, setTablaAlonso] = useState([]);
+  const [tablaAlonsoFiltrada, setTablaAlonsoFiltrada] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
+  const [tablaSucursalFiltrada, setTablaSucursalFiltrada] = useState([]);
   const { setIsLoading } = useContext(LoadingContext);
 
   const [range, setRange] = useState([]);
@@ -100,6 +120,42 @@ export default function DetalleEstadoCuenta() {
   // Handlers para cerrar los modales
   const handleCloseModal = () => {
     setShowModal(false);
+  };
+
+  const handleCloseModalDetalles = () => {
+    setShowModalDetalles(false);
+    setTablaAlonsoFiltrada([]);
+    setTablaSucursalFiltrada([]);
+    setTitleDetalles("");
+    setPage3(0);
+    setPage4(0);
+    setRowsPerPage3(5);
+    setRowsPerPage4(5);
+  };
+
+  const filtrarTabla = (movimientos, movimientoId) => {
+    //Primer filtro para el modal de detalles
+    const filtrarTablaAlonso = tablaAlonso.filter((dato) =>
+      movimientos.includes(dato.id)
+    );
+    const filtrarTablaSucursal = tablaSucursal.filter((dato) =>
+      movimientos.includes(dato.id)
+    );
+    //Segundo filtro en caso de existir un tipo_movimiento_id
+    setTablaAlonsoFiltrada(
+      movimientoId
+        ? filtrarTablaAlonso.filter(
+            (dato) => dato.tipo_movimiento_id === movimientoId
+          )
+        : filtrarTablaAlonso
+    );
+    setTablaSucursalFiltrada(
+      movimientoId
+        ? filtrarTablaSucursal.filter(
+            (dato) => dato.tipo_movimiento_id === movimientoId
+          )
+        : filtrarTablaSucursal
+    );
   };
 
   useEffect(() => {
@@ -160,6 +216,24 @@ export default function DetalleEstadoCuenta() {
     setPage2(0);
   };
 
+  const handleChangePage3 = (event, newPage) => {
+    setPage3(newPage);
+  };
+
+  const handleChangeRowsPerPage3 = (event) => {
+    setRowsPerPage3(parseInt(event.target.value, 10));
+    setPage3(0);
+  };
+
+  const handleChangePage4 = (event, newPage) => {
+    setPage4(newPage);
+  };
+
+  const handleChangeRowsPerPage4 = (event) => {
+    setRowsPerPage4(parseInt(event.target.value, 10));
+    setPage4(0);
+  };
+
   // Funciones de comparación para ordenar la tabla
   const stableSort = (array, comparator) => {
     const stabilizedThis = array.map((el, index) => [el, index]);
@@ -201,6 +275,46 @@ export default function DetalleEstadoCuenta() {
     return 0;
   };
 
+  const stableSort3 = (array, comparator) => {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const order3 = comparator(a[0], b[0]);
+      if (order3 !== 0) return order3;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  };
+
+  const descendingComparator3 = (a3, b3, orderBy3) => {
+    if (b3[orderBy3] < a3[orderBy3]) {
+      return -1;
+    }
+    if (b3[orderBy3] > a3[orderBy3]) {
+      return 1;
+    }
+    return 0;
+  };
+
+  const stableSort4 = (array, comparator) => {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const order4 = comparator(a[0], b[0]);
+      if (order4 !== 0) return order4;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  };
+
+  const descendingComparator4 = (a4, b4, orderBy4) => {
+    if (b4[orderBy4] < a4[orderBy4]) {
+      return -1;
+    }
+    if (b4[orderBy4] > a4[orderBy4]) {
+      return 1;
+    }
+    return 0;
+  };
+
   // Obtiene el comparador según el orden y el campo de ordenamiento
   const getComparator = (order, orderBy) => {
     return order === "desc"
@@ -211,6 +325,16 @@ export default function DetalleEstadoCuenta() {
     return order === "desc"
       ? (a, b) => descendingComparator2(a, b, orderBy)
       : (a, b) => -descendingComparator2(a, b, orderBy);
+  };
+  const getComparator3 = (order, orderBy) => {
+    return order === "desc"
+      ? (a, b) => descendingComparator3(a, b, orderBy)
+      : (a, b) => -descendingComparator3(a, b, orderBy);
+  };
+  const getComparator4 = (order, orderBy) => {
+    return order === "desc"
+      ? (a, b) => descendingComparator4(a, b, orderBy)
+      : (a, b) => -descendingComparator4(a, b, orderBy);
   };
 
   // Funcion para buscar datos en base a los filtros
@@ -241,6 +365,7 @@ export default function DetalleEstadoCuenta() {
         setTablaAlonso,
         onTablaSucursalSet,
         setTablaSucursal,
+        onResumenId,
         onError
       )
       .then(() => {
@@ -265,6 +390,7 @@ export default function DetalleEstadoCuenta() {
     setOtroAbonos(responseOtrosAbono);
     setOtroCargo(responseOtrosCargos);
     setResumenConciliados(responseConciliados);
+    setMovimientosGenerales();
     const totalSumStatus1 = sumValuesByStatus(responseResumen, 1);
     const totalSumStatus2 = sumValuesByStatus(responseResumen, 2);
     let totalAbonos =
@@ -281,6 +407,17 @@ export default function DetalleEstadoCuenta() {
       initialValues[`${item.id}`] = item.tipo_movimiento_id;
     });
     setFormValuesSucursal(initialValues);
+  }
+  function onResumenId(
+    responseMovimientos,
+    responseAbonos,
+    responseCargos,
+    responseConciliados
+  ) {
+    setMovimientosGenerales(responseMovimientos);
+    setMovimientosAbonos(responseAbonos);
+    setMovimientosCargos(responseCargos);
+    setMovimientosConciliados(responseConciliados);
   }
 
   const sumValuesByStatus = (obj, tipo_ingreso) => {
@@ -345,6 +482,12 @@ export default function DetalleEstadoCuenta() {
       <Typography.Title level={3}>
         Administrar Tipos de Movimientos
       </Typography.Title>
+    </Row>
+  );
+  // Título personalizado para el modal de los detalles
+  const customTitleDetalles = (
+    <Row justify={"center"} style={{ color: "#438dcc", margin: "0 auto" }}>
+      <Typography.Title level={2}>{titleDetalles}</Typography.Title>
     </Row>
   );
   // Títulos personalizados para los cards
@@ -536,7 +679,27 @@ export default function DetalleEstadoCuenta() {
               bordered={false}
             >
               <Form {...layoutResumen} name="basicForm">
-                <Form.Item name={`conciliados`} label={"Conciliados"}>
+                <Form.Item
+                  name={`conciliados`}
+                  label={
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.color = "#4096ff")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.color = "initial")
+                      }
+                      onClick={() => {
+                        setShowModalDetalles(true);
+                        filtrarTabla(movimientosConciliados);
+                        setTitleDetalles("Detalles de Conciliados");
+                      }}
+                    >
+                      Conciliados
+                    </span>
+                  }
+                >
                   <Input
                     placeholder={
                       `$ ` +
@@ -560,7 +723,26 @@ export default function DetalleEstadoCuenta() {
                       <Form.Item
                         key={dato.id}
                         name={`movimiento_${index}`}
-                        label={toTitleCase(dato.descripcion)}
+                        label={
+                          <span
+                            style={{ cursor: "pointer" }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.color = "#4096ff")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.color = "initial")
+                            }
+                            onClick={() => {
+                              setShowModalDetalles(true);
+                              filtrarTabla(movimientosGenerales, dato.id);
+                              setTitleDetalles(
+                                "Detalles de" + " " + dato.descripcion
+                              );
+                            }}
+                          >
+                            {toTitleCase(dato.descripcion)}
+                          </span>
+                        }
                       >
                         <Input
                           placeholder={
@@ -570,6 +752,7 @@ export default function DetalleEstadoCuenta() {
                           value={
                             `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
                           }
+                          style={{ cursor: "pointer" }}
                         />
                         <p></p>
                       </Form.Item>
@@ -577,7 +760,27 @@ export default function DetalleEstadoCuenta() {
                   }
                 })}
 
-                <Form.Item name={`otrosAbonos`} label={"Otros"}>
+                <Form.Item
+                  name={`otrosAbonos`}
+                  label={
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.color = "#4096ff")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.color = "initial")
+                      }
+                      onClick={() => {
+                        setShowModalDetalles(true);
+                        filtrarTabla(movimientosAbonos);
+                        setTitleDetalles("Detalles de Abonos");
+                      }}
+                    >
+                      Otros
+                    </span>
+                  }
+                >
                   <Input
                     placeholder={
                       `$ ` + (otroAbonos ? formatPrecio(otroAbonos) : 0)
@@ -615,7 +818,26 @@ export default function DetalleEstadoCuenta() {
                       <Form.Item
                         key={dato.id}
                         name={`movimiento_${index}`}
-                        label={toTitleCase(dato.descripcion)}
+                        label={
+                          <span
+                            style={{ cursor: "pointer" }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.color = "#4096ff")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.color = "initial")
+                            }
+                            onClick={() => {
+                              setShowModalDetalles(true);
+                              filtrarTabla(movimientosGenerales, dato.id);
+                              setTitleDetalles(
+                                "Detalles de" + " " + dato.descripcion
+                              );
+                            }}
+                          >
+                            {toTitleCase(dato.descripcion)}
+                          </span>
+                        }
                       >
                         <Input
                           placeholder={
@@ -631,7 +853,27 @@ export default function DetalleEstadoCuenta() {
                     );
                   }
                 })}
-                <Form.Item name={`otrosCargo`} label={"Otros"}>
+                <Form.Item
+                  name={`otrosCargo`}
+                  label={
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.color = "#4096ff")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.color = "initial")
+                      }
+                      onClick={() => {
+                        setShowModalDetalles(true);
+                        filtrarTabla(movimientosCargos);
+                        setTitleDetalles("Detalles de Cargos");
+                      }}
+                    >
+                      Otros
+                    </span>
+                  }
+                >
                   <Input
                     placeholder={
                       `$ ` + (otroCargo ? formatPrecio(otroCargo) : 0)
@@ -861,6 +1103,216 @@ export default function DetalleEstadoCuenta() {
       >
         {/* Crud de tipo movimientos */}
         <AdministrarTipoMovimiento></AdministrarTipoMovimiento>
+      </Modal>
+
+      <Modal
+        title={customTitleDetalles}
+        footer={null}
+        width={900}
+        open={showModalDetalles}
+        onCancel={() => handleCloseModalDetalles()}
+      >
+        <div>
+          {tablaAlonsoFiltrada.length === 0 &&
+            tablaSucursalFiltrada.length === 0 && (
+              <Row
+                justify={"center"}
+                style={{ margin: 16, flexDirection: "column" }}
+              >
+                <Row>
+                  <Typography.Title
+                    level={3}
+                    style={{
+                      color: "orange",
+                      textAlign: "center",
+                      margin: "0 auto",
+                    }}
+                  >
+                    No hay {titleDetalles} disponibles con la información
+                    solicitada
+                  </Typography.Title>
+                </Row>
+                <Row style={{ margin: "24px" }}>
+                  <FaCircleExclamation
+                    className="m-auto"
+                    size={"60px"}
+                    color="orange"
+                  />
+                </Row>
+              </Row>
+            )}
+          {tablaAlonsoFiltrada.length > 0 && (
+            <Row
+              gutter={[8, 8]}
+              justify="center"
+              style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
+            >
+              <Typography.Title level={3}>
+                Estado de cuenta Alonso Morales
+              </Typography.Title>
+
+              <Col xs={24}>
+                <TableContainer component={Paper} className="tabla">
+                  <Table>
+                    <TableHead className="tabla_encabezado">
+                      <TableRow>
+                        <TableCell>
+                          <p>Fecha</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Concepto</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Cargos</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Abonos</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Tipo de movimiento</p>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {stableSort3(
+                        tablaAlonsoFiltrada,
+                        getComparator3(order3, orderBy3)
+                      )
+                        .slice(
+                          page3 * rowsPerPage3,
+                          page3 * rowsPerPage3 + rowsPerPage3
+                        )
+                        .map((dato, index) => (
+                          <TableRow
+                            key={dato.id}
+                            style={colorDinamicoRow(
+                              dato.codigo_color,
+                              dato.status
+                            )}
+                          >
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              {fechaFormateada2(dato.fechaOperacion)}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              {dato.concepto}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              {dato.tipo_movimiento}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                    <TableFooter>
+                      <TableRow>
+                        <TablePagination
+                          rowsPerPageOptions={[5, 10, 25]}
+                          count={tablaAlonsoFiltrada.length}
+                          rowsPerPage={rowsPerPage3}
+                          page={page3}
+                          onPageChange={handleChangePage3}
+                          onRowsPerPageChange={handleChangeRowsPerPage3}
+                          labelRowsPerPage="Registros por Página"
+                        />
+                      </TableRow>
+                    </TableFooter>
+                  </Table>
+                </TableContainer>
+              </Col>
+            </Row>
+          )}
+
+          {tablaSucursalFiltrada.length > 0 && (
+            <Row
+              gutter={[8, 8]}
+              justify="center"
+              style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
+            >
+              <Typography.Title level={3}>
+                Estado de cuenta sucursal uno de SFPSM #0496201440
+              </Typography.Title>
+
+              <Col xs={24}>
+                <TableContainer component={Paper} className="tabla">
+                  <Table>
+                    <TableHead className="tabla_encabezado">
+                      <TableRow>
+                        <TableCell>
+                          <p>Fecha</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Concepto</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Cargos</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Abonos</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>Tipo de movimiento</p>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {stableSort4(
+                        tablaSucursalFiltrada,
+                        getComparator4(order4, orderBy4)
+                      )
+                        .slice(
+                          page4 * rowsPerPage4,
+                          page4 * rowsPerPage4 + rowsPerPage4
+                        )
+                        .map((dato, index) => (
+                          <TableRow
+                            key={dato.id}
+                            style={colorDinamicoRow(
+                              dato.codigo_color,
+                              dato.status
+                            )}
+                          >
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              {fechaFormateada2(dato.fechaOperacion)}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              {dato.concepto}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
+                            </TableCell>
+                            <TableCell sx={colorDinamicoText(dato.status)}>
+                              {dato.tipo_movimiento}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                    <TableFooter>
+                      <TableRow>
+                        <TablePagination
+                          rowsPerPageOptions={[5, 10, 25]}
+                          count={tablaSucursalFiltrada.length}
+                          rowsPerPage={rowsPerPage4}
+                          page={page4}
+                          onPageChange={handleChangePage4}
+                          onRowsPerPageChange={handleChangeRowsPerPage4}
+                          labelRowsPerPage="Registros por Página"
+                        />
+                      </TableRow>
+                    </TableFooter>
+                  </Table>
+                </TableContainer>
+              </Col>
+            </Row>
+          )}
+        </div>
       </Modal>
     </div>
   );
