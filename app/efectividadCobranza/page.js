@@ -45,7 +45,7 @@ export default function EfectividadCobranza() {
   const [totalPorcentajeClientes, setTotalPorcentajeClientes] = useState();
   const [range, setRange] = useState([]);
   const [mesSelected, setMesSelected] = useState(null);
-  const [añoSelected, setAñoSelected] = useState(2024);
+  const [añoSelected, setAñoSelected] = useState(null);
   const { setIsLoading } = useContext(LoadingContext);
 
   const [orderBy2] = useState("fechaOperacion");
@@ -126,6 +126,7 @@ export default function EfectividadCobranza() {
     form.setFieldValue("proyecto", 0);
 
     setMesSelected(mesActual);
+    setAñoSelected(añoActual)
   }, []);
 
   function handleCloseModal(params) {
@@ -439,7 +440,7 @@ export default function EfectividadCobranza() {
                 optionLabelProp="label"
                 value={añoSelected}
                 onChange={(value) => {
-                  setAñoSelected(value || "0");
+                  setAñoSelected(value);
                 }}
                 options={years}
                 style={{ minWidth: 150 }}
