@@ -49,10 +49,9 @@ import { getCookiePermisos } from "@/helpers/valorPermisos";
 import Anticipos from "./tabs/anticipos/info";
 import TarjetaDCAMR from "./tabs/tarjetaDCAMR/Info";
 export default function Recursos() {
-  //   useEffect(() => {
-
-  //   }, []);
-  const { setIsLoading } = useContext(LoadingContext);
+  const contextValue = useContext(LoadingContext);
+  const { setIsLoading, setType } = contextValue;
+  // const { setIsLoading } = useContext(LoadingContext);
   const [excelData, setExcelData] = useState([]);
   const [pendientes, setMovimientosPendientes] = useState([]);
   const [monto_pendientes, setMovimientosPendientesMonto] = useState(0);
@@ -204,6 +203,7 @@ export default function Recursos() {
         : [];
 
     setIsLoading(true);
+    setType(80);
     var datos = excel_data.slice(1);
     var datos_formateados = [];
     console.log(columns_aux);
@@ -276,6 +276,7 @@ export default function Recursos() {
 
   function cargarMovimientosPendientesConciliar() {
     setIsLoading(true);
+    setType(80);
     var params = {
       terreno_id: terrenoSelected2,
     };
@@ -307,6 +308,7 @@ export default function Recursos() {
   }
   function cargarMovimientosEfectivo() {
     setIsLoading(true);
+    setType(80);
     var params = {
       terreno_id: terrenoSelected,
       check: check,
@@ -339,6 +341,7 @@ export default function Recursos() {
     }).then((result) => {
       if (result.isConfirmed) {
         setIsLoading(true);
+        setType(80);
         var params = {
           movimiento_id: movimiento.id,
           usuario_recibio: usuario_id,
@@ -354,6 +357,7 @@ export default function Recursos() {
 
   function buscarMovimientosBanco(pago) {
     setIsLoading(true);
+    setType(80);
     setPendientes([]);
     setPagoSeleccionado(pago);
     var params = {
@@ -386,6 +390,7 @@ export default function Recursos() {
 
   function conciliarPago(movimiento) {
     setIsLoading(true);
+    setType(80);
     var params = {
       pago_id: pago_seleccionado.id,
       movimiento_id: movimiento.id,

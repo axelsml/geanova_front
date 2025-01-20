@@ -78,7 +78,8 @@ export default function DetalleEstadoCuenta() {
   const [tablaAlonsoFiltrada, setTablaAlonsoFiltrada] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
   const [tablaSucursalFiltrada, setTablaSucursalFiltrada] = useState([]);
-  const { setIsLoading } = useContext(LoadingContext);
+  const contextValue = useContext(LoadingContext);
+  const { setIsLoading, setType } = contextValue;
 
   const [range, setRange] = useState([]);
   const [movimientos, setMovimientos] = useState(false);
@@ -349,6 +350,7 @@ export default function DetalleEstadoCuenta() {
       });
     }
     setIsLoading(true);
+    setType(80);
     let form = {
       fechaInicial: range[0],
       fechaFinal: range[1],

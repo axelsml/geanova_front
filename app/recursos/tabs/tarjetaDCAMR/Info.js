@@ -66,7 +66,8 @@ export default function TarjetaDCAMR() {
   const [tabla, setTabla] = useState([]);
   const [tablaDetalles, setTablaDetalles] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
-  const { setIsLoading } = useContext(LoadingContext);
+  const contextValue = useContext(LoadingContext);
+  const { setIsLoading, setType } = contextValue;
 
   const [titleDetalles, setTitleDetalles] = useState("");
 
@@ -255,6 +256,7 @@ export default function TarjetaDCAMR() {
       });
     }
     setIsLoading(true);
+    setType(80);
     let form = {
       fechaInicial: range[0],
       fechaFinal: range[1],

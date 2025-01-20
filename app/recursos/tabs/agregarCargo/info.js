@@ -20,7 +20,8 @@ import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function AgregarCargo() {
-  const { setIsLoading } = useContext(LoadingContext);
+  const contextValue = useContext(LoadingContext);
+  const { setIsLoading, setType } = contextValue;
   const [datos, setDatos] = useState([]);
   const [message, setMessage] = useState("");
   const [form] = Form.useForm();
@@ -73,6 +74,7 @@ export default function AgregarCargo() {
     }).then((result) => {
       if (result.isConfirmed) {
         setIsLoading(true);
+        setType(80);
         recursosService.agregarCargo(onCargoGuardado, forms, onError);
       }
     });

@@ -36,6 +36,19 @@
   overflow: hidden;
 }
 
+.loaderAt80 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80%;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
 /* --------------------------------------------------------------------------- */
 /* CSS PARA TABLA DE REPORTE DE INGRESOS */
 .rep-ing-row__header {

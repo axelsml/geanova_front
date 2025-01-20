@@ -64,7 +64,8 @@ export default function ManejoEfectivo() {
 
   const [solicitudes, setSolicitudes] = useState([]);
   const [cobranza, setCobranza] = useState([]);
-  const { setIsLoading } = useContext(LoadingContext);
+  const contextValue = useContext(LoadingContext);
+  const { setIsLoading, setType } = contextValue;
 
   const [range, setRange] = useState([]);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
@@ -294,6 +295,7 @@ export default function ManejoEfectivo() {
       });
     }
     setIsLoading(true);
+    setType(80);
     let form = {
       fechaInicial: range[0],
       fechaFinal: range[1],

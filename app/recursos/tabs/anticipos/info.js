@@ -38,7 +38,8 @@ export default function Anticipos() {
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [sistemaPagoSelected, setSistemaPagoSelected] = useState(null);
   const [check, setCheck] = useState(false);
-  const { setIsLoading } = useContext(LoadingContext);
+  const contextValue = useContext(LoadingContext);
+  const { setIsLoading, setType } = contextValue;
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, onError);
@@ -157,6 +158,7 @@ export default function Anticipos() {
       check: check,
     };
     setIsLoading(true);
+    setType(80);
     recursosService.getAnticipos(forms, onBusqueda, onError).then(() => {
       setIsLoading(false);
     });
@@ -192,7 +194,7 @@ export default function Anticipos() {
     }).then((result) => {
       if (result.isConfirmed) {
         setIsLoading(true);
-
+        setType(80);
         recursosService.cambiarAnticipo(forms, onCambioExitoso, onError);
       }
     });
