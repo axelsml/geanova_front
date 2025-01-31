@@ -126,7 +126,7 @@ export default function EfectividadCobranza() {
     form.setFieldValue("proyecto", 0);
 
     setMesSelected(mesActual);
-    setAñoSelected(añoActual)
+    setAñoSelected(añoActual);
   }, []);
 
   function handleCloseModal(params) {
@@ -778,6 +778,12 @@ export default function EfectividadCobranza() {
                     <p>Monto Pendiente</p>
                   </TableCell>
                   <TableCell>
+                    <p>Monto Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto a Favor</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Terreno/Lote</p>
                   </TableCell>
                 </TableRow>
@@ -802,12 +808,13 @@ export default function EfectividadCobranza() {
                         ${formatPrecio(parseFloat(dato.monto_pagado))}
                       </TableCell>
                       <TableCell>
-                        $
-                        {dato.monto_pago - dato.monto_pagado < 0
-                          ? 0
-                          : formatPrecio(
-                              parseFloat(dato.monto_pago - dato.monto_pagado)
-                            )}
+                        ${formatPrecio(parseFloat(dato.monto_pendiente))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_vencido))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_favor))}
                       </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
                     </TableRow>
@@ -876,6 +883,12 @@ export default function EfectividadCobranza() {
                     <p>Monto Pendiente</p>
                   </TableCell>
                   <TableCell>
+                    <p>Monto Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto a Favor</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Terreno/Lote</p>
                   </TableCell>
                 </TableRow>
@@ -902,12 +915,13 @@ export default function EfectividadCobranza() {
                         ${formatPrecio(parseFloat(dato.monto_pagado))}
                       </TableCell>
                       <TableCell>
-                        $
-                        {dato.monto_pago - dato.monto_pagado < 0
-                          ? 0
-                          : formatPrecio(
-                              parseFloat(dato.monto_pago - dato.monto_pagado)
-                            )}
+                        ${formatPrecio(parseFloat(dato.monto_pendiente))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_vencido))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_favor))}
                       </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
                     </TableRow>
@@ -979,6 +993,12 @@ export default function EfectividadCobranza() {
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Monto Pendiente</p>
                   </TableCell>
+                  <TableCell>
+                    <p>Monto Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto a Favor</p>
+                  </TableCell>
                   <TableCell /* style={{ width: 180 }} */>
                     <p>Intereses</p>
                   </TableCell>
@@ -1013,12 +1033,13 @@ export default function EfectividadCobranza() {
                         ${formatPrecio(parseFloat(dato.monto_pagado))}
                       </TableCell>
                       <TableCell>
-                        $
-                        {dato.monto_pago - dato.monto_pagado < 0
-                          ? 0
-                          : formatPrecio(
-                              parseFloat(dato.monto_pago - dato.monto_pagado)
-                            )}
+                        ${formatPrecio(parseFloat(dato.monto_pendiente))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_vencido))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_favor))}
                       </TableCell>
                       <TableCell>
                         $
@@ -1091,6 +1112,12 @@ export default function EfectividadCobranza() {
                     <p>Monto Pendiente</p>
                   </TableCell>
                   <TableCell>
+                    <p>Monto Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Monto a Favor</p>
+                  </TableCell>
+                  <TableCell>
                     <p>Terreno/Lote</p>
                   </TableCell>
                 </TableRow>
@@ -1113,6 +1140,12 @@ export default function EfectividadCobranza() {
                       </TableCell>
                       <TableCell>
                         ${formatPrecio(parseFloat(dato.pendiente))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_vencido))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.monto_favor))}
                       </TableCell>
                       <TableCell>{dato.terreno}</TableCell>
                     </TableRow>
