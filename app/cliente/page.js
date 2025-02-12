@@ -319,6 +319,7 @@ export default function ClientesInfo() {
   function borrarAmortizacion() {
     var params = {
       solicitud_id: info_lote.solicitud_id,
+      nueva_cantidad_pagos: cantidadPagos,
     };
     ventasService.borrarAmortizacion(params, onAmortizacionBorrada, onError);
   }
