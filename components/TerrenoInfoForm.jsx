@@ -88,8 +88,6 @@ export default function TerrenoInfoForm({
 
   return (
     <div>
-      
-      <Row justify={"center"}>
       {/* <Col>
             <Button
               style={{ backgroundColor: "lightgrey" }}
@@ -99,16 +97,11 @@ export default function TerrenoInfoForm({
               <FaArrowCircleLeft className="m-auto" size={"20px"} />
             </Button>
           </Col> */}
-        <Col
-          xs={24}
-          sm={20}
-          md={16}
-          lg={12}
-          xl={8}
-          xxl={4}
-          className="titulo_pantallas"
-        >
-          <b> DATOS DEL TERRENO SELECCIONADO</b>
+      <Row>
+        <Col style={{ margin: "auto" }}>
+          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+            DATOS DEL TERRENO SELECCIONADO
+          </p>
         </Col>
       </Row>
 

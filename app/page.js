@@ -24,7 +24,6 @@ export default function Home() {
   const terreno = cookieMenu.filter((item) => item.descripcion === "Terreno");
   const ventas = cookieMenu.filter((item) => item.descripcion === "Ventas");
   const clientes = cookieMenu.filter((item) => item.descripcion === "Clientes");
-  const ingresos = cookieMenu.filter((item) => item.descripcion === "Ingresos");
   const recursos = cookieMenu.filter((item) => item.descripcion === "Recursos");
   const reportes = cookieMenu.filter((item) => item.descripcion === "Reportes");
   const configuracion = cookieMenu.filter(
@@ -103,28 +102,6 @@ export default function Home() {
                   </Row>
                   <Row justify={"center"}>
                     <p className="text-lg text-center">Clientes</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
-        {ingresos[0]?.descripcion === "Ingresos" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"ReporteIngresos"} href={"/ingresos"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono ingreso.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Ingresos"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Ingresos</p>
                   </Row>
                 </div>
               </Card>

@@ -1,11 +1,7 @@
 "use client";
 
-import { LoadingContext } from "@/contexts/loading";
-import {
-  fechaFormateada2,
-  formatPrecio,
-  formatPrecio2,
-} from "@/helpers/formatters";
+import Loader80 from "@/components/Loader80";
+import { formatPrecio } from "@/helpers/formatters";
 import cobranzaService from "@/services/cobranzaService";
 import terrenosService from "@/services/terrenosService";
 import {
@@ -31,7 +27,7 @@ import {
   Space,
   Typography,
 } from "antd";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 export default function EfectividadCobranza() {
@@ -46,7 +42,8 @@ export default function EfectividadCobranza() {
   const [range, setRange] = useState([]);
   const [mesSelected, setMesSelected] = useState(null);
   const [añoSelected, setAñoSelected] = useState(null);
-  const { setIsLoading } = useContext(LoadingContext);
+
+  const [loading, setLoading] = useState(false);
 
   const [orderBy2] = useState("fechaOperacion");
   const [order2] = useState("desc");
@@ -150,7 +147,7 @@ export default function EfectividadCobranza() {
   }
 
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
   };
 
@@ -271,7 +268,7 @@ export default function EfectividadCobranza() {
       año: añoSelected,
       proyecto: terrenoSelected,
     };
-    setIsLoading(true);
+    setLoading(true);
     console.log("forms:", forms);
 
     cobranzaService.getIEfectividadCobranza(
@@ -295,7 +292,7 @@ export default function EfectividadCobranza() {
     setTotalPorcentajeImporte(params.totalPorcentajeImporte);
     setTotalPorcentajeClientes(params.totalPorcentajeClientes);
 
-    setIsLoading(false);
+    setLoading(false);
   }
 
   const handleRowClick = (dato) => {
@@ -402,8 +399,17 @@ export default function EfectividadCobranza() {
 
   return (
     <>
-      <Row justify={"center"}>
-        <Typography.Title level={2}>Efectividad Cobranza</Typography.Title>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
+      <Row>
+        <Col style={{ margin: "auto" }}>
+          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+            Efectividad Cobranza
+          </p>
+        </Col>
       </Row>
       <Form form={form} {...layout} name="busqueda">
         <Row
@@ -483,7 +489,8 @@ export default function EfectividadCobranza() {
                   Borrar Todas Las Amortizaciones
                 </Button> */}
                 <Button
-                  type="primary"
+                  // type="primary"
+                  style={{ backgroundColor: "67, 141, 204" }}
                   onClick={() => {
                     cargarEfectividadCobranza();
                   }}
@@ -662,8 +669,12 @@ export default function EfectividadCobranza() {
         </Col>
       </Row>
 
-      <Row justify={"center"}>
-        <Typography.Title level={3}>Clientes Congelados</Typography.Title>
+      <Row>
+        <Col style={{ margin: "auto" }}>
+          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+            Clientes Congelados
+          </p>
+        </Col>
       </Row>
 
       <Row justify={"center"} className="mb-5 mt-2">

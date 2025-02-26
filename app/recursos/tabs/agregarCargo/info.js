@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -12,7 +12,7 @@ import {
   Alert,
   Space,
 } from "antd";
-import { LoadingContext } from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 import Swal from "sweetalert2";
 import recursosService from "@/services/recursosService";
 import { formatDate } from "@/helpers/formatters";
@@ -20,8 +20,8 @@ import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function AgregarCargo() {
-  const contextValue = useContext(LoadingContext);
-  const { setIsLoading, setType } = contextValue;
+  const [loading, setLoading] = useState(false);
+
   const [datos, setDatos] = useState([]);
   const [message, setMessage] = useState("");
   const [form] = Form.useForm();
@@ -29,7 +29,7 @@ export default function AgregarCargo() {
   const storedUsuario = window.localStorage.getItem("usuario");
   const [cookiePermisos, setCookiePermisos] = useState([]);
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
     if (e.message) {
       setErrorMessage(
@@ -42,7 +42,7 @@ export default function AgregarCargo() {
 
   useEffect(() => {
     recursosService.showTipoMovimientoManejo(setDatos, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
 
     getCookiePermisos("agregar cargo", setCookiePermisos);
@@ -73,15 +73,14 @@ export default function AgregarCargo() {
       confirmButtonText: "Aceptar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIsLoading(true);
-        setType(80);
+        setLoading(true);
         recursosService.agregarCargo(onCargoGuardado, forms, onError);
       }
     });
   }
 
   const onCargoGuardado = (data) => {
-    setIsLoading(false);
+    setLoading(false);
     if (data.type == "success") {
       form.resetFields();
       setMessage({
@@ -116,8 +115,17 @@ export default function AgregarCargo() {
   };
   return (
     <div>
-      <Row justify={"center"}>
-        <Typography.Title level={3}>Agregar Cargo</Typography.Title>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
+      <Row>
+        <Col style={{ margin: "auto" }}>
+          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+            Agregar Cargo
+          </p>
+        </Col>
       </Row>
       <Row justify={"center"}>
         <Form

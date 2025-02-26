@@ -1,7 +1,6 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
-import { LoadingContext } from "@/contexts/loading";
-import { usuario_id } from "@/helpers/user";
+import { useEffect, useState } from "react";
+import Loader80 from "@/components/Loader80";
 
 import { formatPrecio, formatPrecio2, formatDate } from "@/helpers/formatters";
 import {
@@ -30,10 +29,10 @@ import Swal from "sweetalert2";
 
 import terrenosService from "@/services/terrenosService";
 import pagosService from "@/services/pagosService";
-import ClientesInfo from "@/app/cliente/page";
 
 export default function ReporteEstatusCobranza() {
-  const { setIsLoading } = useContext(LoadingContext);
+  const [loading, setLoading] = useState(false);
+
   const { Option } = Select;
   const [form] = Form.useForm();
 
@@ -71,12 +70,12 @@ export default function ReporteEstatusCobranza() {
   }, []);
 
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
   };
 
   const onSearch = () => {
-    setIsLoading(true);
+    setLoading(true);
     var params = {
       fecha: fecha,
       terreno_id: terrenoSelected,
@@ -89,7 +88,7 @@ export default function ReporteEstatusCobranza() {
   };
 
   async function onReporte(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.encontrado) {
       setDataClientes(data.response);
       setDataSemanas(data.semanas);
@@ -585,6 +584,11 @@ export default function ReporteEstatusCobranza() {
   };
   return (
     <div>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Row justify={"center"}>
         <Col
           xs={24}
@@ -792,7 +796,7 @@ export default function ReporteEstatusCobranza() {
                     <TableCell style={{ textAlign: "center", color: "white" }}>
                       $ {formatPrecio(item.suma_pagado)}
                     </TableCell>
-                    
+
                     <TableCell style={{ textAlign: "center", color: "white" }}>
                       $ {formatPrecio(item.anticipo)}
                     </TableCell>

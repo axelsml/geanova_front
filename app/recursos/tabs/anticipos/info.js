@@ -12,9 +12,9 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import recursosService from "@/services/recursosService";
-import { LoadingContext } from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
 const { Option } = Select;
@@ -38,8 +38,7 @@ export default function Anticipos() {
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [sistemaPagoSelected, setSistemaPagoSelected] = useState(null);
   const [check, setCheck] = useState(false);
-  const contextValue = useContext(LoadingContext);
-  const { setIsLoading, setType } = contextValue;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, onError);
@@ -54,11 +53,11 @@ export default function Anticipos() {
   };
 
   const onError = () => {
-    setIsLoading(false);
+    setLoading(false);
     Swal.fire({
       title: "Error",
       icon: "error",
-      text: data.message,
+      text: "Ha ocurrido un error",
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
       showDenyButton: true,
@@ -157,10 +156,9 @@ export default function Anticipos() {
       sistema_pago_id: sistemaPagoSelected,
       check: check,
     };
-    setIsLoading(true);
-    setType(80);
+    setLoading(true);
     recursosService.getAnticipos(forms, onBusqueda, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
   }
 
@@ -193,15 +191,14 @@ export default function Anticipos() {
       confirmButtonText: "Aceptar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIsLoading(true);
-        setType(80);
+        setLoading(true);
         recursosService.cambiarAnticipo(forms, onCambioExitoso, onError);
       }
     });
   }
 
   function onCambioExitoso(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.type == "Success") {
       buscarAnticipos();
       Swal.fire({
@@ -227,6 +224,11 @@ export default function Anticipos() {
 
   return (
     <div>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Form
         layout="horizontal"
         labelCol={{ span: 4 }}
@@ -292,8 +294,10 @@ export default function Anticipos() {
           </Col>
         </Row>
       </Form>
-      <Row justify={"center"} className="mt-5">
-        <Typography.Title level={3}>Pendientes</Typography.Title>
+      <Row justify={"center"} className="mt-5" style={{ margin: "16px" }}>
+        <Col className="titulo_pantallas">
+          <p>Pendientes</p>
+        </Col>
       </Row>
 
       <Row justify={"center"} className="mb-5">
@@ -377,8 +381,10 @@ export default function Anticipos() {
           </TableContainer>
         </Col>
       </Row>
-      <Row justify={"center"} className="mt-5">
-        <Typography.Title level={3}>Recibidos o Consolidados</Typography.Title>
+      <Row justify={"center"} className="mt-5" style={{ margin: "16px" }}>
+        <Col className="titulo_pantallas">
+          <p>Recibidos o Consolidados</p>
+        </Col>
       </Row>
       <Row justify={"center"} className="mb-5">
         <Col xs={20} sm={24} md={24} lg={24} xl={24} xxl={24}>

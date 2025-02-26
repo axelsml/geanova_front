@@ -28,17 +28,13 @@ import {
   TableFooter,
 } from "@mui/material";
 import { FaCircleExclamation } from "react-icons/fa6";
-import { LoadingContext } from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
 import { UploadOutlined } from "@ant-design/icons";
 import recursosService from "@/services/recursosService";
-import {
-  formatPrecio,
-  fechaFormateada,
-  toTitleCase,
-} from "@/helpers/formatters";
+import { formatPrecio, fechaFormateada } from "@/helpers/formatters";
 import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
 import AdministrarTarjetas from "./AdministrarTarjetas";
 import "./styles.css"; // Archivo CSS personalizado
@@ -65,9 +61,7 @@ export default function TarjetaDCAMR() {
 
   const [tabla, setTabla] = useState([]);
   const [tablaDetalles, setTablaDetalles] = useState([]);
-  const [tablaSucursal, setTablaSucursal] = useState([]);
-  const contextValue = useContext(LoadingContext);
-  const { setIsLoading, setType } = contextValue;
+  const [loading, setLoading] = useState(false);
 
   const [titleDetalles, setTitleDetalles] = useState("");
 
@@ -93,7 +87,7 @@ export default function TarjetaDCAMR() {
   const [excelData, setExcelData] = useState([]);
 
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
     if (e.message) {
       setErrorMessage(
@@ -142,13 +136,13 @@ export default function TarjetaDCAMR() {
   }, []);
   function setearMovimientos(params) {
     recursosService.showTipoMovimientoTarjeta(setDatos, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
   }
   function cargarTarjetas() {
     console.log("cargar tarjetas");
     recursosService.showTarjeta(setDatosTarjetas, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
   }
 
@@ -255,8 +249,7 @@ export default function TarjetaDCAMR() {
         text: "Debes seleccionar un rango de fechas",
       });
     }
-    setIsLoading(true);
-    setType(80);
+    setLoading(true);
     let form = {
       fechaInicial: range[0],
       fechaFinal: range[1],
@@ -565,6 +558,11 @@ export default function TarjetaDCAMR() {
   }
   return (
     <div style={{ paddingBottom: 30 }}>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Form {...layout}>
         <Row
           gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
@@ -862,7 +860,13 @@ export default function TarjetaDCAMR() {
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Typography.Title level={3}>Movimientos</Typography.Title>
+        <Row>
+          <Col style={{ margin: "auto" }}>
+            <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+              Movimientos
+            </p>
+          </Col>
+        </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">

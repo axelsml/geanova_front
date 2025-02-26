@@ -1,10 +1,10 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
-import { LoadingContext } from "@/contexts/loading";
-import { usuario_id } from "@/helpers/user";
+import { useEffect, useState } from "react";
+import Loader80 from "@/components/Loader80";
 
 import { formatPrecio } from "@/helpers/formatters";
-import { Button, Col, Row, Form, Select, Modal, Tabs } from "antd";
+import { Button, Col, Row, Form, Select, Modal, Typography } from "antd";
+const { Text } = Typography;
 import {
   Paper,
   Table,
@@ -19,24 +19,22 @@ import {
 import Swal from "sweetalert2";
 import { FaFilePdf } from "react-icons/fa";
 
-import ventasService from "@/services/ventasService";
 import terrenosService from "@/services/terrenosService";
 import lotesService from "@/services/lotesService";
-import pagosService from "@/services/pagosService";
 import PagoForm from "./PagoForm";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function ReporteLotes() {
-  const { setIsLoading } = useContext(LoadingContext);
+  const [loading, setLoading] = useState(false);
   const [lotes, setLotes] = useState(null);
   const [loteSelected, setLoteSelected] = useState(null);
-  const [loteAux, setLoteAux] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [periodoPagoSelected, setPeriodoPagoSelected] = useState(null);
   const [terrenoAux, setTerrenoAux] = useState(null);
-  const [info, setInfo] = useState(null);
+  const [terrenoAux2, setTerrenoAux2] = useState(null);
+  const [info, setInfo] = useState([]);
   const [infoCliente, setInfoCliente] = useState(null);
   const [infoLote, setInfoLote] = useState(null);
   const [infoFecha, setInfoFecha] = useState(null);
@@ -55,11 +53,7 @@ export default function ReporteLotes() {
   const [totalLiquidados, setTotalLiquidados] = useState(0);
   const [totalCobranza, setTotalCobranza] = useState(0);
 
-  const [info2, setInfo2] = useState(null);
-  const [infoCliente2, setInfoCliente2] = useState(null);
-  const [infoLote2, setInfoLote2] = useState(null);
-  const [infoFecha2, setInfoFecha2] = useState(null);
-  const [nuevoPago2, setNuevoPago2] = useState(false);
+  const [info2, setInfo2] = useState([]);
   const [totalLotes2, setTotalLotes2] = useState(0);
   const [totalPagados2, setTotalPagados2] = useState(0);
   const [montoTotalContrato2, setMontoTotalContrato2] = useState(0);
@@ -117,7 +111,7 @@ export default function ReporteLotes() {
   }, []);
 
   const BuscarInfoLote = () => {
-    setIsLoading(true);
+    setLoading(true);
     setTotalLotes(0);
     setTotalPagados(0);
     setTotalVencidos(0);
@@ -139,10 +133,11 @@ export default function ReporteLotes() {
       bandera: 1,
     };
     lotesService.reporteLotes(params, onInfoClienteCargado, onError);
+    debugger;
   };
 
   async function onInfoClienteCargado(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.encontrado) {
       setInfo(data.response);
       setTotalLotes(data.lotes);
@@ -159,8 +154,8 @@ export default function ReporteLotes() {
       setTotalLiquidados(data.liquidados);
       setTotalCobranza(data.cobranza);
       setTerrenoAux(terrenoSelected);
-      setIsLoading(true);
-
+      setLoading(true);
+      debugger;
       var params = {
         lote_id: loteSelected ? loteSelected.id : 0,
         terreno_id: terrenoSelected.id,
@@ -169,19 +164,22 @@ export default function ReporteLotes() {
       lotesService.reporteLotes(params, onInfoClienteCargado2, onError);
     } else {
       Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: "No Se Pudo Encontrar La Informacion",
+        title: "Aviso",
+        icon: "warning",
+        text:
+          data.message != null
+            ? data.message
+            : "No se han encontrado registros de Clientes Sin Congelar",
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
-        showDenyButton: true,
+        showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
-      setInfo(null);
+      setInfo([]);
     }
   }
   async function onInfoClienteCargado2(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.encontrado) {
       setInfo2(data.response);
       setTotalLotes2(data.lotes);
@@ -198,15 +196,15 @@ export default function ReporteLotes() {
       setTerrenoAux2(terrenoSelected);
     } else {
       Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: "No Se Pudo Encontrar La Informacion",
+        title: "Aviso",
+        icon: "warning",
+        text: "No se han encontrado registros de Clientes Congelados",
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
-        showDenyButton: true,
+        showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
-      setInfo2(null);
+      setInfo2([]);
       setTotalLotes2(0);
       setTotalPagados2(0);
       setTotalVencidos2(0);
@@ -240,7 +238,7 @@ export default function ReporteLotes() {
   };
 
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
   };
 
@@ -285,6 +283,11 @@ export default function ReporteLotes() {
 
   return (
     <Row className="grid gap-4">
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Row justify={"center"}>
         <Col
           xs={24}
@@ -299,12 +302,14 @@ export default function ReporteLotes() {
         </Col>
       </Row>
       <Row
-        gutter={[16, 16]}
-        wrap
         justify={"center"}
-        style={{ marginTop: "15px" }}
+        style={{
+          marginTop: "15px",
+          justifyContent: "center",
+          justifyContent: "space-evenly",
+        }}
       >
-        <Col span={5}>
+        <Col>
           <Form.Item
             label={"Proyecto"}
             name={"terreno"}
@@ -332,48 +337,44 @@ export default function ReporteLotes() {
             </Select>
           </Form.Item>
         </Col>
-        <Col span={5}>
-          <Form name="loteform" form={form}>
-            <Form.Item
-              label={"Lote"}
-              name="lote_id"
-              style={{ width: "100%" }}
-              rules={[{ required: true, message: "Lote no seleccionado" }]}
+        <Col>
+          <Form.Item
+            label={"Lote"}
+            name="lote_id"
+            style={{ width: "100%" }}
+            rules={[{ required: true, message: "Lote no seleccionado" }]}
+          >
+            <Select
+              showSearch
+              placeholder="Seleccione un Lote"
+              optionLabelProp="label"
+              disabled={terrenoSelected == 0}
+              value={loteSelected != null ? loteSelected.numero : undefined}
+              onChange={(value) => {
+                const loteSelected = lotes.find((lote) => lote.id == value);
+                setLoteSelected(loteSelected);
+              }}
             >
-              <Select
-                showSearch
-                placeholder="Seleccione un Lote"
-                optionLabelProp="label"
-                disabled={terrenoSelected == 0}
-                value={loteSelected != null ? loteSelected.numero : undefined}
-                onChange={(value) => {
-                  const loteSelected = lotes.find((lote) => lote.id == value);
-                  setLoteSelected(loteSelected);
-                }}
-              >
-                {lotes && (
-                  <Option key="all" value={0} label="Todos">
-                    {"Todos"}
-                  </Option>
-                )}
-                {lotes?.map((item, index) => (
-                  <Option key={index} value={item.id} label={item.numero}>
-                    {item?.numero}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Form>
+              {lotes && (
+                <Option key="all" value={0} label="Todos">
+                  {"Todos"}
+                </Option>
+              )}
+              {lotes?.map((item, index) => (
+                <Option key={index} value={item.id} label={item.numero}>
+                  {item?.numero}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Col>
-        <Col span={5}>
+        <Col>
           <Form.Item
             label={"Periodo"}
             name={"periodoPago"}
             style={{ width: "100%" }}
-            // rules={[{ required: true, message: "Periodo no seleccionado" }]}
           >
             <Select
-              //showSearch
               placeholder="Seleccione un Periodo"
               optionLabelProp="label"
               onChange={(data) => {
@@ -395,232 +396,274 @@ export default function ReporteLotes() {
             </Select>
           </Form.Item>
         </Col>
-        <Col span={1}>
+        <Col>
           <Button
             className="boton"
             disabled={terrenoSelected == null}
-            onClick={BuscarInfoLote}
+            onClick={() => {
+              BuscarInfoLote();
+            }}
           >
             Buscar
           </Button>
         </Col>
       </Row>
 
-      <b>CLIENTES SIN CONGELADOS</b>
-
-      <div className="reporte-lotes__labels-container">
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="lotes"
-              className="reporte-lotes__input--realizado"
-              value={totalLotes !== 0 ? totalLotes : 0}
-              disabled={true}
-              placeholder={totalLotes !== 0 ? totalLotes : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes Cobrados
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="cobranza"
-              className="reporte-lotes__input--realizado"
-              value={totalCobranza !== 0 ? totalCobranza : 0}
-              disabled={true}
-              placeholder={totalCobranza !== 0 ? totalCobranza : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes liquidados
-            </label>
-          </Row>
-          <Row justify={"liquidados"}>
-            <input
-              id="liquidados"
-              className="reporte-lotes__input--realizado"
-              value={totalLiquidados !== 0 ? totalLiquidados : 0}
-              disabled={true}
-              placeholder={totalLiquidados !== 0 ? totalLiquidados : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Cobro Total Mensual
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="vencidos"
-              className="reporte-lotes__input--realizado"
-              value={
-                montoTotalAmortizaciones !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalAmortizaciones))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                montoTotalAmortizaciones !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalAmortizaciones))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-      </div>
-      <div className="reporte-lotes__labels-container">
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Contratado
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="semanal"
-              className="reporte-lotes__input--realizado"
-              value={
-                montoTotalContrato !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                montoTotalContrato !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Cobrado
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="pagados"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPagados !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagados))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPagados !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagados))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Pend. Por Cobrar
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="pendiente"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPendiente !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPendiente !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Pend. Por Contratar
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            {/* <div>{lotesDisponibles}</div> */}
-            <input
-              id="mensual"
-              className="reporte-lotes__input--realizado"
-              value={
-                pendientePorContratar !== 0
-                  ? "(" +
-                    lotesDisponibles +
-                    "),$" +
-                    formatPrecio(parseFloat(pendientePorContratar))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                pendientePorContratar !== 0
-                  ? "(" +
-                    lotesDisponibles +
-                    "),$" +
-                    formatPrecio(parseFloat(pendientePorContratar))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-      </div>
       <div
-        // className="reporte-lotes__labels-container"
         style={{
+          margin: "0 auto",
+          textAlign: "center",
+          alignContent: "center",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
         }}
       >
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Interes
-            </label>
+        <Row justify={"center"} style={{ marginBottom: "16px" }}>
+          <Col>
+            <Text>
+              <b>CLIENTES NO CONGELADOS </b>
+            </Text>
+          </Col>
+        </Row>
+        <div style={{ margin: "0 auto", display: "flex" }}>
+          <Row
+            style={{
+              justifyContent: "center",
+              justifyContent: "space-evenly",
+              textAlign: "center",
+            }}
+          >
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="lotes"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={totalLotes !== 0 ? totalLotes : 0}
+                  disabled={true}
+                  placeholder={totalLotes !== 0 ? totalLotes : "$ 0.0"}
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes Cobrados
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="cobranza"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={totalCobranza !== 0 ? totalCobranza : 0}
+                  disabled={true}
+                  placeholder={totalCobranza !== 0 ? totalCobranza : "$ 0.0"}
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes liquidados
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="liquidados"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={totalLiquidados !== 0 ? totalLiquidados : 0}
+                  disabled={true}
+                  placeholder={
+                    totalLiquidados !== 0 ? totalLiquidados : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Cobro Total Mensual
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="vencidos"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    montoTotalAmortizaciones !== 0
+                      ? "$ " +
+                        formatPrecio(parseFloat(montoTotalAmortizaciones))
+                      : montoTotalAmortizaciones2 !== 0
+                      ? "$ " +
+                        formatPrecio(parseFloat(montoTotalAmortizaciones2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    montoTotalAmortizaciones !== 0
+                      ? "$ " +
+                        formatPrecio(parseFloat(montoTotalAmortizaciones))
+                      : montoTotalAmortizaciones2 !== 0
+                      ? "$ " +
+                        formatPrecio(parseFloat(montoTotalAmortizaciones2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Monto Contratado
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    montoTotalContrato !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalContrato))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    montoTotalContrato !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalContrato))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Monto Cobrado
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="pagados"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    totalPagados !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPagados))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    totalPagados !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPagados))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Pend. Por Cobrar
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="pendiente"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    totalPendiente !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPendiente))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    totalPendiente !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPendiente))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Pend. Por Contratar
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="mensual"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    pendientePorContratar !== 0
+                      ? "(" +
+                        lotesDisponibles +
+                        "),$" +
+                        formatPrecio(parseFloat(pendientePorContratar))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    pendientePorContratar !== 0
+                      ? "(" +
+                        lotesDisponibles +
+                        "),$" +
+                        formatPrecio(parseFloat(pendientePorContratar))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Monto Interes
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    montoTotalInteres !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalInteres))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    montoTotalInteres !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalInteres))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
           </Row>
-          <Row justify={"center"}>
-            <input
-              id="semanal"
-              className="reporte-lotes__input--realizado"
-              value={
-                montoTotalInteres !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalInteres))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                montoTotalInteres !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalInteres))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
+        </div>
       </div>
-      {info != null && (
+
+      {info.length > 0 && (
         <Row justify={"center"} className="tabla">
           <TableContainer component={Paper}>
             <Table>
@@ -800,7 +843,7 @@ export default function ReporteLotes() {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Amortizaciones por Página"
+                    TextRowsPerPage="Amortizaciones por Página"
                   />
                 </TableRow>
               </TableFooter>
@@ -808,213 +851,250 @@ export default function ReporteLotes() {
           </TableContainer>
         </Row>
       )}
-      <b>CLIENTES CONGELADOS</b>
-      <div className="reporte-lotes__labels-container">
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="lotes"
-              className="reporte-lotes__input--realizado"
-              value={totalLotes2 !== 0 ? totalLotes2 : 0}
-              disabled={true}
-              placeholder={totalLotes2 !== 0 ? totalLotes2 : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes Cobrados {/* // ! falta aclaracion de esto */}
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="cobranza"
-              className="reporte-lotes__input--realizado"
-              value={totalCobranza2 !== 0 ? totalCobranza2 : 0}
-              disabled={true}
-              placeholder={totalCobranza2 !== 0 ? totalCobranza2 : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Lotes liquidados
-            </label>
-          </Row>
-          <Row justify={"liquidados"}>
-            <input
-              id="liquidados"
-              className="reporte-lotes__input--realizado"
-              value={totalLiquidados2 !== 0 ? totalLiquidados2 : 0}
-              disabled={true}
-              placeholder={totalLiquidados2 !== 0 ? totalLiquidados2 : "$ 0.0"}
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Cobro Total Mensual
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="pagados"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPagados2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPagados2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-      </div>
-      <div className="reporte-lotes__labels-container">
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Contratado
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="vencidos"
-              className="reporte-lotes__input--realizado"
-              value={
-                montoTotalContrato2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato2))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                montoTotalContrato2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalContrato2))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Cobrado
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="pendiente"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPagados2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPagados2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPagados2))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Pend. Por Cobrar
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="semanal"
-              className="reporte-lotes__input--realizado"
-              value={
-                totalPendiente2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                totalPendiente2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(totalPendiente2))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Pend. Por Contratar
-            </label>
-          </Row>
-          <Row justify={"center"}>
-            <input
-              id="mensual"
-              className="reporte-lotes__input--realizado"
-              value={
-                pendientePorContratar2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                pendientePorContratar2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
-      </div>
+
       <div
-        // className="reporte-lotes__labels-container"
         style={{
+          margin: "0 auto",
+          textAlign: "center",
+          alignContent: "center",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
         }}
       >
-        <Col xs={12} sm={6} lg={5}>
-          <Row justify={"center"}>
-            <label className="reporte-lotes__label--input" htmlFor="">
-              Monto Interes
-            </label>
+        <Row justify={"center"} style={{ marginBottom: "16px" }}>
+          <Col>
+            <Text>
+              <b>CLIENTES CONGELADOS </b>
+            </Text>
+          </Col>
+        </Row>
+
+        <div style={{ margin: "0 auto", display: "flex" }}>
+          <Row
+            style={{
+              justifyContent: "center",
+              justifyContent: "space-evenly",
+              textAlign: "center",
+            }}
+          >
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="lotes"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={totalLotes2 !== 0 ? totalLotes2 : 0}
+                  disabled={true}
+                  placeholder={totalLotes2 !== 0 ? totalLotes2 : "$ 0.0"}
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes Cobrados {/* // ! falta aclaracion de esto */}
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="cobranza"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={totalCobranza2 !== 0 ? totalCobranza2 : 0}
+                  disabled={true}
+                  placeholder={totalCobranza2 !== 0 ? totalCobranza2 : "$ 0.0"}
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes liquidados
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="liquidados"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={totalLiquidados2 !== 0 ? totalLiquidados2 : 0}
+                  disabled={true}
+                  placeholder={
+                    totalLiquidados2 !== 0 ? totalLiquidados2 : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Cobro Total Mensual
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="pagados"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    totalPagados2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPagados2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    totalPagados2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPagados2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Monto Contratado
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="vencidos"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    montoTotalContrato2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalContrato2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    montoTotalContrato2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalContrato2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Monto Cobrado
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="pendiente"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    totalPagados2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPagados2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    totalPagados2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPagados2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Pend. Por Cobrar
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    totalPendiente2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPendiente2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    totalPendiente2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(totalPendiente2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Pend. Por Contratar
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="mensual"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    pendientePorContratar2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    pendientePorContratar2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Monto Interes
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    montoTotalInteres2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalInteres2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    montoTotalInteres2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(montoTotalInteres2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
           </Row>
-          <Row justify={"center"}>
-            <input
-              id="semanal"
-              className="reporte-lotes__input--realizado"
-              value={
-                montoTotalInteres2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalInteres2))
-                  : "$ 0.0"
-              }
-              disabled={true}
-              placeholder={
-                montoTotalInteres2 !== 0
-                  ? "$ " + formatPrecio(parseFloat(montoTotalInteres2))
-                  : "$ 0.0"
-              }
-            />
-          </Row>
-        </Col>
+        </div>
       </div>
-      {info2 != null && (
+
+      {info2.length > 0 && (
         <Row justify={"center"} className="tabla">
           <TableContainer component={Paper}>
             <Table>
@@ -1023,7 +1103,7 @@ export default function ReporteLotes() {
                   <TableCell>
                     <p>No.</p>
                   </TableCell>
-                  {terrenoAux == 0 && (
+                  {terrenoAux2 == 0 && (
                     <TableCell>
                       <p>Terreno</p>
                     </TableCell>
@@ -1081,7 +1161,7 @@ export default function ReporteLotes() {
                   .map((item, index) => (
                     <TableRow key={index}>
                       <TableCell>{index + 1}</TableCell>
-                      {terrenoAux == 0 && (
+                      {terrenoAux2 == 0 && (
                         <TableCell>{item["resumen_lote"]["terreno"]}</TableCell>
                       )}
                       <TableCell>{item["resumen_lote"]["lote"]}</TableCell>

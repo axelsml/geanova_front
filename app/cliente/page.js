@@ -762,17 +762,11 @@ export default function ClientesInfo() {
 
   return (
     <div className="p-8 grid gap-4">
-      <Row justify={"center"}>
-        <Col
-          xs={24}
-          sm={20}
-          md={16}
-          lg={12}
-          xl={8}
-          xxl={4}
-          className="titulo_pantallas"
-        >
-          <b>INFORMACION DEL CLIENTE</b>
+      <Row>
+        <Col style={{ margin: "auto" }}>
+          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+            INFORMACION DEL CLIENTE
+          </p>
         </Col>
       </Row>
       <Row justify={"center"} style={{ marginTop: "15px" }}>
@@ -823,7 +817,11 @@ export default function ClientesInfo() {
           </Form.Item>
         </Col>
         <Col>
-          <Button className="boton" onClick={BuscarInfoLote}>
+          <Button
+            className="boton"
+            disabled={terrenoSelected == null || loteSelected == null}
+            onClick={BuscarInfoLote}
+          >
             Buscar
           </Button>
         </Col>

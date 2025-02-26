@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -26,7 +26,7 @@ import {
   TableFooter,
 } from "@mui/material";
 import { FaCircleExclamation } from "react-icons/fa6";
-import { LoadingContext } from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 import terrenosService from "@/services/terrenosService";
 import Swal from "sweetalert2";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
@@ -78,8 +78,7 @@ export default function DetalleEstadoCuenta() {
   const [tablaAlonsoFiltrada, setTablaAlonsoFiltrada] = useState([]);
   const [tablaSucursal, setTablaSucursal] = useState([]);
   const [tablaSucursalFiltrada, setTablaSucursalFiltrada] = useState([]);
-  const contextValue = useContext(LoadingContext);
-  const { setIsLoading, setType } = contextValue;
+  const [loading, setLoading] = useState(false);
 
   const [range, setRange] = useState([]);
   const [movimientos, setMovimientos] = useState(false);
@@ -107,7 +106,7 @@ export default function DetalleEstadoCuenta() {
     { index: 2, id: 2, nombre: "No conciliado" },
   ];
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
     if (e.message) {
       setErrorMessage(
@@ -182,7 +181,7 @@ export default function DetalleEstadoCuenta() {
     terrenosService.getTerrenos(setTerrenos, onError);
 
     recursosService.showTipoMovimiento(setDatos, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
   }, []);
 
@@ -349,8 +348,7 @@ export default function DetalleEstadoCuenta() {
         text: "Debes seleccionar un rango de fechas",
       });
     }
-    setIsLoading(true);
-    setType(80);
+    setLoading(true);
     let form = {
       fechaInicial: range[0],
       fechaFinal: range[1],
@@ -371,7 +369,7 @@ export default function DetalleEstadoCuenta() {
         onError
       )
       .then(() => {
-        setIsLoading(false);
+        setLoading(false);
       });
   }
 
@@ -511,6 +509,11 @@ export default function DetalleEstadoCuenta() {
 
   return (
     <div style={{ paddingBottom: 30 }}>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Form {...layout}>
         <Row
           gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
@@ -906,9 +909,13 @@ export default function DetalleEstadoCuenta() {
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Typography.Title level={3}>
-          Estado de cuenta Alonso Morales
-        </Typography.Title>
+        <Row>
+          <Col style={{ margin: "auto" }}>
+            <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+              Estado de cuenta Alonso Morales
+            </p>
+          </Col>
+        </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">
@@ -1002,9 +1009,13 @@ export default function DetalleEstadoCuenta() {
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Typography.Title level={3}>
-          Estado de cuenta sucursal uno de SFPSM #0496201440
-        </Typography.Title>
+        <Row>
+          <Col style={{ margin: "auto" }}>
+            <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+              Estado de cuenta sucursal uno de SFPSM #0496201440
+            </p>
+          </Col>
+        </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">

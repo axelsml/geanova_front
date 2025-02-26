@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -25,7 +25,7 @@ import {
   TableFooter,
 } from "@mui/material";
 import { FaCircleExclamation } from "react-icons/fa6";
-import { LoadingContext } from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 import Swal from "sweetalert2";
 import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
 import recursosService from "@/services/recursosService";
@@ -64,11 +64,9 @@ export default function ManejoEfectivo() {
 
   const [solicitudes, setSolicitudes] = useState([]);
   const [cobranza, setCobranza] = useState([]);
-  const contextValue = useContext(LoadingContext);
-  const { setIsLoading, setType } = contextValue;
+  const [loading, setLoading] = useState(false);
 
   const [range, setRange] = useState([]);
-  const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [tipoSelected, setTipoSelected] = useState(null);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -83,14 +81,11 @@ export default function ManejoEfectivo() {
   const [dataResumen, setDataResumen] = useState([]);
 
   const [titleDetalles, setTitleDetalles] = useState("");
-  const [movimientos, setMovimientos] = useState([]);
-  const [movimientosId, setMovimientosId] = useState(null);
 
   const [tabla, setTabla] = useState([]);
   const [tablaFiltrada, setTablaFiltrada] = useState([]);
 
   const [formValues, setFormValues] = useState({});
-  const [formValuesSucursal, setFormValuesSucursal] = useState({});
   const [cookiePermisos, setCookiePermisos] = useState([]);
   const { Option } = Select;
 
@@ -100,7 +95,7 @@ export default function ManejoEfectivo() {
     { index: 2, id: 2, nombre: "Anticipo" },
   ];
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
     if (e.message) {
       setErrorMessage(
@@ -161,7 +156,7 @@ export default function ManejoEfectivo() {
 
   function setearMovimientos(params) {
     recursosService.showTipoMovimientoManejo(setDatos, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
   }
 
@@ -294,8 +289,7 @@ export default function ManejoEfectivo() {
         text: "Debes seleccionar un rango de fechas",
       });
     }
-    setIsLoading(true);
-    setType(80);
+    setLoading(true);
     let form = {
       fechaInicial: range[0],
       fechaFinal: range[1],
@@ -303,7 +297,7 @@ export default function ManejoEfectivo() {
     };
 
     recursosService.getIManejo(form, onConsulta, onError).then(() => {
-      setIsLoading(false);
+      setLoading(false);
     });
   }
 
@@ -442,6 +436,11 @@ export default function ManejoEfectivo() {
   }
   return (
     <div style={{ paddingBottom: 30 }}>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Form {...layout} name="busqueda">
         <Row
           gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
@@ -748,7 +747,13 @@ export default function ManejoEfectivo() {
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Typography.Title level={3}>Cobranza</Typography.Title>
+        <Row>
+          <Col style={{ margin: "auto" }}>
+            <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+              Cobranza
+            </p>
+          </Col>
+        </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">
@@ -845,7 +850,13 @@ export default function ManejoEfectivo() {
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Typography.Title level={3}>Anticipos</Typography.Title>
+        <Row>
+          <Col style={{ margin: "auto" }}>
+            <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+              Anticipos
+            </p>
+          </Col>
+        </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">

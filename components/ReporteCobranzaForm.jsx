@@ -1,20 +1,9 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
-import { LoadingContext } from "@/contexts/loading";
-import { usuario_id } from "@/helpers/user";
+import { useEffect, useState } from "react";
+import Loader80 from "@/components/Loader80";
 
 import { formatPrecio, formatDate } from "@/helpers/formatters";
-import {
-  Button,
-  Col,
-  Row,
-  Form,
-  Select,
-  Modal,
-  Tabs,
-  DatePicker,
-  Typography,
-} from "antd";
+import { Button, Col, Row, Form, Select, DatePicker, Typography } from "antd";
 import {
   Paper,
   Table,
@@ -26,14 +15,13 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
-import InputIn from "./Input";
 import Swal from "sweetalert2";
 
 import terrenosService from "@/services/terrenosService";
 import pagosService from "@/services/pagosService";
 
 export default function ReporteCobranza() {
-  const { setIsLoading } = useContext(LoadingContext);
+  const [loading, setLoading] = useState(false);
 
   const [data, setData] = useState(null);
   const [dataSolicitudes, setDataSolicitudes] = useState(null);
@@ -76,7 +64,7 @@ export default function ReporteCobranza() {
   }, []);
 
   const onError = (e) => {
-    setIsLoading(false);
+    setLoading(false);
     console.log(e);
   };
 
@@ -84,7 +72,7 @@ export default function ReporteCobranza() {
     if (sistemaPagoSelected != 2 || statusPagoId != 2) {
       setCuentaBancariaSelected(null);
     }
-    setIsLoading(true);
+    setLoading(true);
     setTotalPagado(0);
     setTotalContrato(0);
     setTotalPendiente(0);
@@ -102,7 +90,7 @@ export default function ReporteCobranza() {
   };
 
   async function onReporte(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.encontrado && data.response.length > 0) {
       setData(data.response);
       setDataSolicitudes(data.solicitudes);
@@ -159,6 +147,11 @@ export default function ReporteCobranza() {
   };
   return (
     <div>
+      {loading && (
+        <>
+          <Loader80 />
+        </>
+      )}
       <Row justify={"center"}>
         <Col
           xs={24}

@@ -249,7 +249,7 @@ export default function TerrenoEditForm({
             xxl={8}
             className="titulo_pantallas"
           >
-            <b> EDITAR DATOS DEL TERRENO</b>
+            <b style={{ fontSize: "16px" }}> EDITAR DATOS DEL TERRENO</b>
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: "25px" }}>

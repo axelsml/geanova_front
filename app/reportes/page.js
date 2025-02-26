@@ -1,5 +1,4 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
 
 import { Col, Row, Tabs } from "antd";
 import TabPane from "antd/es/tabs/TabPane";
@@ -7,17 +6,10 @@ import TabPane from "antd/es/tabs/TabPane";
 import ReporteLotes from "@/components/ReporteLotesForm";
 import ReporteCobranza from "@/components/ReporteCobranzaForm";
 import ReporteEstatusCobranza from "@/components/ReporteEstatusCobranza";
+import ReporteIngresos from "@/components/ReporteIngresos";
 import ReporteEfectividadCobranza from "../efectividadCobranza/page";
 
 export default function Reportes() {
-  const [showReporteLote, setShowReporteLote] = useState(false);
-
-  // const handleTabChange = (key) => {
-  //   if (key === "2") {
-  //   }
-  // };
-  // en <Tabs /> onChange={handleTabChange} como prop
-
   return (
     <div>
       <Row justify={"center"} style={{ marginTop: "1%" }}>
@@ -48,6 +40,13 @@ export default function Reportes() {
               <Row justify={"center"} className="mb-5">
                 <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
                   <ReporteEfectividadCobranza />
+                </Col>
+              </Row>
+            </TabPane>
+            <TabPane tab="Ingresos" key={"5"}>
+              <Row justify={"center"} className="mb-5">
+                <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
+                  <ReporteIngresos />
                 </Col>
               </Row>
             </TabPane>
