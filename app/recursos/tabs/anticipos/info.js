@@ -1,5 +1,14 @@
 import terrenosService from "@/services/terrenosService";
-import { Button, Checkbox, Col, Form, Row, Select, Typography } from "antd";
+import {
+  Button,
+  Checkbox,
+  Col,
+  Form,
+  Row,
+  Select,
+  Typography,
+  DatePicker,
+} from "antd";
 import {
   Paper,
   Table,
@@ -18,6 +27,9 @@ import Loader80 from "@/components/Loader80";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
 const { Option } = Select;
+const { Text } = Typography;
+const { RangePicker } = DatePicker;
+import locale from "antd/lib/date-picker/locale/es_ES";
 
 export default function Anticipos() {
   // * Variables del funcionamiento de la Tabla
@@ -32,6 +44,7 @@ export default function Anticipos() {
   const [order2, setOrder2] = useState("desc");
   const [orderBy2, setOrderBy2] = useState("fecha_operacion");
 
+  const [resumenMontos, setResumenMontos] = useState(null);
   const [cambiados, setCambiados] = useState([]);
   const [datos, setDatos] = useState([]);
   const [terrenos, setTerrenos] = useState([]);
@@ -39,6 +52,8 @@ export default function Anticipos() {
   const [sistemaPagoSelected, setSistemaPagoSelected] = useState(null);
   const [check, setCheck] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [rangoFechas, setRangoFechas] = useState([]);
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, onError);
@@ -150,21 +165,55 @@ export default function Anticipos() {
     setOrderBy2(property);
   };
 
+  const onSetFechas = (dates, dateStrings) => {
+    setRangoFechas(dateStrings);
+  };
+
   function buscarAnticipos() {
-    let forms = {
+    let params = {
       terreno_id: terrenoSelected,
       sistema_pago_id: sistemaPagoSelected,
       check: check,
+      fecha_inicial: rangoFechas[0],
+      fecha_final: rangoFechas[1],
     };
+    debugger;
     setLoading(true);
-    recursosService.getAnticipos(forms, onBusqueda, onError).then(() => {
-      setLoading(false);
-    });
+    recursosService.getAnticipos(params, onBusqueda, onError);
   }
 
-  function onBusqueda(data) {
-    setDatos(data.anticipo_info);
-    setCambiados(data.recibidos);
+  async function onBusqueda(data) {
+    debugger;
+    setLoading(false);
+    if (data.success) {
+      setDatos(data.anticipo_info);
+      setCambiados(data.recibidos);
+      setResumenMontos(data.resumen);
+      if (data.message !== "") {
+        Swal.fire({
+          title: "Aviso",
+          icon: "warning",
+          text: data.message,
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: false,
+          confirmButtonText: "Aceptar",
+        });
+      }
+    } else {
+      Swal.fire({
+        title: "Aviso",
+        icon: "warning",
+        text:
+          data.message != ""
+            ? data.message
+            : "No se han encontrado registros con la informacion solicitada",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
   }
 
   async function cambiarEstatus(fila) {
@@ -229,71 +278,152 @@ export default function Anticipos() {
           <Loader80 />
         </>
       )}
-      <Form
-        layout="horizontal"
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 14 }}
-      >
-        <Row justify={"center"} className="mb-5 gap-2">
-          <Col>
-            <Select
-              showSearch
-              placeholder="Seleccione un Sistema de Pago"
-              style={{ minWidth: "12vw", maxWidth: "12vw" }}
-              optionLabelProp="label"
-              onChange={handleChangeSistemaPago}
+      <Form>
+        <Row style={{ display: "flex", flexDirection: "column" }}>
+          <Row justify={"center"}>
+            <Col
+              style={{
+                display: "flex",
+                textAlign: "center",
+                justifyContent: "center",
+              }}
             >
-              <Option value={0} label={"Todos"}>
-                Todos
-              </Option>
-              <Option value={1} label={"Pago en Oficina"}>
-                Pago en Oficina
-              </Option>
-              <Option value={2} label={"Transferencia"}>
-                Transferencia
-              </Option>
-            </Select>
-          </Col>
-          <Col>
-            <Select
-              showSearch
-              placeholder="Seleccione un Proyecto"
-              style={{ minWidth: "12vw", maxWidth: "12vw" }}
-              optionLabelProp="label"
-              onChange={handleSelectChange}
-            >
-              <Option value={0} label={"Todos"}>
-                Todos
-              </Option>
-              {terrenos?.map((item, index) => (
-                <Option key={item.id} value={item.id} label={item.nombre}>
-                  {item?.nombre}
+              <Row
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Text>Seleccionar fechas</Text>
+                <Form.Item name="range">
+                  <RangePicker
+                    locale={locale}
+                    format="YYYY-MM-DD"
+                    defaultValue={rangoFechas}
+                    onChange={(value, dateString) => {
+                      onSetFechas(value, dateString);
+                    }}
+                    style={{ width: "75%" }}
+                  />
+                </Form.Item>
+              </Row>
+            </Col>
+          </Row>
+          <Row justify={"center"} className="mb-5 gap-2">
+            <Col>
+              <Select
+                showSearch
+                placeholder="Seleccione un Sistema de Pago"
+                style={{ minWidth: "12vw", maxWidth: "12vw" }}
+                optionLabelProp="label"
+                onChange={handleChangeSistemaPago}
+              >
+                <Option value={0} label={"Todos"}>
+                  Todos
                 </Option>
-              ))}
-            </Select>
-          </Col>
-          <Col style={{ marginTop: "auto", marginBottom: "auto" }}>
-            <Checkbox
-              onChange={() => {
-                setCheck(!check);
-              }}
-              checked={check}
-            >
-              Recibidos Y Consolidados
-            </Checkbox>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              onClick={() => {
-                buscarAnticipos();
-              }}
-            >
-              Cargar Anticipos
-            </Button>
-          </Col>
+                <Option value={1} label={"Pago en Oficina"}>
+                  Pago en Oficina
+                </Option>
+                <Option value={2} label={"Transferencia"}>
+                  Transferencia
+                </Option>
+              </Select>
+            </Col>
+            <Col>
+              <Select
+                showSearch
+                placeholder="Seleccione un Proyecto"
+                style={{ minWidth: "12vw", maxWidth: "12vw" }}
+                optionLabelProp="label"
+                onChange={handleSelectChange}
+              >
+                <Option value={0} label={"Todos"}>
+                  Todos
+                </Option>
+                {terrenos?.map((item, index) => (
+                  <Option key={item.id} value={item.id} label={item.nombre}>
+                    {item?.nombre}
+                  </Option>
+                ))}
+              </Select>
+            </Col>
+            <Col style={{ marginTop: "auto", marginBottom: "auto" }}>
+              <Checkbox
+                onChange={() => {
+                  setCheck(!check);
+                }}
+                checked={check}
+              >
+                Recibidos Y Consolidados
+              </Checkbox>
+            </Col>
+            <Col>
+              <Button
+                className="boton"
+                onClick={() => {
+                  buscarAnticipos();
+                }}
+                disabled={
+                  terrenoSelected == null || sistemaPagoSelected == null
+                }
+              >
+                Cargar Anticipos
+              </Button>
+            </Col>
+          </Row>
         </Row>
       </Form>
+
+      {datos.length > 0 || cambiados.length > 0 ? (
+        <Row justify={"center"}>
+          <Col>
+            <TableContainer component={Paper} className="tabla">
+              <Table>
+                <TableHead className="tabla_encabezado">
+                  <TableRow>
+                    <TableCell style={{ textAlign: "right" }}>
+                      <p>RESUMEN</p>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Solicitudes: </TableCell>
+                    <TableCell style={{ textAlign: "right" }}>
+                      Pendientes
+                    </TableCell>
+                    <TableCell style={{ textAlign: "right" }}>
+                      Conciliados
+                    </TableCell>
+                    <TableCell style={{ textAlign: "right" }}>
+                      Recibidos
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Monto Anticipo: </TableCell>
+                    <TableCell style={{ textAlign: "right" }}>
+                      ${resumenMontos?.resumen_monto_pendientes}
+                    </TableCell>
+                    <TableCell style={{ textAlign: "right" }}>
+                      ${resumenMontos?.resumen_monto_consolidados}
+                    </TableCell>
+                    <TableCell style={{ textAlign: "right" }}>
+                      ${resumenMontos?.resumen_monto_recibidos}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Total: </TableCell>
+                    <TableCell colSpan={3} style={{ textAlign: "right" }}>
+                      ${resumenMontos?.resumen_montos_total}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Col>
+        </Row>
+      ) : null}
+
       <Row justify={"center"} className="mt-5" style={{ margin: "16px" }}>
         <Col className="titulo_pantallas">
           <p>Pendientes</p>

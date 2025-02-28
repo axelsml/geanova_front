@@ -6,7 +6,16 @@ import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
 
-import { Button, Row, Col, Select, Checkbox, Typography } from "antd";
+import {
+  Button,
+  Row,
+  Col,
+  Select,
+  Checkbox,
+  Typography,
+  DatePicker,
+  Form,
+} from "antd";
 import {
   Paper,
   Table,
@@ -21,7 +30,8 @@ import {
 } from "@mui/material";
 const { Text } = Typography;
 const { Option } = Select;
-
+const { RangePicker } = DatePicker;
+import locale from "antd/lib/date-picker/locale/es_ES";
 import terrenosService from "@/services/terrenosService";
 import pagosService from "@/services/pagosService";
 
@@ -30,6 +40,7 @@ export default function Efectivo() {
   const [loading, setLoading] = useState(false);
 
   const [check, setCheck] = useState(false);
+  const [rangoFechas, setRangoFechas] = useState([]);
   const [terrenos, setTerrenos] = useState([]);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [pendientes, setMovimientosPendientes] = useState([]);
@@ -121,6 +132,8 @@ export default function Efectivo() {
     var params = {
       terreno_id: terrenoSelected,
       check: check,
+      fecha_inicial: rangoFechas[0],
+      fecha_final: rangoFechas[1],
     };
     pagosService.getMovimientosEfectivo(
       params,
@@ -144,8 +157,15 @@ export default function Efectivo() {
         showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
+      setMovimientosPendientes([]);
+      setMovimientosPendientesMonto(0);
+      setMovimientosRecibidos([]);
     }
   }
+
+  const onSetFechas = (dates, dateStrings) => {
+    setRangoFechas(dateStrings);
+  };
 
   return (
     <>
@@ -177,10 +197,11 @@ export default function Efectivo() {
                   showSearch
                   placeholder="Seleccione un Proyecto"
                   optionLabelProp="label"
+                  style={{ width: "150px" }}
                   onChange={handleSelectChange}
                 >
                   {terrenos?.map((item, index) => (
-                    <Option key={index} value={item.id}>
+                    <Option key={index} value={item.id} label={item.nombre}>
                       {item?.nombre}
                     </Option>
                   ))}
@@ -202,11 +223,40 @@ export default function Efectivo() {
                 <Checkbox
                   onChange={() => {
                     setCheck(!check);
+                    setRangoFechas([]);
                   }}
                   checked={check}
                 />
               </Row>
             </Col>
+            {check && (
+              <Col
+                style={{
+                  display: "flex",
+                  textAlign: "center",
+                }}
+              >
+                <Row
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Text>Seleccionar fechas</Text>
+                  <Form.Item name="range">
+                    <RangePicker
+                      locale={locale}
+                      format="YYYY-MM-DD"
+                      defaultValue={rangoFechas}
+                      onChange={(value, dateString) => {
+                        onSetFechas(value, dateString);
+                      }}
+                      style={{ width: "75%" }}
+                    />
+                  </Form.Item>
+                </Row>
+              </Col>
+            )}
           </Row>
           <Row style={{ margin: "12px auto 12px" }}>
             <Button
@@ -214,7 +264,9 @@ export default function Efectivo() {
               onClick={() => {
                 cargarMovimientosEfectivo();
               }}
-              disabled={terrenoSelected == null}
+              disabled={
+                terrenoSelected == null || (check && rangoFechas.length < 2)
+              }
             >
               Cargar Efectivo
             </Button>
