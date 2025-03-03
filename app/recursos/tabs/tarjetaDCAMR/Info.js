@@ -265,6 +265,8 @@ export default function TarjetaDCAMR() {
   }
 
   function Consultado(response) {
+    setLoading(false);
+
     let { type, message, movimientos, resumenTipo } = response;
     let totalSumStatus1;
     let totalSumStatus2;
