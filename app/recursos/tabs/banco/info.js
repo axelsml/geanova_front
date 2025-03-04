@@ -6,7 +6,8 @@ import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
 import { UploadOutlined } from "@ant-design/icons";
-
+import { usuario_id } from "@/helpers/user";
+import * as XLSX from "xlsx";
 import { Button, Row, Col, Select, Typography, Upload, Modal } from "antd";
 const { Text } = Typography;
 const { Option } = Select;
@@ -31,6 +32,7 @@ export default function Banco() {
   const [loading, setLoading] = useState(false);
 
   const [excelData, setExcelData] = useState([]);
+  const [message, setMessage] = useState("");
 
   const [terrenos, setTerrenos] = useState([]);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
@@ -72,12 +74,12 @@ export default function Banco() {
     getCookiePermisos("efectivo", setCookiePermisos);
   }, []);
 
-  const onError = () => {
+  const onError = (data) => {
     setLoading(false);
     Swal.fire({
       title: "Error",
       icon: "error",
-      text: data.message,
+      text: "FALLO AL INTENTAR GUARDAR",
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
       showDenyButton: true,
@@ -94,7 +96,7 @@ export default function Banco() {
       const worksheet = workbook.Sheets[sheetName];
       const dataArr = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
       setExcelData(dataArr);
-      message.success(`${file.name} Adjuntado`);
+      // message.success(`${file.name} Adjuntado`);
       guardarEstadoCuenta(dataArr);
     };
     reader.readAsArrayBuffer(file);
@@ -166,7 +168,21 @@ export default function Banco() {
       onError
     );
   }
-
+async function onMovimientosGuardados(data) {
+  debugger
+    console.log("data: ", data.movimientos_guardados);
+    let aux = data.movimientos_guardados;
+    setLoading(false);
+    Swal.fire({
+      title: "Info",
+      icon: "info",
+      text: "Cantidad De Registros Nuevos Guardados: " + data.movimientos_guardados,
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: false,
+      confirmButtonText: "Aceptar",
+    });
+  }
   function excelDateToJSDate(serial) {
     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
     const timezoneOffset = date.getTimezoneOffset() * 60000; // Compensa el desfase de la zona horaria
@@ -417,62 +433,6 @@ export default function Banco() {
               </Row>
             </Col>
           )}
-          <Col>
-            <Row Row justify={"center"} style={{ marginBottom: "12px" }}>
-              <Text className="titulo_pantallas">
-                <b>Movimientos Disponibles</b>
-              </Text>
-            </Row>
-            <Row Row justify={"center"} style={{ marginBottom: "32px" }}>
-              <TableContainer className="tabla">
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Cuenta</TableCell>
-                      <TableCell>Fecha Operacion</TableCell>
-                      <TableCell>Descripcion</TableCell>
-                      <TableCell>Descripcion Larga</TableCell>
-                      <TableCell>Monto</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {stableSort(
-                      movimientos_por_conciliar,
-                      getComparator(order, orderBy)
-                    )
-                      .slice(
-                        page2 * rowsPerPage2,
-                        page2 * rowsPerPage2 + rowsPerPage2
-                      )
-                      .map((mov, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{mov.cuenta}</TableCell>
-                          <TableCell>{mov.fecha_operacion}</TableCell>
-                          <TableCell>{mov.descripcion}</TableCell>
-                          <TableCell>{mov.concepto}</TableCell>
-                          <TableCell>
-                            ${formatPrecio(parseFloat(mov.abono))}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
-                        count={movimientos_por_conciliar.length}
-                        rowsPerPage={rowsPerPage2}
-                        page={page2}
-                        onPageChange={handleChangePage2}
-                        onRowsPerPageChange={handleChangeRowsPerPage2}
-                        labelRowsPerPage="Pendientes por Página"
-                      />
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </TableContainer>
-            </Row>
-          </Col>
           {por_conciliar.length != 0 && (
             <Col>
               <Row Row justify={"center"}>
@@ -590,6 +550,63 @@ export default function Banco() {
               </Row>
             </Col>
           )}
+          <Col>
+            <Row Row justify={"center"} style={{ marginBottom: "12px" }}>
+              <Text className="titulo_pantallas">
+                <b>Movimientos Disponibles</b>
+              </Text>
+            </Row>
+            <Row Row justify={"center"} style={{ marginBottom: "32px" }}>
+              <TableContainer className="tabla">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Cuenta</TableCell>
+                      <TableCell>Fecha Operacion</TableCell>
+                      <TableCell>Descripcion</TableCell>
+                      <TableCell>Descripcion Larga</TableCell>
+                      <TableCell>Monto</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {stableSort(
+                      movimientos_por_conciliar,
+                      getComparator(order, orderBy)
+                    )
+                      .slice(
+                        page2 * rowsPerPage2,
+                        page2 * rowsPerPage2 + rowsPerPage2
+                      )
+                      .map((mov, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{mov.cuenta}</TableCell>
+                          <TableCell>{mov.fecha_operacion}</TableCell>
+                          <TableCell>{mov.descripcion}</TableCell>
+                          <TableCell>{mov.concepto}</TableCell>
+                          <TableCell>
+                            ${formatPrecio(parseFloat(mov.abono))}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        count={movimientos_por_conciliar.length}
+                        rowsPerPage={rowsPerPage2}
+                        page={page2}
+                        onPageChange={handleChangePage2}
+                        onRowsPerPageChange={handleChangeRowsPerPage2}
+                        labelRowsPerPage="Pendientes por Página"
+                      />
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </TableContainer>
+            </Row>
+          </Col>
+          
         </Row>
 
         <Modal

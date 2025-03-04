@@ -265,7 +265,7 @@ export default function Efectivo() {
                 cargarMovimientosEfectivo();
               }}
               disabled={
-                terrenoSelected == null || (check && rangoFechas.length < 2)
+                (check && rangoFechas.length < 2)
               }
             >
               Cargar Efectivo
