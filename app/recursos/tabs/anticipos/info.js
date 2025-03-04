@@ -402,19 +402,19 @@ export default function Anticipos() {
                   <TableRow>
                     <TableCell>Monto Anticipo: </TableCell>
                     <TableCell style={{ textAlign: "right" }}>
-                      ${resumenMontos?.resumen_monto_pendientes}
+                      ${formatPrecio(resumenMontos?.resumen_monto_pendientes)}
                     </TableCell>
                     <TableCell style={{ textAlign: "right" }}>
-                      ${resumenMontos?.resumen_monto_consolidados}
+                      ${formatPrecio(resumenMontos?.resumen_monto_consolidados)}
                     </TableCell>
                     <TableCell style={{ textAlign: "right" }}>
-                      ${resumenMontos?.resumen_monto_recibidos}
+                      ${formatPrecio(resumenMontos?.resumen_monto_recibidos)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total: </TableCell>
                     <TableCell colSpan={3} style={{ textAlign: "right" }}>
-                      ${resumenMontos?.resumen_montos_total}
+                      ${formatPrecio(resumenMontos?.resumen_montos_total)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

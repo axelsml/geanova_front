@@ -8,6 +8,7 @@ import ReporteCobranza from "@/components/ReporteCobranzaForm";
 import ReporteEstatusCobranza from "@/components/ReporteEstatusCobranza";
 import ReporteIngresos from "@/components/ReporteIngresos";
 import ReporteEfectividadCobranza from "../efectividadCobranza/page";
+import ReporteProyeccion from "@/components/ReporteProyeccion";
 
 export default function Reportes() {
   return (
@@ -47,6 +48,13 @@ export default function Reportes() {
               <Row justify={"center"} className="mb-5">
                 <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
                   <ReporteIngresos />
+                </Col>
+              </Row>
+            </TabPane>
+            <TabPane tab="Proyección" key={"6"}>
+              <Row justify={"center"} className="mb-5">
+                <Col>
+                  <ReporteProyeccion />
                 </Col>
               </Row>
             </TabPane>

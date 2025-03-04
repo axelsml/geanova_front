@@ -433,7 +433,7 @@ export default function ReporteLotes() {
               textAlign: "center",
             }}
           >
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -451,7 +451,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -469,7 +469,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -489,7 +489,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -523,7 +523,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -549,7 +549,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -575,7 +575,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -601,7 +601,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -633,7 +633,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -877,7 +877,7 @@ export default function ReporteLotes() {
               textAlign: "center",
             }}
           >
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -895,7 +895,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -913,7 +913,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -933,7 +933,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -960,7 +960,7 @@ export default function ReporteLotes() {
               </Row>
             </Col>
 
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -986,7 +986,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -1012,7 +1012,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -1038,7 +1038,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
@@ -1064,7 +1064,7 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
-            <Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
