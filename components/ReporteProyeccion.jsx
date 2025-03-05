@@ -32,7 +32,7 @@ export default function ReporteProyeccion() {
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
   const [mesNombre, setMesNombre] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(1);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [financiamientoSeleccionado, setFinanciamientoSeleccionado] =
     useState(null);
