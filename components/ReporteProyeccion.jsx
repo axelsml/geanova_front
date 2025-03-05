@@ -170,23 +170,6 @@ export default function ReporteProyeccion() {
           <Col style={{ textAlign: "center", margin: "0px 5px 0px 5px" }}>
             <Form.Item>
               <p>
-                <Text>Seleccionar Año</Text>
-              </p>
-              <Select
-                showSearch
-                placeholder="Seleccione un Año"
-                optionLabelProp="label"
-                onChange={(value) => {
-                  setSelectedYear(value);
-                }}
-                options={years}
-                style={{ width: 100 }}
-              />
-            </Form.Item>
-          </Col>
-          <Col style={{ textAlign: "center", margin: "0px 5px 0px 5px" }}>
-            <Form.Item>
-              <p>
                 <Text>Seleccionar rango de Meses</Text>
               </p>
               <Select
