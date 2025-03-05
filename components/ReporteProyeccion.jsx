@@ -32,7 +32,6 @@ export default function ReporteProyeccion() {
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
   const [mesNombre, setMesNombre] = useState("");
-  const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [financiamientoSeleccionado, setFinanciamientoSeleccionado] =
@@ -40,19 +39,18 @@ export default function ReporteProyeccion() {
   const [sistemaPagoSeleccionado, setSistemaPagoSeleccionado] = useState(null);
 
   const months = [
-    { value: 0, label: "Todos" },
-    { value: 1, label: "Enero" },
-    { value: 2, label: "Febrero" },
-    { value: 3, label: "Marzo" },
-    { value: 4, label: "Abril" },
-    { value: 5, label: "Mayo" },
-    { value: 6, label: "Junio" },
-    { value: 7, label: "Julio" },
-    { value: 8, label: "Agosto" },
-    { value: 9, label: "Septiembre" },
-    { value: 10, label: "Octubre" },
-    { value: 11, label: "Noviembre" },
-    { value: 12, label: "Diciembre" },
+    { value: 1, label: "1 MES" },
+    { value: 2, label: "2 MESES" },
+    { value: 3, label: "3 MESES" },
+    { value: 4, label: "4 MESES" },
+    { value: 5, label: "5 MESES" },
+    { value: 6, label: "6 MESES" },
+    { value: 7, label: "7 MESES" },
+    { value: 8, label: "8 MESES" },
+    { value: 9, label: "9 MESES" },
+    { value: 10, label: "10 MESES" },
+    { value: 11, label: "11 MESES" },
+    { value: 12, label: "12 MESES" },
   ];
 
   const today = new Date();
@@ -92,8 +90,7 @@ export default function ReporteProyeccion() {
     setLoading(true);
     let params = {
       terreno_id: terrenoSelected,
-      year: selectedYear,
-      mes: selectedMonth,
+      meses: selectedMonth,
       financiamiento_id: financiamientoSeleccionado,
       sistema_pago_id: sistemaPagoSeleccionado,
     };
@@ -190,11 +187,11 @@ export default function ReporteProyeccion() {
           <Col style={{ textAlign: "center", margin: "0px 5px 0px 5px" }}>
             <Form.Item>
               <p>
-                <Text>Seleccionar Mes</Text>
+                <Text>Seleccionar rango de Meses</Text>
               </p>
               <Select
                 showSearch
-                placeholder="Seleccione un Mes"
+                placeholder="Seleccione un rango"
                 optionLabelProp="label"
                 onChange={(value) => {
                   setSelectedMonth(value);
