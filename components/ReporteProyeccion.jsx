@@ -8,6 +8,7 @@ import pagosService from "@/services/pagosService";
 import Loader80 from "@/components/Loader80";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
+import TableInCol from "./TableInCol";
 
 import {
   Paper,
@@ -26,6 +27,7 @@ export default function ReporteProyeccion() {
   const [loading, setLoading] = useState(false);
 
   const [data, setData] = useState(null);
+  const [dataMensual, setDataMensual] = useState(null);
   const [terrenos, setTerrenos] = useState([]);
   const [tiposFinanciamiento, setTiposFinanciamiento] = useState([]);
   const [tiposSistemaPago, setTiposSistemaPago] = useState([]);
@@ -101,6 +103,7 @@ export default function ReporteProyeccion() {
     setLoading(false);
     if (data.success) {
       setData(data.response);
+      setDataMensual(data.resumenes_mensuales);
       debugger;
     } else {
       Swal.fire({
@@ -113,6 +116,7 @@ export default function ReporteProyeccion() {
         confirmButtonText: "Aceptar",
       });
       setData(null);
+      setDataMensual(null);
     }
   }
 
@@ -373,6 +377,16 @@ export default function ReporteProyeccion() {
                 </Table>
               </TableContainer>
             </Col>
+          </Row>
+        </div>
+      )}
+
+      {dataMensual && (
+        <div style={{ margin: "0 auto" }}>
+          <Row style={{ display: "flex", justifyContent: "center" }}>
+            {dataMensual.map((item, index) => (
+              <TableInCol key={index} data={item} />
+            ))}
           </Row>
         </div>
       )}
