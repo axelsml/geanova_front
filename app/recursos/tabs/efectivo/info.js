@@ -167,6 +167,63 @@ export default function Efectivo() {
     setRangoFechas(dateStrings);
   };
 
+  function cambiar_a_recibido(movimiento) {
+    Swal.fire({
+      title:
+        "El Status De Este Movimiento Se Cambiara a Recibido,¿Desea Continuar?",
+      icon: "info",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      showCancelButton: false,
+      allowOutsideClick: false,
+      confirmButtonText: "Aceptar",
+      denyButtonText: `Cancelar`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        setType(80);
+        var params = {
+          movimiento_id: movimiento.id,
+          usuario_recibio: usuario_id,
+        };
+        pagosService
+          .cambiarRecibido(params, onMovimientoRecibido, onError)
+          .then(() => {
+            cargarMovimientosEfectivo();
+          });
+      }
+    });
+  }
+
+  async function onMovimientoRecibido(data) {
+    setIsLoading(false);
+    if (data.success) {
+      Swal.fire({
+        title: "Success",
+        icon: "success",
+        text: "Efectivo Recibido",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+      cargarMovimientosEfectivo();
+      setMovimientosPendientes(data.pendientes);
+      setMovimientosRecibidos(data.recibidos);
+    } else {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No Se Pudo Actualizar El Status A Recibido",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
+  }
+
   return (
     <>
       {loading && (
