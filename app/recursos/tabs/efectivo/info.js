@@ -209,8 +209,8 @@ export default function Efectivo() {
         confirmButtonText: "Aceptar",
       });
       cargarMovimientosEfectivo();
-      setMovimientosPendientes(data.pendientes);
-      setMovimientosRecibidos(data.recibidos);
+      // setMovimientosPendientes(data.pendientes);
+      // setMovimientosRecibidos(data.recibidos);
     } else {
       Swal.fire({
         title: "Error",
