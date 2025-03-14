@@ -182,7 +182,6 @@ export default function Efectivo() {
     }).then((result) => {
       if (result.isConfirmed) {
         setLoading(true);
-        setType(80);
         var params = {
           movimiento_id: movimiento.id,
           usuario_recibio: usuario_id,
