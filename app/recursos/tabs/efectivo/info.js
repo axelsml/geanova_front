@@ -181,7 +181,7 @@ export default function Efectivo() {
       denyButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        setIsLoading(true);
+        setLoading(true);
         setType(80);
         var params = {
           movimiento_id: movimiento.id,
@@ -197,7 +197,7 @@ export default function Efectivo() {
   }
 
   async function onMovimientoRecibido(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.success) {
       Swal.fire({
         title: "Success",
