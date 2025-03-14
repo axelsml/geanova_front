@@ -5,6 +5,7 @@ import Loader80 from "@/components/Loader80";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
+import { usuario_id } from "@/helpers/user";
 
 import {
   Button,
