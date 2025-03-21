@@ -9,6 +9,7 @@ import ReporteEstatusCobranza from "@/components/ReporteEstatusCobranza";
 import ReporteIngresos from "@/components/ReporteIngresos";
 import ReporteEfectividadCobranza from "../efectividadCobranza/page";
 import ReporteProyeccion from "@/components/ReporteProyeccion";
+import InformeCortes from "@/components/InformeCortes";
 
 export default function Reportes() {
   return (
@@ -55,6 +56,13 @@ export default function Reportes() {
               <Row justify={"center"} className="mb-5">
                 <Col>
                   <ReporteProyeccion />
+                </Col>
+              </Row>
+            </TabPane>
+            <TabPane tab="Informe Cortes" key={"7"}>
+              <Row justify={"center"} className="mb-5">
+                <Col>
+                  <InformeCortes />
                 </Col>
               </Row>
             </TabPane>
