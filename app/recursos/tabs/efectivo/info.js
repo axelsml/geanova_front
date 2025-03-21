@@ -5,6 +5,7 @@ import Loader80 from "@/components/Loader80";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
+import { usuario_id } from "@/helpers/user";
 
 import {
   Button,
@@ -166,6 +167,62 @@ export default function Efectivo() {
   const onSetFechas = (dates, dateStrings) => {
     setRangoFechas(dateStrings);
   };
+
+  function cambiar_a_recibido(movimiento) {
+    Swal.fire({
+      title:
+        "El Status De Este Movimiento Se Cambiara a Recibido,¿Desea Continuar?",
+      icon: "info",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      showCancelButton: false,
+      allowOutsideClick: false,
+      confirmButtonText: "Aceptar",
+      denyButtonText: `Cancelar`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setLoading(true);
+        var params = {
+          movimiento_id: movimiento.id,
+          usuario_recibio: usuario_id,
+        };
+        pagosService
+          .cambiarRecibido(params, onMovimientoRecibido, onError)
+          .then(() => {
+            cargarMovimientosEfectivo();
+          });
+      }
+    });
+  }
+
+  async function onMovimientoRecibido(data) {
+    setLoading(false);
+    if (data.success) {
+      Swal.fire({
+        title: "Success",
+        icon: "success",
+        text: "Efectivo Recibido",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+      cargarMovimientosEfectivo();
+      // setMovimientosPendientes(data.pendientes);
+      // setMovimientosRecibidos(data.recibidos);
+    } else {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No Se Pudo Actualizar El Status A Recibido",
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
+  }
 
   return (
     <>
