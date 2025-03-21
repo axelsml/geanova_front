@@ -59,7 +59,7 @@ export default function Reportes() {
                 </Col>
               </Row>
             </TabPane>
-            <TabPane tab="Informe Cortes" key={"7"}>
+            <TabPane tab="Informe Histórico" key={"7"}>
               <Row justify={"center"} className="mb-5">
                 <Col>
                   <InformeCortes />

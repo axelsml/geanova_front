@@ -101,7 +101,7 @@ export default function TablaInformeCortes({ informe }) {
   }
 
   return (
-    <Col style={{ maxWidth: "300px", margin: "16px" }}>
+    <Col style={{ margin: "16px" }}>
       {informe && (
         <>
           <div style={{ textAlign: "center" }}>
@@ -136,10 +136,7 @@ export default function TablaInformeCortes({ informe }) {
             </Col>
           </div>
           <div className="tabla">
-            <TableContainer
-              component={Paper}
-              sx={{ maxHeight: "400px", width: "100%" }}
-            >
+            <TableContainer component={Paper} sx={{ width: "100%" }}>
               <Table size="small">
                 <TableHead>
                   <TableRow style={{ backgroundColor: "rgb(67, 141, 204)" }}>
@@ -150,6 +147,7 @@ export default function TablaInformeCortes({ informe }) {
                           fontWeight: "bold",
                           color: "white",
                           fontSize: "16px",
+                          textAlign: "center",
                         }}
                       >
                         Fecha Inicial:{" "}
@@ -163,6 +161,7 @@ export default function TablaInformeCortes({ informe }) {
                           fontWeight: "bold",
                           color: "white",
                           fontSize: "16px",
+                          textAlign: "center",
                         }}
                       >
                         Fecha Final:{" "}

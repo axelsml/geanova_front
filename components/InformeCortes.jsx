@@ -405,11 +405,16 @@ export default function InformeCortes() {
         )}
       </div>
       {/* TABLAS */}
-      <div>
-        <Row justify={"center"} style={{ display: "flex" }}>
+      <div style={{ overflowX: "auto" }}>
+        <Row
+          justify={"flex-start"}
+          style={{ display: "flex", flexWrap: "nowrap" }}
+        >
           {informe &&
             informe.map((item, index) => (
-              <TablaInformeCortes key={index} informe={item} />
+              <div key={index} style={{ display: "inline-block" }}>
+                <TablaInformeCortes informe={item} />
+              </div>
             ))}
         </Row>
       </div>
