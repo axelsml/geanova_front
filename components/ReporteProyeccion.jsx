@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import cobranzaService from "@/services/cobranzaService";
 import terrenosService from "@/services/terrenosService";
 import pagosService from "@/services/pagosService";
 
 import Loader80 from "@/components/Loader80";
 import { formatPrecio } from "@/helpers/formatters";
 import Swal from "sweetalert2";
-import TableInCol from "./TableInCol";
-
 import {
   Paper,
   Table,
@@ -26,11 +23,13 @@ export default function ReporteProyeccion() {
   const { Text } = Typography;
   const [loading, setLoading] = useState(false);
 
-  const [data, setData] = useState(null);
-  const [dataMensual, setDataMensual] = useState(null);
+  const [general, setGeneral] = useState(null);
+  const [mensual, setMensual] = useState(null);
+
   const [terrenos, setTerrenos] = useState([]);
   const [tiposFinanciamiento, setTiposFinanciamiento] = useState([]);
   const [tiposSistemaPago, setTiposSistemaPago] = useState([]);
+
   const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
 
   const [mesNombre, setMesNombre] = useState("");
@@ -102,9 +101,8 @@ export default function ReporteProyeccion() {
   async function onResumen(data) {
     setLoading(false);
     if (data.success) {
-      setData(data.response);
-      setDataMensual(data.resumenes_mensuales);
-      debugger;
+      setGeneral(data.resumen_general);
+      setMensual(data.resumenes_mensuales);
     } else {
       Swal.fire({
         title: "Aviso",
@@ -115,8 +113,8 @@ export default function ReporteProyeccion() {
         showDenyButton: false,
         confirmButtonText: "Aceptar",
       });
-      setData(null);
-      setDataMensual(null);
+      setGeneral(null);
+      setMensual(null);
     }
   }
 
@@ -270,123 +268,165 @@ export default function ReporteProyeccion() {
         </Row>
       </div>
 
-      {data != null && (
+      {general != null && mensual != null && (
         <div style={{ margin: "0  auto" }}>
+          <Text style={{ margin: "auto", textAlign: "center" }}>
+            <h3 style={{ marginTop: "16px", color: "rgb(67, 141, 204)" }}>
+              {mesNombre}
+            </h3>
+          </Text>
           <Row style={{ marginTop: "24px" }}>
             <Col className="tabla" style={{ margin: "0 auto" }}>
               <TableContainer component={Paper}>
                 <Table>
                   <TableHead>
-                    <TableRow className="tabla_encabezado">
-                      <TableCell colSpan={4}>
-                        <p style={{ textAlign: "center", fontWeight: "bold" }}>
-                          {mesNombre}
-                        </p>
+                    <TableRow style={{ backgroundColor: "rgb(67, 141, 204)" }}>
+                      <TableCell
+                        colSpan={5}
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        Financiamiento
+                      </TableCell>
+                      <TableCell
+                        colSpan={4}
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        Monto Proyectado
+                      </TableCell>
+                    </TableRow>
+                    <TableRow style={{ backgroundColor: "rgb(67, 141, 204)" }}>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Mes
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Mensuales
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Quincenales
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Semanales
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Total clientes
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Mensuales
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Quincenales
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Semanales
+                      </TableCell>
+                      <TableCell
+                        style={{ fontWeight: "bold", color: "#FFFFFF" }}
+                      >
+                        Total
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>
-                        <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-                          Financiamiento
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-                          Clientes
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-                          Monto Proyectado
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-                          Termino Contrato
-                        </p>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <p>Mensuales</p>
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.numero_solicitudes_mensuales}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        ${" "}
-                        {formatPrecio(
-                          parseFloat(data?.monto_solicitudes_mensuales)
-                        )}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.termina_contrato_solicitudes_mensuales}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <p>Quincenales</p>
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.numero_solicitudes_quincenales}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        ${" "}
-                        {formatPrecio(
-                          parseFloat(data?.monto_solicitudes_quincenales)
-                        )}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.termina_contrato_solicitudes_quincenales}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <p>Semanales</p>
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.numero_solicitudes_semanales}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        ${" "}
-                        {formatPrecio(
-                          parseFloat(data?.monto_solicitudes_semanales)
-                        )}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.termina_contrato_solicitudes_semanales}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <p style={{ fontWeight: "bold" }}>Total: </p>
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.total_solicitudes}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        $ {formatPrecio(parseFloat(data?.total_montos))}
-                      </TableCell>
-                      <TableCell style={{ textAlign: "center" }}>
-                        {data?.total_contratos}
-                      </TableCell>
-                    </TableRow>
+                    {mensual?.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {item.nombre_mes}
+                        </TableCell>
+                        <TableCell>
+                          {item.numero_solicitudes_mensuales}
+                        </TableCell>
+                        <TableCell>
+                          {item.numero_solicitudes_quincenales}
+                        </TableCell>
+                        <TableCell>
+                          {item.numero_solicitudes_semanales}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {item.total_solicitudes}
+                        </TableCell>
+                        <TableCell>
+                          {`$ ${formatPrecio(
+                            item.monto_solicitudes_mensuales
+                          )}`}
+                        </TableCell>
+                        <TableCell>
+                          {`$ ${item.monto_solicitudes_quincenales}`}
+                        </TableCell>
+                        <TableCell>
+                          {`$ ${item.monto_solicitudes_semanales}`}
+                        </TableCell>
+                        <TableCell
+                          style={{ fontWeight: "bold" }}
+                        >{`$ ${item.total_montos}`}</TableCell>
+                      </TableRow>
+                    ))}
+                    {general && (
+                      <TableRow>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Totales
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {general.total_clientes_mensuales}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {general.total_clientes_quincenales}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {general.total_clientes_semanales}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {general.total_clientes}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {`$ ${formatPrecio(
+                            general.total_importes_mensuales
+                          )}`}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {`$ ${formatPrecio(
+                            general.total_importes_quincenales
+                          )}`}
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          {`$ ${formatPrecio(
+                            general.total_importes_semanales
+                          )}`}
+                        </TableCell>
+                        <TableCell
+                          style={{ fontWeight: "bold" }}
+                        >{`$ ${formatPrecio(
+                          general.total_importes
+                        )}`}</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
             </Col>
-          </Row>
-        </div>
-      )}
-
-      {dataMensual && (
-        <div style={{ margin: "0 auto" }}>
-          <Row style={{ display: "flex", justifyContent: "center" }}>
-            {dataMensual.map((item, index) => (
-              <TableInCol key={index} data={item} />
-            ))}
           </Row>
         </div>
       )}
