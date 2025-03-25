@@ -374,14 +374,18 @@ export default function ReporteProyeccion() {
                           )}`}
                         </TableCell>
                         <TableCell>
-                          {`$ ${item.monto_solicitudes_quincenales}`}
+                          {`$ ${formatPrecio(
+                            item.monto_solicitudes_quincenales
+                          )}`}
                         </TableCell>
                         <TableCell>
-                          {`$ ${item.monto_solicitudes_semanales}`}
+                          {`$ ${formatPrecio(
+                            item.monto_solicitudes_semanales
+                          )}`}
                         </TableCell>
                         <TableCell
                           style={{ fontWeight: "bold" }}
-                        >{`$ ${item.total_montos}`}</TableCell>
+                        >{`$ ${formatPrecio(item.total_montos)}`}</TableCell>
                       </TableRow>
                     ))}
                     {general && (
