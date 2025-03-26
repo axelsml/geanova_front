@@ -350,6 +350,7 @@ export default function ReporteIngresos() {
             onCancel={() => {
               setShow(!show);
               setDetalles(null);
+              setPage(0);
             }}
           >
             <Row justify={"center"}>
