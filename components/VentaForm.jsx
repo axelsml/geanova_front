@@ -14,6 +14,7 @@ import {
   Typography,
 } from "antd";
 const { Text } = Typography;
+const { Option } = Select;
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import Loader from "./Loader";
@@ -49,8 +50,6 @@ export default function VentaForm() {
   const [terrenos, setTerrenos] = useState(null);
   const [plazos, setPlazos] = useState(null);
   const [financiamientoId, setFinanciamientoId] = useState(null);
-  const [financiamiento, setFinanciamiento] = useState("");
-  const { Option } = Select;
   const [lotes, setLotes] = useState(null);
   const [plazoSelected, setPlazoSelected] = useState(null);
   const [buttonSelected, setButtonSelected] = useState(1);
@@ -287,7 +286,6 @@ export default function VentaForm() {
     console.log(usuario);
     console.log("entro en guardar cliente 1");
     console.log(pdf);
-    debugger;
 
     Swal.fire({
       title: "Verifique que los datos sean correctos",
@@ -413,7 +411,6 @@ export default function VentaForm() {
 
   const onImagenGuardada = (data) => {
     console.log("entro en onimagenguardada 4");
-    debugger;
     setIsLoading(false);
     if (data.success) {
       guardarSolicitud(data.cliente_id);
@@ -527,6 +524,7 @@ export default function VentaForm() {
                     (plazo) => plazo.id == value
                   );
                   setPlazoSelected(plazoSelected);
+
                   setSolicitud({
                     ...solicitud,
                     plazo_id: value,
@@ -595,7 +593,7 @@ export default function VentaForm() {
               <>
                 <Row justify={"center"} className="m-auto">
                   <TableContainer component={Paper} className="tabla">
-                    <Table>
+                    <Table size="small">
                       <TableHead>
                         <TableRow className="tabla_encabezado">
                           <TableCell>
@@ -669,10 +667,13 @@ export default function VentaForm() {
               </>
             )}
 
-            <Form.Item name={"montoContrato"} style={{ width: "100%" }}>
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
+            <Row justify={"center"}>
+              <Col style={{ margin: "16px 0px 8px 0px" }}>
                 <Text style={{ color: "#FFFFFF" }}>Monto Contrato</Text>
               </Col>
+            </Row>
+
+            <Form.Item name={"montoContrato"} style={{ width: "100%" }}>
               <InputNumber
                 onChange={(value) => {
                   setSolicitud({
@@ -690,10 +691,13 @@ export default function VentaForm() {
               />
             </Form.Item>
 
-            <Form.Item name={"cantidad_pagos"} style={{ width: "100%" }}>
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
+            <Row justify={"center"}>
+              <Col style={{ marginBottom: "8px" }}>
                 <Text style={{ color: "#FFFFFF" }}>Cantidad de Pagos</Text>
               </Col>
+            </Row>
+
+            <Form.Item name={"cantidad_pagos"} style={{ width: "100%" }}>
               <InputNumber
                 disabled
                 suffix={
