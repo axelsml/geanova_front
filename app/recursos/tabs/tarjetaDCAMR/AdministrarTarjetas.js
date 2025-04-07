@@ -12,6 +12,7 @@ import {
   Select,
   Checkbox,
 } from "antd";
+const { Option } = Select;
 import {
   Paper,
   Table,
