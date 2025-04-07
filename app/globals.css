@@ -200,6 +200,15 @@
 
 }
 
+.formulario-2 {
+  color: white;
+  background-color: rgb(66, 142, 204);
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 18px;
+
+}
+
 .formulario_alterno {
   background-color: rgb(66, 142, 204);
   color: white;

@@ -179,6 +179,23 @@ export function calcularSemanas(meses) {
   return semanasRedondeadas;
 }
 
+export function calcularCantidad(financiamiento, meses) {
+  let resultado;
+
+  switch (financiamiento) {
+    case 1: // Mensual
+      resultado = meses * 1;
+      break;
+    case 2: // Quincenal
+      resultado = meses * 2;
+      break;
+    case 3: // Semanal
+      resultado = meses * 4.34524;
+      break;
+  }
+  return Math.round(resultado);
+}
+
 export function formatDate(obj) {
   var year = obj.$y;
   var month = obj.$M + 1; // Los meses en JavaScript comienzan desde 0

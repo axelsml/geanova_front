@@ -29,6 +29,7 @@ export default function Home() {
   const configuracion = cookieMenu.filter(
     (item) => item.descripcion === "Configuracion"
   );
+  const mapas = cookieMenu.filter((item) => item.descripcion === "Mapas");
 
   return (
     <div className="menu">
@@ -174,6 +175,27 @@ export default function Home() {
             </Link>
           </Col>
         )}
+
+        {/* <Col xs={24} sm={12} md={8} lg={6}>
+          <Link key={"Mapas"} href={"/mapas"}>
+            <Card hoverable>
+              <div>
+                <Row justify={"center"}>
+                  <Image
+                    src={"/icono terreno.svg"}
+                    width={200}
+                    height={200}
+                    priority
+                    alt="Logo Mapas"
+                  />
+                </Row>
+                <Row justify={"center"}>
+                  <p className="text-lg text-center">Mapas</p>
+                </Row>
+              </div>
+            </Card>
+          </Link>
+        </Col> */}
       </Row>
     </div>
   );
