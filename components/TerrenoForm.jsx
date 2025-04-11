@@ -1,6 +1,16 @@
 "use client";
 
-import { Button, Form, InputNumber, Select, Row, Col } from "antd";
+import {
+  Button,
+  Form,
+  InputNumber,
+  Select,
+  Row,
+  Col,
+  Upload,
+  Modal,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import { useContext, useState } from "react";
@@ -10,14 +20,25 @@ import { formatPrecio } from "@/helpers/formatters";
 import { Paper } from "@mui/material";
 import AsignarM2 from "@/app/lotes/asignar/page";
 import PlazosCrear from "@/app/plazos/crear/page";
+import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 
-export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
+export default function TerrenoForm({ setTerrenoNuevo }) {
   const { setIsLoading } = useContext(LoadingContext);
   const { Option } = Select;
   const [precio_compra, setPrecioCompra] = useState(0.0);
   const [superficie_total_proyecto, setSuperficieTotalProyecto] = useState(0.0);
   const [lotes, setAsignarLotes] = useState(false);
   const [terreno_info, setTerrenoInfo] = useState(null);
+  const [imagen, setImagen] = useState("");
+  const [imagenUrl, setImagenUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [show, setShow] = useState(false);
+  const [crop, setCrop] = useState();
+  const [error, setError] = useState("");
+
+  const ASPECT_RATIO = 1;
+  const MIN_DIMENSION = 150;
 
   const empresas = [
     {
@@ -25,6 +46,11 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
       nombre: "Sucursal 1",
     },
   ];
+
+  const onError = (e) => {
+    setIsLoading(false);
+    console.log(e);
+  };
 
   const onGuardarTerreno = (values) => {
     Swal.fire({
@@ -40,14 +66,16 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
     }).then((result) => {
       if (result.isConfirmed) {
         setIsLoading(true);
-        terrenosService.createTerreno(values, onTerrenoGuardado, onError);
+        terrenosService.createTerreno(
+          { ...values, imagenBase64: imagen, recorteBase64: imagenRecorte },
+          onTerrenoGuardado,
+          onError
+        );
       }
     });
   };
 
   const handleCancel = async () => {
-    //MENSAJE EMERGENTE PARA REAFIRMAR QUE SE VA A
-    //CANCELAR EL PROCESO DE GUARDADO
     Swal.fire({
       title: "¿Desea cancelar el proceso?",
       icon: "info",
@@ -103,9 +131,83 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
     }
   };
 
-  const onError = (e) => {
-    setIsLoading(false);
-    console.log(e);
+  const onSelectFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reinicia estados relacionados con la advertencia
+    setError("");
+    setImagen("");
+    setFileName("");
+    setImagenUrl("");
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const imageElement = new Image();
+      const imageUrl = reader.result?.toString() || "";
+      imageElement.src = imageUrl;
+
+      imageElement.addEventListener("load", (e) => {
+        const { naturalWidth, naturalHeight } = e.currentTarget;
+
+        if (naturalWidth < MIN_DIMENSION || naturalHeight < MIN_DIMENSION) {
+          const errorMessage = "Imagen demasiado pequeña";
+          setError(errorMessage);
+
+          Swal.fire({
+            title: "Advertencia",
+            icon: "warning",
+            text: errorMessage,
+            confirmButtonColor: "#4096ff",
+            showDenyButton: false,
+            confirmButtonText: "Aceptar",
+          });
+          return; // Termina la ejecución aquí si la imagen es demasiado pequeña
+        }
+
+        // Si la imagen es válida, establece los estados correspondientes
+        setFileName(file.name);
+        setImagen(imageUrl);
+        setImagenUrl(imageUrl);
+
+        Swal.fire({
+          title: "¿Recortar Cuadro de Construcción?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          confirmButtonText: "Recortar",
+          cancelButtonText: "Omitir",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setShow(true); // Alterna el estado de show
+          }
+        });
+      });
+    });
+    reader.readAsDataURL(file);
+  };
+  // else if (info.file.status === "error") {
+  //   Swal.fire({
+  //     title: "Error al intentar cargar la imagen",
+  //     icon: "error",
+  //     confirmButtonColor: "#4096ff",
+  //   });
+  // }
+
+  const onImageLoad = (e) => {
+    const { width, height } = e.currentTarget;
+    const crop = makeAspectCrop(
+      {
+        unit: "%",
+        width: MIN_DIMENSION,
+      },
+      ASPECT_RATIO,
+      width,
+      height
+    );
+    const centeredCrop = centerCrop(crop, width, height);
+    setCrop(centeredCrop);
   };
 
   return (
@@ -127,15 +229,7 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
             layout="vertical"
           >
             <Row justify={"center"}>
-              <Col
-                xs={24}
-                sm={20}
-                md={16}
-                lg={12}
-                xl={8}
-                xxl={4}
-                className="titulo_pantallas"
-              >
+              <Col className="titulo_pantallas">
                 <b>DATOS DEL TERRENO</b>
               </Col>
             </Row>
@@ -206,8 +300,37 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
                       },
                     ]}
                   />
+                  {/* <div style={{ marginBottom: "16px" }}>
+                    <label
+                      htmlFor="fileInput"
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 20px",
+                        backgroundColor: "#FFFFFF",
+                        color: "rgb(66, 142, 204)",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        textAlign: "center",
+                      }}
+                    >
+                      Subir archivo
+                    </label>
+                    <input
+                      id="fileInput"
+                      type="file"
+                      accept="image/*, application/pdf"
+                      onChange={onSelectFile}
+                      style={{
+                        display: "none",
+                      }}
+                    />
+                    {fileName && (
+                      <p style={{ color: "#FFFFFF" }}>
+                        Imagen Cargada: {fileName}
+                      </p>
+                    )}
+                  </div> */}
                   <p>Colonia/Localidad</p>
-
                   <InputIn
                     className="input_formulario"
                     placeholder="Colonia/Localidad"
@@ -429,6 +552,30 @@ export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
               </Button>
             </span>
           </Form>
+
+          <Modal
+            title="Recortar Cuadro de Construcción"
+            visible={show}
+            onCancel={() => {
+              setShow(false);
+            }}
+          >
+            {imagenUrl && (
+              <div>
+                <ReactCrop
+                  crop={crop}
+                  keepSelection
+                  aspect={ASPECT_RATIO}
+                  minWidth={MIN_DIMENSION}
+                  onChange={(newCrop) => {
+                    setCrop(newCrop);
+                  }}
+                >
+                  <img src={imagenUrl} alt="mapa" onLoad={onImageLoad} />
+                </ReactCrop>
+              </div>
+            )}
+          </Modal>
         </>
       )}
     </div>

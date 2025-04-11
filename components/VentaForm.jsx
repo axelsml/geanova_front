@@ -321,33 +321,6 @@ export default function VentaForm() {
       onError
     );
   }
-  // const onGuardarVenta = async (values) => {
-  //   values["fechaInicioContrato"] = formatDate(values.fechaInicioContrato);
-  //   console.log(values)
-  //   console.log(usuario)
-
-  //
-  //   Swal.fire({
-  //     title: "Verifique que los datos sean correctos",
-  //     icon: "info",
-  //     confirmButtonColor: "#4096ff",
-  //     cancelButtonColor: "#ff4d4f",
-  //     showDenyButton: true,
-  //     showCancelButton: false,
-  //     allowOutsideClick: false,
-  //     confirmButtonText: "Aceptar",
-  //     denyButtonText: `Cancelar`,
-  //   }).then((result) => {
-  //     if (result.isConfirmed) {
-  //       setIsLoading(true);
-  //       ventasService.createVenta(
-  //         { ...dataForm, usuarioId: usuario_id, ...values },
-  //         onVentaGuardada,
-  //         onError
-  //       );
-  //     }
-  //   });
-  // };
 
   const validacionMensajes = {
     required: "${label} es requerido",
@@ -364,7 +337,6 @@ export default function VentaForm() {
 
     setIsLoading(false);
     if (data.success) {
-      setCliente(data.cliente);
       guardarImagenes(data.cliente.id);
     } else {
       Swal.fire({
@@ -485,15 +457,15 @@ export default function VentaForm() {
       >
         <Row justify={"center"} gutter={[24]} style={{ marginTop: "30px" }}>
           <div className="formulario-2">
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Proyecto</Text>
+            </Row>
             <Form.Item
               name={"terreno"}
               style={{ width: "100%", color: "white" }}
               rules={[{ required: true, message: "Proyecto no seleccionado" }]}
               initialValue={terrenoSelected?.nombre}
             >
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Proyecto</Text>
-              </Col>
               <Select
                 showSearch
                 placeholder="Seleccione un Proyecto"
@@ -507,18 +479,17 @@ export default function VentaForm() {
               </Select>
             </Form.Item>
 
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Plazo</Text>
+            </Row>
             <Form.Item
               name="plazo_id"
               style={{ width: "100%" }}
               rules={[{ required: true, message: "Plazo no seleccionado" }]}
             >
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Plazo</Text>
-              </Col>
               <Select
                 showSearch
                 placeholder="Seleccione un Plazo"
-                optionLabelProp="label"
                 onChange={(value) => {
                   const plazoSelected = plazos.find(
                     (plazo) => plazo.id == value
@@ -544,14 +515,13 @@ export default function VentaForm() {
               </Select>
             </Form.Item>
 
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Financiamiento</Text>
+            </Row>
             <Form.Item name={"financiamiento"} style={{ width: "100%" }}>
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Financiamiento</Text>
-              </Col>
               <Select
                 showSearch
                 placeholder="Seleccione un financiamiento"
-                optionLabelProp="label"
                 onChange={(value) => {
                   setSolicitud({
                     ...solicitud,
@@ -568,10 +538,10 @@ export default function VentaForm() {
               </Select>
             </Form.Item>
 
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Anticipo</Text>
+            </Row>
             <Form.Item name={"anticipo"} style={{ width: "100%" }}>
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Anticipo</Text>
-              </Col>
               <InputNumber
                 style={{
                   width: "100%",
@@ -667,10 +637,8 @@ export default function VentaForm() {
               </>
             )}
 
-            <Row justify={"center"}>
-              <Col style={{ margin: "16px 0px 8px 0px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Monto Contrato</Text>
-              </Col>
+            <Row justify={"center"} style={{ margin: "16px 0px 8px 0px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Monto Contrato</Text>
             </Row>
 
             <Form.Item name={"montoContrato"} style={{ width: "100%" }}>
@@ -691,10 +659,8 @@ export default function VentaForm() {
               />
             </Form.Item>
 
-            <Row justify={"center"}>
-              <Col style={{ marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Cantidad de Pagos</Text>
-              </Col>
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Cantidad de Pagos</Text>
             </Row>
 
             <Form.Item name={"cantidad_pagos"} style={{ width: "100%" }}>
@@ -717,6 +683,9 @@ export default function VentaForm() {
               />
             </Form.Item>
 
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>Sistema de Pago</Text>
+            </Row>
             <Form.Item
               name={"sistema_pago_id"}
               style={{ width: "100%" }}
@@ -727,13 +696,9 @@ export default function VentaForm() {
                 },
               ]}
             >
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>Sistema de Pago</Text>
-              </Col>
               <Select
                 showSearch
                 placeholder="Seleccione un Sistema de Pago"
-                optionLabelProp="label"
                 onChange={(value) => {
                   setSolicitud({
                     ...solicitud,
@@ -749,6 +714,11 @@ export default function VentaForm() {
               </Select>
             </Form.Item>
 
+            <Row justify={"center"} style={{ marginBottom: "8px" }}>
+              <Text style={{ color: "#FFFFFF" }}>
+                Fecha de Inicio de Contrato
+              </Text>
+            </Row>
             <Form.Item
               name="fechaInicioContrato"
               style={{ width: "100%" }}
@@ -759,11 +729,6 @@ export default function VentaForm() {
                 },
               ]}
             >
-              <Col style={{ textAlign: "center", marginBottom: "8px" }}>
-                <Text style={{ color: "#FFFFFF" }}>
-                  Fecha de Inicio de Contrato
-                </Text>
-              </Col>
               <DatePicker
                 style={{ width: "100%" }}
                 onChange={(value) => {
@@ -849,7 +814,7 @@ export default function VentaForm() {
                                       }}
                                       size="large"
                                     >
-                                      Guardar
+                                      Guardar soli
                                     </Button>
                                   </TableCell>
                                 </TableRow>

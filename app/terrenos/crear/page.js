@@ -136,8 +136,6 @@ export default function TerrenosCrear() {
             <TerrenoInfoForm
               setTerrenoNuevo={setNuevoTerreno}
               terrenoSeleccionado={terreno}
-              setWatch={setChangeState}
-              watch={changeState}
             />
           )}
         </Col>
