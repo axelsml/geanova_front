@@ -20,8 +20,8 @@ import { formatPrecio } from "@/helpers/formatters";
 import { Paper } from "@mui/material";
 import AsignarM2 from "@/app/lotes/asignar/page";
 import PlazosCrear from "@/app/plazos/crear/page";
-import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css";
+// import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
+// import "react-image-crop/dist/ReactCrop.css";
 
 export default function TerrenoForm({ setTerrenoNuevo }) {
   const { setIsLoading } = useContext(LoadingContext);
