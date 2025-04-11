@@ -11,17 +11,14 @@ import {
   Upload,
   Input,
   Col,
-  Typography,
 } from "antd";
-const { Text } = Typography;
-const { Option } = Select;
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import Loader from "./Loader";
 import { useState, useEffect, useContext } from "react";
 import {
   formatPrecio,
-  calcularCantidad,
+  calcularSemanas,
   formatDate,
 } from "@/helpers/formatters";
 import {
@@ -43,23 +40,29 @@ import { usuario_id } from "@/helpers/user";
 import { LoadingContext } from "@/contexts/loading";
 import { UploadOutlined } from "@ant-design/icons";
 import pagosService from "@/services/pagosService";
+import BuscarCliente from "./BuscarCliente";
 
-export default function VentaForm() {
+export default function VentaForm({ setNuevaVenta, setWatch, watch }) {
   const { setIsLoading } = useContext(LoadingContext);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
   const [terrenos, setTerrenos] = useState(null);
   const [plazos, setPlazos] = useState(null);
-  const [financiamientoId, setFinanciamientoId] = useState(null);
+  const { Option } = Select;
   const [lotes, setLotes] = useState(null);
+  const [loteSelected, setLoteSelected] = useState(null);
   const [plazoSelected, setPlazoSelected] = useState(null);
   const [buttonSelected, setButtonSelected] = useState(1);
   const [dataForm, setDataForm] = useState(null);
   const [form] = Form.useForm();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [imagen, setImagen] = useState(null);
   const [opcion_usuario, setOpcionUsuario] = useState(0);
   const [sistemas_pago, setSistemasPago] = useState(null);
+  const [sistemaSelected, setSistemaSelected] = useState(null);
+  const [cliente, setCliente] = useState(null);
   const [clienteExistentes, setClientesExistentes] = useState(null);
+  const [cliente_existente, setClienteExistentes] = useState(null);
 
   const [solicitud, setSolicitud] = useState({
     terreno_id: "",
@@ -86,12 +89,6 @@ export default function VentaForm() {
     cp: null,
     imagen: null,
   });
-
-  const financiamientos = [
-    { index: 0, id: 1, nombre: "Mensual" },
-    { index: 1, id: 2, nombre: "Quincenal" },
-    { index: 2, id: 3, nombre: "Semanal" },
-  ];
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
@@ -142,9 +139,12 @@ export default function VentaForm() {
       fileReader.onload = (event) => {
         // Obtener el contenido base64
         const base64Url = event.target.result;
+
         // Guardar el contenido base64 en el estado
+
         setImagenBase64(base64Url);
       };
+
       // Leer el contenido del archivo como base64
       fileReader.readAsDataURL(info.file.originFileObj);
 
@@ -181,9 +181,12 @@ export default function VentaForm() {
       fileReader.onload = (event) => {
         // Obtener el contenido base64
         const base64Url = event.target.result;
+
         // Guardar el contenido base64 en el estado
+
         setImagenBase64R(base64Url);
       };
+
       // Leer el contenido del archivo como base64
       fileReader.readAsDataURL(info.file.originFileObj);
 
@@ -225,6 +228,7 @@ export default function VentaForm() {
       },
       onError
     );
+    // onBuscarPlazos(value);
   }
 
   const onBuscarPlazos = (value) => {
@@ -237,17 +241,14 @@ export default function VentaForm() {
   };
 
   const calcularMontoContratoPlazo = (lote) => {
-    form.setFieldValue("montoContrato", formatPrecio(lote.costo));
+    form.setFieldValue("montoContrato", lote.costo);
     form.setFieldValue(
-      "cantidad_pagos",
-      calcularCantidad(financiamientoId, plazoSelected.cantidad_meses)
+      "semanas",
+      calcularSemanas(plazoSelected.cantidad_meses)
     );
     setSolicitud({
       ...solicitud,
-      plazo_pagos: calcularCantidad(
-        financiamientoId,
-        plazoSelected.cantidad_meses
-      ),
+      plazo_pagos: calcularSemanas(plazoSelected.cantidad_meses),
       monto_contrato: lote.costo,
       lote_id: lote.id,
     });
@@ -256,6 +257,19 @@ export default function VentaForm() {
       form.setFieldValue("anticipo", lote.costo);
     }
     return lote.costo;
+  };
+
+  const calcularMontoContratoLote = (lote) => {
+    if (plazoSelected) {
+      let monto_contrato = plazoSelected.precio * lote.superficie;
+      form.setFieldValue("montoContrato", monto_contrato);
+      form.setFieldValue(
+        "semanas",
+        calcularSemanas(plazoSelected.cantidad_meses)
+      );
+
+      return monto_contrato;
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -286,6 +300,7 @@ export default function VentaForm() {
     console.log(usuario);
     console.log("entro en guardar cliente 1");
     console.log(pdf);
+    debugger;
 
     Swal.fire({
       title: "Verifique que los datos sean correctos",
@@ -322,6 +337,26 @@ export default function VentaForm() {
     );
   }
 
+  const handleCancel = async () => {
+    //MENSAJE EMERGENTE PARA REAFIRMAR QUE SE VA A
+    //CANCELAR EL PROCESO DE GUARDADO
+    Swal.fire({
+      title: "¿Desea cancelar el proceso?",
+      icon: "info",
+      text: "Se eliminarán los datos ingresados",
+      confirmButtonColor: "#4096ff",
+      cancelButtonColor: "#ff4d4f",
+      showDenyButton: true,
+      showCancelButton: false,
+      confirmButtonText: "Aceptar",
+      denyButtonText: `Cancelar`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setNuevaVenta(false);
+      }
+    });
+  };
+
   const validacionMensajes = {
     required: "${label} es requerido",
     types: {
@@ -332,6 +367,13 @@ export default function VentaForm() {
     },
   };
 
+  const loteSeleccionado = (valor) => {
+    setLoteSelected(valor);
+    setUsuario({
+      ...usuario,
+      montoContrato: valor.costo,
+    });
+  };
   const onVentaGuardada = (data) => {
     console.log("entro en ventaGuardada 2");
 
@@ -356,6 +398,7 @@ export default function VentaForm() {
     setIsLoading(false);
 
     if (data.success) {
+      setWatch(!watch);
       Swal.fire({
         title: "Guardado con Éxito",
         icon: "success",
@@ -383,6 +426,7 @@ export default function VentaForm() {
 
   const onImagenGuardada = (data) => {
     console.log("entro en onimagenguardada 4");
+    debugger;
     setIsLoading(false);
     if (data.success) {
       guardarSolicitud(data.cliente_id);
@@ -421,10 +465,15 @@ export default function VentaForm() {
           onClick={() => {
             handleClick(option);
           }}
+          size="large"
           className="boton"
         >
           Siguiente
         </Button>
+
+        {/* <Button onClick={handleCancel} danger size="large">
+          Cancelar
+        </Button> */}
       </span>
     );
   }
@@ -442,7 +491,15 @@ export default function VentaForm() {
   return (
     <div className="w-1/2 max-w-md mx-auto p-6 m-7 bg-white">
       <Row justify={"center"}>
-        <Col className="titulo_pantallas">
+        <Col
+          xs={24}
+          sm={24}
+          md={16}
+          lg={16}
+          xl={8}
+          xxl={8}
+          className="titulo_pantallas"
+        >
           <b>Nueva Venta</b>
         </Col>
       </Row>
@@ -461,14 +518,16 @@ export default function VentaForm() {
               <Text style={{ color: "#FFFFFF" }}>Proyecto</Text>
             </Row>
             <Form.Item
+              label={"Proyecto"}
               name={"terreno"}
-              style={{ width: "100%", color: "white" }}
+              style={{ width: "100%" }}
               rules={[{ required: true, message: "Proyecto no seleccionado" }]}
               initialValue={terrenoSelected?.nombre}
             >
               <Select
                 showSearch
                 placeholder="Seleccione un Proyecto"
+                optionLabelProp="label"
                 onChange={onBuscarPlazos}
               >
                 {terrenos?.map((item) => (
@@ -483,6 +542,7 @@ export default function VentaForm() {
               <Text style={{ color: "#FFFFFF" }}>Plazo</Text>
             </Row>
             <Form.Item
+              label={"Plazo"}
               name="plazo_id"
               style={{ width: "100%" }}
               rules={[{ required: true, message: "Plazo no seleccionado" }]}
@@ -495,12 +555,15 @@ export default function VentaForm() {
                     (plazo) => plazo.id == value
                   );
                   setPlazoSelected(plazoSelected);
-
                   setSolicitud({
                     ...solicitud,
                     plazo_id: value,
                   });
                   onBuscarLotes(value);
+                  // setUsuario({
+                  //   ...usuario,
+                  //   montoContrato: calcularMontoContratoPlazo(plazoSelected),
+                  // });
                 }}
               >
                 {plazos?.map((item) => (
@@ -563,7 +626,7 @@ export default function VentaForm() {
               <>
                 <Row justify={"center"} className="m-auto">
                   <TableContainer component={Paper} className="tabla">
-                    <Table size="small">
+                    <Table>
                       <TableHead>
                         <TableRow className="tabla_encabezado">
                           <TableCell>
@@ -603,6 +666,8 @@ export default function VentaForm() {
                                       showDenyButton: false,
                                       confirmButtonText: "Aceptar",
                                     });
+
+                                    setLoteSelected(lote);
 
                                     setUsuario({
                                       ...usuario,
@@ -663,18 +728,14 @@ export default function VentaForm() {
               <Text style={{ color: "#FFFFFF" }}>Cantidad de Pagos</Text>
             </Row>
 
-            <Form.Item name={"cantidad_pagos"} style={{ width: "100%" }}>
+            <Form.Item
+              name={"semanas"}
+              label={"Plazo Semanal"}
+              style={{ width: "100%" }}
+            >
               <InputNumber
                 disabled
-                suffix={
-                  financiamientoId == 1
-                    ? "Meses"
-                    : financiamientoId == 2
-                    ? "Quincenas"
-                    : financiamientoId == 3
-                    ? "Semanas"
-                    : ""
-                }
+                suffix={"Semanas"}
                 style={{
                   width: "100%",
                   backgroundColor: "whitesmoke",
@@ -687,6 +748,7 @@ export default function VentaForm() {
               <Text style={{ color: "#FFFFFF" }}>Sistema de Pago</Text>
             </Row>
             <Form.Item
+              label={"Sistema de Pago"}
               name={"sistema_pago_id"}
               style={{ width: "100%" }}
               rules={[
@@ -700,6 +762,7 @@ export default function VentaForm() {
                 showSearch
                 placeholder="Seleccione un Sistema de Pago"
                 onChange={(value) => {
+                  setSistemaSelected(value);
                   setSolicitud({
                     ...solicitud,
                     sistemas_pago_id: value,
@@ -721,6 +784,7 @@ export default function VentaForm() {
             </Row>
             <Form.Item
               name="fechaInicioContrato"
+              label="Fecha de Inicio de Contrato"
               style={{ width: "100%" }}
               rules={[
                 {
@@ -783,6 +847,7 @@ export default function VentaForm() {
           <>
             <div>
               <Row>
+                {/* clienteExistentes */}
                 {clienteExistentes != null && (
                   <>
                     <Row justify={"center"} className="m-auto">
@@ -1126,6 +1191,8 @@ export default function VentaForm() {
             {buttonSelected === 4 && (
               <>
                 <div className="formulario">
+                  {/* <Row justify={"center"} className="gap-10" style={{marginBottom:"20px",marginTop:"20px"}}> */}
+
                   <Form.Item>
                     <Row
                       justify={"center"}
