@@ -559,8 +559,8 @@ export default function VentaForm() {
               />
             </Form.Item>
 
-            {lotes != null && financiamientoId != null && (
-              <>
+            {/* {lotes != null && financiamientoId != null && ( */}
+              {/* <> */}
                 <Row justify={"center"} className="m-auto">
                   <TableContainer component={Paper} className="tabla">
                     <Table size="small">
@@ -634,8 +634,8 @@ export default function VentaForm() {
                     </Table>
                   </TableContainer>
                 </Row>
-              </>
-            )}
+              {/* </> */}
+            {/* )} */}
 
             <Row justify={"center"} style={{ margin: "16px 0px 8px 0px" }}>
               <Text style={{ color: "#FFFFFF" }}>Monto Contrato</Text>
