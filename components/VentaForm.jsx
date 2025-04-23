@@ -50,7 +50,7 @@ export default function VentaForm() {
   const [terrenos, setTerrenos] = useState(null);
   const [plazos, setPlazos] = useState(null);
   const [financiamientoId, setFinanciamientoId] = useState(null);
-  const [lotes, setLotes] = useState(null);
+  const [lotes, setLotes] = useState([]);
   const [plazoSelected, setPlazoSelected] = useState(null);
   const [buttonSelected, setButtonSelected] = useState(1);
   const [dataForm, setDataForm] = useState(null);
@@ -59,7 +59,7 @@ export default function VentaForm() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [opcion_usuario, setOpcionUsuario] = useState(0);
   const [sistemas_pago, setSistemasPago] = useState(null);
-  const [clienteExistentes, setClientesExistentes] = useState(null);
+  const [clienteExistentes, setClientesExistentes] = useState([]);
 
   const [solicitud, setSolicitud] = useState({
     terreno_id: "",
