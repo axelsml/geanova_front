@@ -1,21 +1,23 @@
 "use client";
 
-import { Button, Form, InputNumber } from "antd";
+import { Button, Form, InputNumber, Col, Row } from "antd";
+import { useForm } from "antd/es/form/Form";
 import Swal from "sweetalert2";
 import InputIn from "./Input";
 import Loader from "./Loader";
-import { useContext, useState } from "react";
+import { useState, forwardRef, useImperativeHandle, useRef } from "react";
 import plazosService from "@/services/plazosService";
 import { formatPrecio } from "@/helpers/formatters";
-import { LoadingContext } from "@/contexts/loading";
 
-export default function PlazosForm({
-  setNuevoPlazo,
-  setWatch,
-  watch,
-  terrenoId,
-}) {
-  const { setIsLoading } = useContext(LoadingContext);
+const PlazosForm = forwardRef(({ terrenoId }, ref) => {
+  const [loading, setLoading] = useState(false);
+  const [form] = useForm();
+
+  useImperativeHandle(ref, () => ({
+    resetForm: () => {
+      form.resetFields();
+    },
+  }));
 
   const onGuardarPlazo = (values) => {
     Swal.fire({
@@ -32,19 +34,17 @@ export default function PlazosForm({
       denyButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        setIsLoading(true);
+        setLoading(true);
         plazosService.createPlazo(
           { ...values, terreno_id: terrenoId },
           onPlazoGuardado,
-          onError
+          onerror
         );
       }
     });
   };
 
   const handleCancel = async () => {
-    //MENSAJE EMERGENTE PARA REAFIRMAR QUE SE VA A
-    //CANCELAR EL PROCESO DE GUARDADO
     Swal.fire({
       title: "¿Desea cancelar el proceso?",
       icon: "info",
@@ -57,7 +57,7 @@ export default function PlazosForm({
       denyButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        setNuevoPlazo(false);
+        form.resetFields();
       }
     });
   };
@@ -73,18 +73,16 @@ export default function PlazosForm({
   };
 
   const onPlazoGuardado = (data) => {
-    setIsLoading(false);
+    setLoading(false);
     if (data.success) {
-      setWatch(!watch);
       Swal.fire({
         title: "Guardado con Éxito",
         icon: "success",
         confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: true,
         confirmButtonText: "Aceptar",
+      }).then(() => {
+        form.resetFields();
       });
-      setNuevoPlazo(false);
     } else {
       Swal.fire({
         title: "Error",
@@ -98,13 +96,13 @@ export default function PlazosForm({
     }
   };
 
-  const onError = (e) => {
-    setIsLoading(false);
-    console.log(e);
-  };
-
   return (
-    <div className="w-1/2 max-w-md mx-auto p-6 m-7 bg-white rounded-lg shadow-md">
+    <div>
+      {loading && (
+        <>
+          <Loader />
+        </>
+      )}
       <h1 className="text-2xl font-semibold mb-4 text-center">
         Datos del Plazo
       </h1>
@@ -115,6 +113,7 @@ export default function PlazosForm({
         className="grid gap-1"
         validateMessages={validacionMensajes}
         layout="vertical"
+        form={form}
       >
         <InputIn
           placeholder="Ingrese la Descripción del Plazo"
@@ -173,7 +172,7 @@ export default function PlazosForm({
           />
         </Form.Item>
 
-        <span className="flex gap-2 justify-end">
+        <Row className="flex gap-2 justify-end">
           <Button htmlType="submit" size="large">
             Guardar
           </Button>
@@ -181,8 +180,11 @@ export default function PlazosForm({
           <Button onClick={handleCancel} danger size="large">
             Cancelar
           </Button>
-        </span>
+        </Row>
       </Form>
     </div>
   );
-}
+});
+
+PlazosForm.displayName = "PlazosForm";
+export default PlazosForm;

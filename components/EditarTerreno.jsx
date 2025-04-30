@@ -1,40 +1,50 @@
 "use client";
 
 import {
-  Button,
-  Form,
-  InputNumber,
-  message,
-  Input,
-  Row,
-  Col,
-  Select,
-} from "antd";
-import Swal from "sweetalert2";
-import InputIn from "./Input";
-import Loader from "./Loader";
-import { useContext, useEffect, useState } from "react";
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+} from "react";
+import { Button, Form, InputNumber, Input, Row, Col, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { Paper } from "@mui/material";
-import terrenosService from "@/services/terrenosService";
+const { Option } = Select;
+import Swal from "sweetalert2";
+import Loader from "@/components/Loader";
+import CroquisUploader from "@/components/CroquisUploader";
 import { formatPrecio } from "@/helpers/formatters";
-import { LoadingContext } from "@/contexts/loading";
+import terrenosService from "@/services/terrenosService";
 import lotesService from "@/services/lotesService";
 
-export default function TerrenoEditForm({
-  setTerrenoEditado,
-  setWatch,
-  watch,
-  terrenoId,
-  terreno,
-}) {
-  const { Option } = Select;
-  const { setIsLoading } = useContext(LoadingContext);
+const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
+  const [loading, setLoading] = useState(false);
+
+  const [form] = useForm();
+
   const [cantidad, setCantidad] = useState(null);
   const [lotes, setLotes] = useState([]);
   const [selectedLotes, setSelectedLotes] = useState([]);
   const [totalLotes, setTotalLotes] = useState(terreno.cantidad_lotes);
   const [opcion, setOpcion] = useState(null);
+
+  const [imagen, setImagen] = useState("");
+  const [imagenRecortada, setImagenRecortada] = useState("");
+
+  const [resetCroquis, setResetCroquis] = useState(() => () => {});
+
+  const clear = () => {
+    form.resetFields();
+    resetCroquis();
+    setImagen("");
+    setImagenRecortada("");
+  };
+
+  useImperativeHandle(ref, () => ({ clear: clear }), [clear]);
+
+  const handleCroquisReset = useCallback((resetFunc) => {
+    setResetCroquis(() => resetFunc);
+  }, []);
 
   const onGuardarTerreno = (values) => {
     Swal.fire({
@@ -48,21 +58,25 @@ export default function TerrenoEditForm({
       denyButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIsLoading(true);
+        setLoading(true);
         terrenosService.actualizarTerreno(
-          { ...values, terreno_id: terrenoId },
+          {
+            ...values,
+            terreno_id: terrenoId,
+            imagen: imagen,
+            recorte: imagenRecortada,
+          },
           onTerrenoGuardado,
-          onError
+          onerror
         );
       }
     });
   };
 
   const handleCancel = async () => {
-    //Mensaje para confirmar la cancelacion
     Swal.fire({
       title: "¿Desea cancelar el proceso?",
-      icon: "info",
+      icon: "question",
       text: "Se eliminarán los datos ingresados",
       confirmButtonColor: "#4096ff",
       cancelButtonColor: "#ff4d4f",
@@ -72,8 +86,10 @@ export default function TerrenoEditForm({
       denyButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        setTerrenoEditado(false);
-        setWatch(false);
+        form.resetFields();
+        resetCroquis();
+        setImagen("");
+        setImagenRecortada("");
       }
     });
   };
@@ -89,9 +105,8 @@ export default function TerrenoEditForm({
   };
 
   const onTerrenoGuardado = (data) => {
-    setIsLoading(false);
+    setLoading(false);
     if (data.success) {
-      setWatch(!watch);
       Swal.fire({
         title: "Guardado con Éxito",
         icon: "success",
@@ -100,7 +115,6 @@ export default function TerrenoEditForm({
         showDenyButton: true,
         confirmButtonText: "Aceptar",
       });
-      setTerrenoEditado(false);
     } else {
       Swal.fire({
         title: "Error",
@@ -114,10 +128,6 @@ export default function TerrenoEditForm({
     }
   };
 
-  const inputNumberValue = (cantidad) => {
-    setCantidad(cantidad);
-  };
-
   const radioChangeValue = (opcion) => {
     setOpcion(opcion.target.value);
     if (opcion.target.value === "2") {
@@ -125,7 +135,7 @@ export default function TerrenoEditForm({
       let params = {
         terreno_id: terrenoId,
       };
-      lotesService.getAllLotes(params, onAllLotes, onError);
+      lotesService.getAllLotes(params, onAllLotes, onerror);
     }
     if (opcion.target.value === "1") {
       setSelectedLotes([]);
@@ -140,7 +150,7 @@ export default function TerrenoEditForm({
     setSelectedLotes(id);
   };
 
-  const handleGestionarTerrenos = () => {
+  const onSaveLotes = () => {
     if (opcion === "1") {
       Swal.fire({
         title: "Confirmar",
@@ -154,12 +164,12 @@ export default function TerrenoEditForm({
         denyButtonText: `Cancelar`,
       }).then((result) => {
         if (result.isConfirmed) {
-          setIsLoading(true);
+          setLoading(true);
           let params = {
             terreno_id: terrenoId,
             cantidad_lotes: cantidad,
           };
-          lotesService.agregarLotes(params, onAgregarLotes, onError);
+          lotesService.agregarLotes(params, onAgregarLotes, onerror);
         }
       });
     }
@@ -176,19 +186,19 @@ export default function TerrenoEditForm({
         denyButtonText: `Cancelar`,
       }).then((result) => {
         if (result.isConfirmed) {
-          setIsLoading(true);
+          setLoading(true);
           let params = {
             terreno_id: terrenoId,
             lotes_seleccionados: selectedLotes,
           };
-          lotesService.eliminarLotes(params, onEliminarLotes, onError);
+          lotesService.eliminarLotes(params, onEliminarLotes, onerror);
         }
       });
     }
   };
 
   async function onAgregarLotes(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.success) {
       Swal.fire({
         title: "Guardado exitoso",
@@ -207,7 +217,7 @@ export default function TerrenoEditForm({
   }
 
   async function onEliminarLotes(data) {
-    setIsLoading(false);
+    setLoading(false);
     if (data.success) {
       Swal.fire({
         title: "Guardado exitoso",
@@ -225,12 +235,18 @@ export default function TerrenoEditForm({
     }
   }
 
-  const onError = (e) => {
-    setIsLoading(false);
+  const handleImageSelected = (imagen, recorte) => {
+    setImagen(imagen);
+    setImagenRecortada(recorte);
   };
 
   return (
     <>
+      {loading && (
+        <>
+          <Loader />
+        </>
+      )}
       <Form
         name="basic"
         onFinish={onGuardarTerreno}
@@ -238,18 +254,13 @@ export default function TerrenoEditForm({
         className="grid gap-1"
         validateMessages={validacionMensajes}
         layout="vertical"
+        form={form}
       >
         <Row justify={"center"}>
-          <Col
-            xs={24}
-            sm={20}
-            md={16}
-            lg={16}
-            xl={8}
-            xxl={8}
-            className="titulo_pantallas"
-          >
-            <b style={{ fontSize: "16px" }}> EDITAR DATOS DEL TERRENO</b>
+          <Col className="titulo_pantallas">
+            <span className="titulo_pantallas-texto">
+              EDITAR DATOS DEL TERRENO
+            </span>
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: "25px" }}>
@@ -267,7 +278,7 @@ export default function TerrenoEditForm({
                   },
                 ]}
               >
-                <InputIn
+                <Input
                   className="terreno-edit__input-in"
                   placeholder={
                     terreno.nombre || "Ingrese el nombre del Proyecto"
@@ -287,7 +298,7 @@ export default function TerrenoEditForm({
                   },
                 ]}
               >
-                <InputIn
+                <Input
                   className="terreno-edit__input-in"
                   placeholder={
                     terreno.propietario || "Ingrese el nombre del Propietario"
@@ -307,7 +318,7 @@ export default function TerrenoEditForm({
                   },
                 ]}
               >
-                <InputIn
+                <Input
                   className="terreno-edit__input-in"
                   placeholder={terreno.ciudad || "Ingrese la Ciudad"}
                 />
@@ -325,7 +336,7 @@ export default function TerrenoEditForm({
                   },
                 ]}
               >
-                <InputIn
+                <Input
                   className="terreno-edit__input-in"
                   placeholder={terreno.domicilio || "Ingrese el Domicilio"}
                 />
@@ -343,11 +354,23 @@ export default function TerrenoEditForm({
                   },
                 ]}
               >
-                <InputIn
+                <Input
                   className="terreno-edit__input-in"
                   placeholder={terreno.colonia || "Ingrese la Colonia"}
                 />
               </Form.Item>
+            </div>
+            <div
+              className="formulario"
+              style={{ marginTop: "12px", textAlign: "center" }}
+            >
+              <div style={{ textAlign: "center" }}>
+                <span>Actualizar imagen</span>
+                <CroquisUploader
+                  onImageSelected={handleImageSelected}
+                  onReset={handleCroquisReset}
+                />
+              </div>
             </div>
             <div className="formulario" style={{ marginTop: "12px" }}>
               <label style={{ textAlign: "center", display: "block" }}>
@@ -394,7 +417,9 @@ export default function TerrenoEditForm({
                     marginTop: "10px",
                   }}
                   controls={false}
-                  onChange={inputNumberValue}
+                  onChange={(value) => {
+                    setCantidad(value);
+                  }}
                 />
               )}
               {opcion === "2" && (
@@ -429,7 +454,7 @@ export default function TerrenoEditForm({
                   opcion == null
                 }
                 onClick={() => {
-                  handleGestionarTerrenos();
+                  onSaveLotes();
                 }}
               >
                 Guardar
@@ -636,12 +661,15 @@ export default function TerrenoEditForm({
               Guardar
             </Button>
 
-            {/* <Button onClick={handleCancel} danger size="large">
+            <Button onClick={handleCancel} danger size="large">
               Cancelar
-            </Button> */}
+            </Button>
           </span>
         </div>
       </Form>
     </>
   );
-}
+});
+
+EditarTerreno.displayName = "EditarTerreno";
+export default EditarTerreno;

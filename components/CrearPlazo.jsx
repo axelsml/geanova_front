@@ -12,24 +12,44 @@ import {
   Typography,
   Form,
   InputNumber,
+  Tabs,
 } from "antd";
-import { useState, useEffect, useContext } from "react";
-import { LoadingContext } from "@/contexts/loading";
+import {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import Loader from "./Loader";
 import { useForm } from "antd/es/form/Form";
 import Swal from "sweetalert2";
 
-export default function PlazosCrear({ terrenoId }) {
-  const [nuevoPlazo, setNuevoPlazo] = useState(false);
+const CrearPlazo = forwardRef(({ terrenoId }, ref) => {
   const [plazos, setPlazos] = useState(null);
-  const [changeState, setChangeState] = useState(false);
-  const { setIsLoading } = useContext(LoadingContext);
+  const [loading, setLoading] = useState(false);
+  const plazosFormRef = useRef(null);
+
+  const resetPlazosForm = () => {
+    plazosFormRef.current?.resetForm();
+  };
 
   useEffect(() => {
-    plazosService.getPlazos({ terreno_id: terrenoId }, setPlazos, Error);
-  }, [terrenoId, changeState]);
+    setLoading(true);
+    plazosService
+      .getPlazos({ terreno_id: terrenoId }, setPlazos, onError)
+      .finally(() => setLoading(false));
+  }, [terrenoId]);
 
-  const CreateNuevoPlazo = () => {
-    setNuevoPlazo(!nuevoPlazo);
+  const onError = (e) => {
+    setLoading(false);
+    console.error("Error al obtener los plazos:", e);
+    Swal.fire({
+      title: "Error al cargar los plazos",
+      icon: "error",
+      text: "Hubo un problema al cargar la lista de plazos",
+      confirmButtonColor: "#4096ff",
+    });
   };
 
   const Plazo = ({ plazo }) => {
@@ -38,7 +58,7 @@ export default function PlazosCrear({ terrenoId }) {
 
     useEffect(() => {
       form.setFieldValue("precio", plazo.precio);
-    }, [form, editar]);
+    }, [form, editar, plazo.precio]);
 
     const guardarPrecioEditado = (values) => {
       let params = {
@@ -58,41 +78,36 @@ export default function PlazosCrear({ terrenoId }) {
         denyButtonText: `Cancelar`,
       }).then((result) => {
         if (result.isConfirmed) {
-          setIsLoading(true);
+          setLoading(true);
           plazosService.editarPlazo(params, onPrecioEditado, onError);
         }
       });
     };
 
     const onPrecioEditado = (data) => {
-      setIsLoading(false);
+      setLoading(false);
       setEditar(false);
       if (data.success) {
-        setChangeState(!changeState);
         Swal.fire({
           title: "Guardado con Éxito",
           icon: "success",
           confirmButtonColor: "#4096ff",
-          cancelButtonColor: "#ff4d4f",
-          showDenyButton: true,
           confirmButtonText: "Aceptar",
         });
+        setPlazos((prevPlazos) =>
+          prevPlazos?.map((p) =>
+            p.id === plazo.id ? { ...p, precio: data.plazo.precio } : p
+          )
+        );
       } else {
         Swal.fire({
           title: "Error",
           icon: "error",
-          text: data.message,
+          text: data.message || "Hubo un error al guardar el precio.",
           confirmButtonColor: "#4096ff",
-          cancelButtonColor: "#ff4d4f",
-          showDenyButton: true,
           confirmButtonText: "Aceptar",
         });
       }
-    };
-
-    const onError = (e) => {
-      setIsLoading(false);
-      console.log(e);
     };
 
     const validacionMensajes = {
@@ -154,41 +169,54 @@ export default function PlazosCrear({ terrenoId }) {
     );
   };
 
-  return (
-    <div className="p-8 grid gap-4">
-      {!nuevoPlazo && (
+  const items = [
+    {
+      key: "editar",
+      label: "Editar Plazos",
+      children: (
         <Row justify={"center"}>
-          <Col>
-            <Button size={"large"} onClick={CreateNuevoPlazo}>
-              Crear Nuevo Plazo
-            </Button>
+          <Col style={{ width: "100%" }}>
+            {plazos?.length > 0 ? (
+              <Collapse>
+                <Collapse.Panel header="Lista de Plazos">
+                  {plazos?.map((plazo, index) => (
+                    <Plazo key={index} plazo={plazo} />
+                  ))}
+                </Collapse.Panel>
+              </Collapse>
+            ) : (
+              <Typography className="text-center">
+                No hay plazos creados para este terreno.
+              </Typography>
+            )}
           </Col>
         </Row>
-      )}
-      <Row justify={"center"}>
-        <Col span={24}>
-          {nuevoPlazo && (
-            <PlazoForm
-              setNuevoPlazo={setNuevoPlazo}
-              setWatch={setChangeState}
-              watch={changeState}
-              terrenoId={terrenoId}
-            />
-          )}
-        </Col>
-      </Row>
-
-      {!nuevoPlazo && plazos?.length > 0 && (
+      ),
+    },
+    {
+      key: "crear",
+      label: "Crear Nuevo Plazo",
+      children: (
         <Row justify={"center"}>
-          <Collapse className="w-3/4">
-            <Collapse.Panel header="Lista de Plazos">
-              {plazos?.map((plazo, index) => (
-                <Plazo key={index} plazo={plazo} />
-              ))}
-            </Collapse.Panel>
-          </Collapse>
+          <Col span={24}>
+            <PlazoForm terrenoId={terrenoId} ref={plazosFormRef} />
+          </Col>
         </Row>
-      )}
+      ),
+    },
+  ];
+
+  useImperativeHandle(ref, () => ({
+    resetFields: resetPlazosForm,
+  }));
+
+  return (
+    <div className="p-8 grid gap-4">
+      {loading && <Loader />}
+      <Tabs defaultActiveKey="editar" items={items} />
     </div>
   );
-}
+});
+
+CrearPlazo.displayName = "CrearPlazo";
+export default CrearPlazo;

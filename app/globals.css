@@ -424,3 +424,14 @@
 .no-scroll {
   overflow: hidden;
 }
+
+.swal-z-index-9999 {
+  z-index: 9999 !important;
+  /* Intenta con un valor alto para asegurarte de que esté por encima de los modales */
+}
+
+.titulo_pantallas-text {
+  color: #FFFFFF;
+  font-weight: bold;
+  padding: 8px;
+}
