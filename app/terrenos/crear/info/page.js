@@ -11,8 +11,8 @@ import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { useSearchParams } from "next/navigation";
 
 export default function TerrenoInfo() {
-  const searchParams = useSearchParams();
-  const terrenoId = searchParams.get("id");
+  const [searchParams, setSearchParams] = useState(null);
+  const [terrenoId, setTerrenoId] = useState(null);
 
   const [terreno, setTerreno] = useState(null);
 
@@ -26,15 +26,23 @@ export default function TerrenoInfo() {
 
   const [cookiePermisos, setCookiePermisos] = useState([]);
 
-  const handleGetTerreno = useCallback((id) => {
-    const params = { terreno_id: id };
-    terrenosService.getTerreno(params, onTerreno, onerror);
+  const handleGetTerreno = useCallback(() => {
+    if (terrenoId) {
+      const params = { terreno_id: terrenoId };
+      terrenosService.getTerreno(params, onTerreno, onerror);
+    }
+  }, [terrenoId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSearchParams(params);
+    setTerrenoId(params.get("id"));
   }, []);
 
   useEffect(() => {
     getCookiePermisos("lista de terrenos", setCookiePermisos);
-    handleGetTerreno(terrenoId);
-  }, [handleGetTerreno, terrenoId]);
+    handleGetTerreno();
+  }, [handleGetTerreno, cookiePermisos]);
 
   async function onTerreno(data) {
     console.log(data);
