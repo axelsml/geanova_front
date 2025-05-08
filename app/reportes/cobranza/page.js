@@ -69,7 +69,7 @@ export default function ReporteCobranza() {
   };
 
   const onSearch = () => {
-    if (sistemaPagoSelected != 2 || statusPagoId != 2) {
+    if (sistemaPagoSelected != 2 || statusPagoId != 1) {
       setCuentaBancariaSelected(null);
     }
     setLoading(true);

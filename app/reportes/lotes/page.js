@@ -21,7 +21,7 @@ import { FaFilePdf } from "react-icons/fa";
 
 import terrenosService from "@/services/terrenosService";
 import lotesService from "@/services/lotesService";
-import PagoForm from "./PagoForm";
+import PagoForm from "@/components/PagoForm";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
@@ -381,18 +381,17 @@ export default function ReporteLotes() {
                 setPeriodoPagoSelected(data);
               }}
             >
-              {lotes &&
-                periodos.map((periodo, index) => {
-                  return (
-                    <Option
-                      key={periodo.id}
-                      value={periodo.value}
-                      label={periodo.label}
-                    >
-                      {periodo.label}
-                    </Option>
-                  );
-                })}
+              {periodos.map((periodo, index) => {
+                return (
+                  <Option
+                    key={periodo.id}
+                    value={periodo.value}
+                    label={periodo.label}
+                  >
+                    {periodo.label}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
         </Col>

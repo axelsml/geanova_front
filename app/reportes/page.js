@@ -3,9 +3,9 @@
 import { Col, Row, Tabs } from "antd";
 import TabPane from "antd/es/tabs/TabPane";
 
-import ReporteLotes from "@/components/ReporteLotesForm";
-import ReporteCobranza from "@/components/ReporteCobranzaForm";
-import ReporteEstatusCobranza from "@/components/ReporteEstatusCobranza";
+import ReporteLotes from "./lotes/page";
+import ReporteCobranza from "./cobranza/page";
+import ReporteEstatusCobranza from "./cobranza_estatus/page";
 import ReporteIngresos from "@/components/ReporteIngresos";
 import ReporteEfectividadCobranza from "../efectividadCobranza/page";
 import ReporteProyeccion from "@/components/ReporteProyeccion";
