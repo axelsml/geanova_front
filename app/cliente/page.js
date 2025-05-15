@@ -18,6 +18,7 @@ import {
   Tooltip,
   Badge,
 } from "antd";
+const { Text } = Typography;
 import { useContext, useEffect, useState } from "react";
 import {
   FaArrowCircleLeft,
@@ -27,6 +28,7 @@ import {
   FaRegCheckCircle,
 } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
+import CancelarSolicitud from "@/components/CancelarSolicitud";
 import queryString from "query-string";
 import { FaFilePdf } from "react-icons/fa6";
 import { SiOpslevel } from "react-icons/si";
@@ -762,23 +764,27 @@ export default function ClientesInfo() {
 
   return (
     <div className="p-8 grid gap-4">
-      <Row>
-        <Col style={{ margin: "auto" }}>
-          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
-            INFORMACION DEL CLIENTE
-          </p>
-        </Col>
+      <Row justify={"center"}>
+        <Text className="titulo_pantallas" style={{ fontSize: "24px" }}>
+          INFORMACION DEL CLIENTE
+        </Text>
       </Row>
-      <Row justify={"center"} style={{ marginTop: "15px" }}>
-        <Col>
-          <Form.Item
-            label={"Proyecto"}
-            name={"terreno"}
-            style={{ width: "100%" }}
-            rules={[{ required: true, message: "Terreno no seleccionado" }]}
-            initialValue={terrenoSelected?.nombre}
+      <Row
+        justify={"center"}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <div style={{ display: "flex", textAlign: "center", margin: "0 auto" }}>
+          <Col
+            style={{
+              margin: "0.5rem",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
+            <Text>Proyecto</Text>
             <Select
+              style={{ width: 150 }}
               showSearch
               placeholder="Seleccione un Proyecto"
               optionLabelProp="label"
@@ -790,16 +796,18 @@ export default function ClientesInfo() {
                 </Option>
               ))}
             </Select>
-          </Form.Item>
-        </Col>
-        <Col>
-          <Form.Item
-            label={"Lote"}
-            name="lote_id"
-            style={{ width: "100%" }}
-            rules={[{ required: true, message: "Lote no seleccionado" }]}
+          </Col>
+          <Col
+            style={{
+              margin: "0.5rem",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
+            <Text>Lote</Text>
             <Select
+              style={{ width: 150 }}
               showSearch
               placeholder="Seleccione un Lote"
               optionLabelProp="label"
@@ -814,9 +822,9 @@ export default function ClientesInfo() {
                 </Option>
               ))}
             </Select>
-          </Form.Item>
-        </Col>
-        <Col>
+          </Col>
+        </div>
+        <div style={{ margin: "0.5rem auto" }}>
           <Button
             className="boton"
             disabled={terrenoSelected == null || loteSelected == null}
@@ -824,304 +832,296 @@ export default function ClientesInfo() {
           >
             Buscar
           </Button>
-        </Col>
+        </div>
       </Row>
       {info_cliente != null && (
-        <Row justify={"center"} gutter={[16]}>
-          <Col className="formulario_alterno" xs={24} sm={12} lg={12}>
-            <Row justify={"center"} gutter={[16]} style={{ marginTop: "5px" }}>
-              <Col xs={24} sm={24} lg={24}>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}></Col>
-                  <Col xs={24} sm={12} lg={12} style={{ textAlign: "right" }}>
-                    <Button
-                      className="boton renglon_otro_color"
-                      disabled={usuarioInfo.id != 2}
-                      onClick={() => {
-                        datosModal();
-                        setShowModalEditar(true);
-                      }}
-                      size="large"
-                    >
-                      <FaPencilAlt className="m-auto" size={"20px"} />
-                    </Button>
-                  </Col>
-                </Row>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    Nombre Cliente: {info_cliente.nombre_completo}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Cliente Desde: {info_cliente.cliente_desde}
-                  </Col>
-                </Row>
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col>Domicilio: {info_cliente.domicilio}</Col>
-                </Row>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    Telefono 1: {info_cliente.telefono_celular}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Telefono 2: {info_cliente.telefono_celular_2}
-                  </Col>
-                </Row>
-
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col xs={24} sm={12} lg={12}>
-                    Fecha Nacimiento: {info_cliente.fecha_nacimiento}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Lotes Adquiridos: {info_cliente.lotes_adquiridos}
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-            <Row justify={"center"} gutter={[16]}>
-              <Col xs={24} sm={24} lg={24}>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    No. Lote: {info_lote.lote}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Superficie(M2): {info_lote.superficie}
-                  </Col>
-                </Row>
-
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col xs={24} sm={12} lg={12}>
-                    Proyecto: {info_lote.terreno}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Fecha De Solicitud: {info_lote.fecha_solicitud}
-                  </Col>
-                </Row>
-
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    Monto Contrato: ${formatPrecio(info_lote.monto_contrato)}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Cantidad Pagos: {info_lote.cantidad_pagos}
-                  </Col>
-                </Row>
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col xs={24} sm={12} lg={12}>
-                    Anticipo: ${formatPrecio(info_lote.anticipo)}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Sistema De Pago: {info_lote.sistema_pago}
-                  </Col>
-                </Row>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    Plazo: {info_lote.plazo}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Monto Requerido: $
-                    {formatPrecio(info_lote.monto_pago_requerido)}
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-            <Row justify={"center"} gutter={[16]}>
-              <Col xs={24} sm={24} lg={24}>
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col xs={4} sm={4} lg={2}>
-                    Estado:
-                  </Col>
-
-                  <Col xs={4} sm={4} lg={10}>
-                    <Button
-                      disabled
-                      size={"small"}
-                      shape="round"
-                      style={{
-                        backgroundColor: info_lote.situacion_solicitud_color,
-                        border: "none",
-                      }}
-                    >
-                      <SiOpslevel
-                        style={{
-                          backgroundColor: info_lote.situacion_solicitud_color,
+        <Row justify={"center"}>
+          <Col xs={24} sm={20} md={16} lg={14} xl={14} xxl={14}>
+            <TableContainer>
+              <Table className="formulario_alterno" size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell colSpan={2} style={{ textAlign: "right" }}>
+                      <Button
+                        className="boton renglon_otro_color"
+                        disabled={usuarioInfo.id != 2}
+                        onClick={() => {
+                          datosModal();
+                          setShowModalEditar(true);
                         }}
-                      />
-                    </Button>
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Monto Interés: $
-                    {info_lote.interes ? formatPrecio(info_lote.interes) : "0"}
-                  </Col>
-                </Row>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    Monto Pagado: ${formatPrecio(info_lote.monto_pagado)}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Monto Vencido: ${formatPrecio(info_lote.monto_vencido)}
-                  </Col>
-                </Row>
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col xs={24} sm={12} lg={12}>
-                    Pagos Vencidos: {info_lote.cantidad_vencidos}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Pagos Adelantados: {info_lote.cantidad_adelantados}
-                  </Col>
-                </Row>
-                <Row gutter={[16]}>
-                  <Col xs={24} sm={12} lg={12}>
-                    Pagos Completados: {info_lote.pagos_completados}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Pagos Realizados: {info_lote.pagos_dados}
-                  </Col>
-                </Row>
-                <Row gutter={[16]} className="renglon_otro_color">
-                  <Col xs={24} sm={12} lg={12}>
-                    Pagos Transcurridos: {info_lote.pagos_esperados}
-                  </Col>
-                  <Col xs={24} sm={12} lg={12}>
-                    Saldo: ${formatPrecio(info_lote.saldo)}
-                  </Col>
-                </Row>
-                <Row gutter={[16]} style={{ marginBottom: "18px" }}>
-                  <Col
-                    xs={24}
-                    sm={24}
-                    lg={24}
-                    style={{ display: "flex", alignItems: "center" }}
-                  >
-                    Tiene Luz:{" "}
-                    {tieneLuzPantalla ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginLeft: 8,
-                        }}
+                        size="large"
                       >
-                        <FaRegCheckCircle
-                          style={{ color: "#22bb33", marginRight: 8 }}
-                        />
-                        Este contrato sí cuenta con suministro de electricidad
+                        <FaPencilAlt className="m-auto" size={"20px"} />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Nombre Cliente: {info_cliente.nombre_completo}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Cliente Desde: {info_cliente.cliente_desde}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Domicilio: {info_cliente.domicilio}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Telefono 1: {info_cliente.telefono_celular}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Telefono 2: {info_cliente.telefono_celular_2}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Fecha Nacimiento: {info_cliente.fecha_nacimiento}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Lotes Adquiridos: {info_cliente.lotes_adquiridos}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      No. Lote: {info_lote.lote}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Superficie(M2): {info_lote.superficie}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Proyecto: {info_lote.terreno}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Fecha De Solicitud: {info_lote.fecha_solicitud}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Monto Contrato: ${formatPrecio(info_lote.monto_contrato)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Cantidad Pagos: {info_lote.cantidad_pagos}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Anticipo: ${formatPrecio(info_lote.anticipo)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Sistema De Pago: {info_lote.sistema_pago}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Plazo: {info_lote.plazo}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      {" "}
+                      Monto Requerido: $
+                      {formatPrecio(info_lote.monto_pago_requerido)}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span>Estado:</span>
+                        <div>
+                          <Button
+                            disabled
+                            size={"small"}
+                            shape="round"
+                            style={{
+                              backgroundColor:
+                                info_lote.situacion_solicitud_color,
+                              border: "none",
+                            }}
+                          >
+                            <SiOpslevel
+                              style={{
+                                backgroundColor:
+                                  info_lote.situacion_solicitud_color,
+                              }}
+                            />
+                          </Button>
+                        </div>
                       </div>
-                    ) : (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginLeft: 8,
-                        }}
-                      >
-                        <FaRegTimesCircle
-                          style={{ color: "red", marginRight: 8 }}
-                        />
-                        Este contrato no cuenta con suministro de electricidad
-                      </div>
-                    )}
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      {" "}
+                      Monto Interés: $
+                      {info_lote.interes
+                        ? formatPrecio(info_lote.interes)
+                        : "0"}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Monto Pagado: ${formatPrecio(info_lote.monto_pagado)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Monto Vencido: ${formatPrecio(info_lote.monto_vencido)}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Pagos Vencidos: {info_lote.cantidad_vencidos}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Pagos Adelantados: {info_lote.cantidad_adelantados}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Pagos Completados: {info_lote.pagos_completados}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="renglon_otro_color">
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Pagos Realizados: {info_lote.pagos_dados}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Pagos Transcurridos: {info_lote.pagos_esperados}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Saldo: ${formatPrecio(info_lote.saldo)}
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF" }}>
+                      Tiene Luz:{" "}
+                      {tieneLuzPantalla ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginLeft: 8,
+                          }}
+                        >
+                          <FaRegCheckCircle
+                            style={{ color: "#22bb33", marginRight: 8 }}
+                          />
+                          Este contrato sí cuenta con suministro de electricidad
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginLeft: 8,
+                          }}
+                        >
+                          <FaRegTimesCircle
+                            style={{ color: "red", marginRight: 8 }}
+                          />
+                          Este contrato no cuenta con suministro de electricidad
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Col>
         </Row>
       )}
 
       {info_cliente != null && info_lote != null && (
-        <Row justify={"center"} className="gap-10">
-          <Col>
-            <Button
-              className="boton"
-              size={"large"}
-              disabled={cookiePermisos >= 1 ? false : true}
-              onClick={CreateNuevoPago}
-            >
-              Nuevo Pago
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              //disabled={cookiePermisos > 2 ? false : true}
-              size={"large"}
-              onClick={() => {
-                borrarAmortizacion();
-              }}
-            >
-              Borrar Amortizacion
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              disabled={cookiePermisos >= 1 ? false : true}
-              size="large"
-              onClick={() => {
-                borrarAmortizacion();
-              }}
-            >
-              Amortización
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              disabled={cookiePermisos >= 1 ? false : true}
-              size="large"
-              onClick={() => {
-                // terrenoSelected.id,loteSelected.id
-                window.open(
-                  `https://api.santamariadelaluz.com/getClienteByLote/${terrenoSelected.id}/${loteSelected.id}.pdf`
-                );
-              }}
-            >
-              Estado De Cuenta
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              disabled={cookiePermisos >= 1 ? false : true}
-              onClick={() => {
-                window.open(
-                  // https://api.santamariadelaluz.com
-                  `https://api.santamariadelaluz.com/mostrar_imagen/${info_cliente.id}.pdf`
-                );
-              }}
-              size="large"
-            >
-              Ver Imagenes
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              onClick={() => {
-                actualizarPerdonarInteres();
-              }}
-              disabled={usuarioInfo.id != 2}
-              size="large"
-            >
-              {info_lote.perdonar_interes
-                ? `Aplicar Interés`
-                : `Perdonar Interés`}
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              className="boton"
-              onClick={() => {
-                congelarCliente();
-              }}
-              disabled={usuarioInfo.id != 2}
-              size="large"
-            >
-              {info_lote.fecha_congelamiento != null
-                ? `Descongelar Cliente`
-                : `Congelar Cliente`}
-            </Button>
-          </Col>
+        <Row justify={"center"} style={{ justifyContent: "space-evenly" }}>
+          <Button
+            className="boton"
+            size={"large"}
+            disabled={cookiePermisos >= 1 ? false : true}
+            onClick={CreateNuevoPago}
+          >
+            Nuevo Pago
+          </Button>
+
+          <Button
+            className="boton"
+            //disabled={cookiePermisos > 2 ? false : true}
+            size={"large"}
+            onClick={() => {
+              borrarAmortizacion();
+            }}
+          >
+            Borrar Amortizacion
+          </Button>
+
+          <Button
+            className="boton"
+            disabled={cookiePermisos >= 1 ? false : true}
+            size="large"
+            onClick={() => {
+              borrarAmortizacion();
+            }}
+          >
+            Amortización
+          </Button>
+
+          <Button
+            className="boton"
+            disabled={cookiePermisos >= 1 ? false : true}
+            size="large"
+            onClick={() => {
+              // terrenoSelected.id,loteSelected.id
+              window.open(
+                `https://api.santamariadelaluz.com/getClienteByLote/${terrenoSelected.id}/${loteSelected.id}.pdf`
+              );
+            }}
+          >
+            Estado De Cuenta
+          </Button>
+
+          <Button
+            className="boton"
+            disabled={cookiePermisos >= 1 ? false : true}
+            onClick={() => {
+              window.open(
+                // https://api.santamariadelaluz.com
+                `https://api.santamariadelaluz.com/mostrar_imagen/${info_cliente.id}.pdf`
+              );
+            }}
+            size="large"
+          >
+            Ver Imagenes
+          </Button>
+
+          <Button
+            className="boton"
+            onClick={() => {
+              actualizarPerdonarInteres();
+            }}
+            disabled={usuarioInfo.id != 2}
+            size="large"
+          >
+            {info_lote.perdonar_interes
+              ? `Aplicar Interés`
+              : `Perdonar Interés`}
+          </Button>
+
+          <Button
+            className="boton"
+            onClick={() => {
+              congelarCliente();
+            }}
+            disabled={usuarioInfo.id != 2}
+            size="large"
+          >
+            {info_lote.fecha_congelamiento != null
+              ? `Descongelar Cliente`
+              : `Congelar Cliente`}
+          </Button>
+
+          <CancelarSolicitud
+            solicitudId={info_lote.solicitud_id}
+            loteId={info_lote.lote_id}
+            fechaCancelacion={info_lote.fecha_cancelacion}
+          />
         </Row>
       )}
 

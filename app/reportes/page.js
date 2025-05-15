@@ -10,6 +10,7 @@ import ReporteIngresos from "@/components/ReporteIngresos";
 import ReporteEfectividadCobranza from "../efectividadCobranza/page";
 import ReporteProyeccion from "@/components/ReporteProyeccion";
 import InformeCortes from "@/components/InformeCortes";
+import SolicitudesCanceladas from "./solicitudes_canceladas/page";
 
 export default function Reportes() {
   return (
@@ -63,6 +64,13 @@ export default function Reportes() {
               <Row justify={"center"} className="mb-5">
                 <Col>
                   <InformeCortes />
+                </Col>
+              </Row>
+            </TabPane>
+            <TabPane tab="Solicitudes Canceladas" key={"8"}>
+              <Row justify={"center"} className="mb-5">
+                <Col>
+                  <SolicitudesCanceladas />
                 </Col>
               </Row>
             </TabPane>

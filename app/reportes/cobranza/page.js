@@ -35,7 +35,7 @@ export default function ReporteCobranza() {
   const [fechaInicial, setFechaInicial] = useState(null);
   const [fechaFinal, setFechaFinal] = useState(null);
 
-  const [pagos, setPagos] = useState(0);
+  const [cantidadPagos, setCantidadPagos] = useState(0);
   const [totalPagado, setTotalPagado] = useState(0);
   const [totalContrato, setTotalContrato] = useState(0);
   const [totalPendiente, setTotalPendiente] = useState(0);
@@ -99,7 +99,7 @@ export default function ReporteCobranza() {
       setTotalPendiente(data.pendiente);
       setTotalAnticipo(data.anticipo);
       setTotalInteres(data.monto_interes);
-      setPagos(data.pagos);
+      setCantidadPagos(data.cantidad_pagos);
     } else {
       Swal.fire({
         title: "Error",
@@ -553,7 +553,7 @@ export default function ReporteCobranza() {
                   <TableRow>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25]}
-                      count={pagos}
+                      count={cantidadPagos}
                       rowsPerPage={rowsPerPage}
                       page={page}
                       onPageChange={handleChangePage}
