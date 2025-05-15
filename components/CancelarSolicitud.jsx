@@ -89,7 +89,7 @@ export default function CancelarSolicitud({
         onClick={() => {
           setShow(true);
         }}
-        disabled={rol_id != 1 || rol_id != 5}
+        disabled={rol_id > 2}
       >
         Cancelar Solicitud
       </Button>

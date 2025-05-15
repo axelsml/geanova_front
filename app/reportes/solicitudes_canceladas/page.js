@@ -299,7 +299,7 @@ export default function SolicitudesCanceladas() {
                             onClick={() => {
                               regresarAnticipo(item.id);
                             }}
-                            disabled={rol_id != 1 || rol_id != 5}
+                            disabled={rol_id > 2}
                           >
                             Regresar Anticipo
                           </Button>
