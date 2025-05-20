@@ -17,7 +17,7 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
-import ReporteProyectoForm from "@/components/ReporteProyectoForm";
+import ReporteProyectoForm from "./ReporteProyectoForm";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
 export default function TerrenosCrear() {

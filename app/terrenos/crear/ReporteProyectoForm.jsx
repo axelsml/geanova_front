@@ -2,7 +2,6 @@
 
 import { Button, Select, Row, Col } from "antd";
 import Swal from "sweetalert2";
-import InputIn from "./Input";
 import { useContext, useState, useEffect } from "react";
 import { LoadingContext } from "@/contexts/loading";
 import terrenosService from "@/services/terrenosService";

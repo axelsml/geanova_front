@@ -6,10 +6,10 @@ import TabPane from "antd/es/tabs/TabPane";
 import ReporteLotes from "./lotes/page";
 import ReporteCobranza from "./cobranza/page";
 import ReporteEstatusCobranza from "./cobranza_estatus/page";
-import ReporteIngresos from "@/components/ReporteIngresos";
-import ReporteEfectividadCobranza from "../efectividadCobranza/page";
-import ReporteProyeccion from "@/components/ReporteProyeccion";
-import InformeCortes from "@/components/InformeCortes";
+import EfectividadCobranza from "./cobranza_efectividad/page";
+import ReporteIngresos from "./ingresos/page";
+import ReporteProyeccion from "./proyeccion/page";
+import InformeCortes from "./cortes/page";
 import SolicitudesCanceladas from "./solicitudes_canceladas/page";
 
 export default function Reportes() {
@@ -42,7 +42,7 @@ export default function Reportes() {
             <TabPane tab="Efectividad Cobranza" key={"4"}>
               <Row justify={"center"} className="mb-5">
                 <Col xs={24} sm={18} md={24} lg={24} xl={22} xxl={20}>
-                  <ReporteEfectividadCobranza />
+                  <EfectividadCobranza />
                 </Col>
               </Row>
             </TabPane>

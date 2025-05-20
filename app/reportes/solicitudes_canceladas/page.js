@@ -20,6 +20,7 @@ import {
   TableRow,
   TablePagination,
   TableFooter,
+  TableSortLabel,
 } from "@mui/material";
 import Swal from "sweetalert2";
 
@@ -33,6 +34,8 @@ export default function SolicitudesCanceladas() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [orderBy, setOrderBy] = useState(null);
+  const [order, setOrder] = useState("asc");
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -132,6 +135,47 @@ export default function SolicitudesCanceladas() {
     }
   }
 
+  const handleSort = (property) => () => {
+    if (property === "fecha_cancelacion") {
+      const isAsc = orderBy === property && order === "asc";
+      setOrder(isAsc ? "desc" : "asc");
+      setOrderBy(property);
+    }
+  };
+
+  const sortedSolicitudes = solicitudes.slice().sort((a, b) => {
+    if (orderBy === "fecha_cancelacion") {
+      const dateA =
+        a.fecha_cancelacion === "Sin fecha"
+          ? null
+          : new Date(a.fecha_cancelacion);
+      const dateB =
+        b.fecha_cancelacion === "Sin fecha"
+          ? null
+          : new Date(b.fecha_cancelacion);
+
+      const timeA = dateA ? dateA.valueOf() : null;
+      const timeB = dateB ? dateB.valueOf() : null;
+
+      if (timeA === null && timeB === null) {
+        return 0;
+      }
+      if (timeA === null) {
+        return order === "asc" ? 1 : -1;
+      }
+      if (timeB === null) {
+        return order === "asc" ? -1 : 1;
+      }
+
+      if (order === "asc") {
+        return timeA - timeB;
+      } else {
+        return timeB - timeA;
+      }
+    }
+    return 0;
+  });
+
   return (
     <>
       {loading && (
@@ -139,6 +183,7 @@ export default function SolicitudesCanceladas() {
           <Loader80 />
         </>
       )}
+      {/* ENCABEZADO  */}
       <Row justify={"center"}>
         <Text className="titulo_pantallas">Solicitudes Canceladas</Text>
       </Row>
@@ -195,6 +240,7 @@ export default function SolicitudesCanceladas() {
           </Button>
         </Row>
       </Row>
+      {/* TABLA/INFORMACION */}
       {solicitudes.length > 0 && (
         <Row className="tabla" justify={"center"} style={{ margin: "3em" }}>
           <TableContainer component={Paper}>
@@ -260,9 +306,22 @@ export default function SolicitudesCanceladas() {
                       fontWeight: "bold",
                       fontFamily: "serif",
                       fontSize: "1.2em",
+                      cursor: "pointer",
                     }}
+                    sortDirection={
+                      orderBy === "fecha_cancelacion" ? order : false
+                    }
                   >
-                    Fecha de cancelación
+                    <TableSortLabel
+                      active={orderBy === "fecha_cancelacion"}
+                      direction={
+                        orderBy === "fecha_cancelacion" ? order : "asc"
+                      }
+                      onClick={handleSort("fecha_cancelacion")}
+                      style={{ color: "#FFFFFF" }}
+                    >
+                      Fecha de cancelación
+                    </TableSortLabel>
                   </TableCell>
                   <TableCell
                     style={{
@@ -277,7 +336,7 @@ export default function SolicitudesCanceladas() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {solicitudes
+                {sortedSolicitudes
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((item, index) => (
                     <TableRow key={index}>
@@ -313,7 +372,7 @@ export default function SolicitudesCanceladas() {
                   <TablePagination
                     style={{ color: "rgb(67, 141, 204)" }}
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={solicitudes.length}
+                    count={sortedSolicitudes.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}

@@ -27,7 +27,6 @@ export default function ReporteIngresos() {
   const { Option } = Select;
 
   const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
 
   const [proyectos, setProyectos] = useState([]);
 
