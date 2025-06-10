@@ -491,6 +491,7 @@ export default function ClientesInfo() {
       tieneLuz: tieneLuz,
       financiamiento_id: financiamientoId,
       fecha_solicitud: fechaSolicitud,
+      plazoId:plazoId
     };
 
     debugger
