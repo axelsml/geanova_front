@@ -55,6 +55,7 @@ import { InputNumber } from "antd";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { getCookie } from "@/helpers/Cookies";
 import cobranzaService from "@/services/cobranzaService";
+import plazosService from "@/services/plazosService";
 
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
@@ -91,6 +92,7 @@ export default function ClientesInfo() {
     fecha_transferencia: null,
   });
   const [sistemas_pago, setSistemasPago] = useState(null);
+  const [plazos, setPlazos] = useState(null);
   const [sistemaPagoSelected, setSistemaPagoSelected] = useState(null);
 
   const [info_lote, setInfoLote] = useState(null);
@@ -115,8 +117,10 @@ export default function ClientesInfo() {
   const [totalImpuestoLuz, setTotalImpuestoLuz] = useState(0);
   const [agregarLuz, setAgregarLuz] = useState(false);
   const [tieneLuz, setTieneLuz] = useState(false);
-  const [financiamientoId, setFinanciamientoId] = useState(null);
+  const [financiamientoId, setFinanciamientoId] = useState(0);
   const [financiamientoNombre, setFinanciamientoNombre] = useState(null);
+  const [plazoId, setPlazoId] = useState(null);
+  const [plazoNombre, setPlazoNombre] = useState(null);
   const [fechaSolicitud, setFechaSolicitud] = useState(null);
   const [modalKey, setModalKey] = useState(0);
   const [cambiarFecha, setCambiarFecha] = useState(false);
@@ -146,7 +150,6 @@ export default function ClientesInfo() {
 
   useEffect(() => {
     pagosService.getSistemasPago(setSistemasPago, onError);
-
     // se necesita el nombre de la pantalla o un callback para setear el valor
     getCookiePermisos("informacion del cliente", setCookiePermisos);
   }, []);
@@ -226,7 +229,7 @@ export default function ClientesInfo() {
     setInfoLote(null);
     setProximoPago(null);
     setIsLoading(true);
-    setFinanciamientoId(null);
+    setFinanciamientoId(0);
     setFinanciamientoNombre(null);
     lotesService.getClienteByLote(
       terrenoSelected.id,
@@ -243,6 +246,9 @@ export default function ClientesInfo() {
       setInfoLote(data.info_lote);
       setProximoPago(data.fecha_proximo_pago);
       setTieneLuzPantalla(data.tiene_luz);
+      plazosService.getPlazos({ terreno_id: data.info_lote.terreno_id },setPlazos, onError);
+      setPlazoId(data.info_lote.plazo_id)
+      setPlazoNombre(data.info_lote.plazo)
     } else {
       Swal.fire({
         title: "Error",
@@ -323,6 +329,7 @@ export default function ClientesInfo() {
       solicitud_id: info_lote.solicitud_id,
       nueva_cantidad_pagos: cantidadPagos,
     };
+    debugger
     ventasService.borrarAmortizacion(params, onAmortizacionBorrada, onError);
   }
   async function onAmortizacionBorrada(data) {
@@ -373,7 +380,7 @@ export default function ClientesInfo() {
 
   const handleCloseModalEditar = () => {
     setShowModalEditar(false);
-    setFinanciamientoId(null);
+    setFinanciamientoId(0);
     setFinanciamientoNombre(null);
     setFechaSolicitud(null);
     setModalKey(modalKey + 1);
@@ -484,7 +491,10 @@ export default function ClientesInfo() {
       tieneLuz: tieneLuz,
       financiamiento_id: financiamientoId,
       fecha_solicitud: fechaSolicitud,
+      plazoId:plazoId
     };
+
+    debugger
     await Swal.fire({
       title: "Guardar cambios en la información del cliente?",
       icon: "question",
@@ -589,10 +599,11 @@ export default function ClientesInfo() {
 
   const onClienteActualizado = (data) => {
     setShowModalEditar(false);
-    if (data.montoModificado) {
+    setCantidadPagos(data.cantidad_pagos)
+    // if (data.montoModificado) {
       //Borrar mortizaciones con la funcion borrarAmortizacion()
       borrarAmortizacion();
-    }
+    // }
     setIsLoading(false);
     if (data.type == "success") {
       BuscarInfoLote();
@@ -844,7 +855,7 @@ export default function ClientesInfo() {
                     <TableCell colSpan={2} style={{ textAlign: "right" }}>
                       <Button
                         className="boton renglon_otro_color"
-                        disabled={usuarioInfo.id != 2}
+                        disabled={usuarioInfo.id > 2}
                         onClick={() => {
                           datosModal();
                           setShowModalEditar(true);
@@ -1096,7 +1107,7 @@ export default function ClientesInfo() {
             onClick={() => {
               actualizarPerdonarInteres();
             }}
-            disabled={usuarioInfo.id != 2}
+            disabled={usuarioInfo.id > 2}
             size="large"
           >
             {info_lote.perdonar_interes
@@ -1109,7 +1120,7 @@ export default function ClientesInfo() {
             onClick={() => {
               congelarCliente();
             }}
-            disabled={usuarioInfo.id != 2}
+            disabled={usuarioInfo.id > 2}
             size="large"
           >
             {info_lote.fecha_congelamiento != null
@@ -1516,6 +1527,7 @@ export default function ClientesInfo() {
                   placeholder="Cantidad Pagos"
                   style={{ width: "100%" }}
                   value={cantidadPagos}
+                  disabled={true}
                   onChange={(e) => {
                     setCantidadPagos(e);
                     setNewAmortizacion(true);
@@ -1654,6 +1666,7 @@ export default function ClientesInfo() {
                   }
                   style={{ width: "100%" }}
                   onChange={(value, label) => {
+                    console.log("valuie? "+ value)
                     setFinanciamientoId(value);
                     setFinanciamientoNombre(label);
                   }}
@@ -1661,6 +1674,28 @@ export default function ClientesInfo() {
                   {opcionFinanciamiento.map((item, index) => (
                     <Option key={index} value={item.id} label={item.nombre}>
                       {item?.nombre}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item label="Plazos">
+                <Select
+                  placeholder={"Plazos"}
+                  optionLabelProp="label"
+                  value={
+                    plazoNombre
+                      ? plazoNombre
+                      : " "
+                  }
+                  style={{ width: "100%" }}
+                  onChange={(value, label) => {
+                    setPlazoId(value);
+                    setPlazoNombre(label);
+                  }}
+                >
+                  {plazos?.map((item, index) => (
+                    <Option key={index} value={item.id} label={item.descripcion}>
+                      {item?.descripcion}
                     </Option>
                   ))}
                 </Select>
