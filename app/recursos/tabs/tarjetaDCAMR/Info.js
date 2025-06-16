@@ -260,7 +260,7 @@ export default function TarjetaDCAMR() {
     recursosService
       .getMovimientosTarjetas(form, Consultado, onError)
       .then(() => {
-        setIsLoading(false);
+        setLoading(false);
       });
   }
 
@@ -484,21 +484,18 @@ export default function TarjetaDCAMR() {
   };
 
   function guardarEstadoCuenta(excel_data) {
-    const columns_aux =
-      excel_data.length > 0
-        ? excel_data[0].map((header, index) => ({
-            title: header,
-            dataIndex: index.toString(),
-          }))
-        : [];
+    excel_data.length > 0
+      ? excel_data[0].map((header, index) => ({
+          title: header,
+          dataIndex: index.toString(),
+        }))
+      : [];
 
-    //setIsLoading(true);
+    //setLoading(true);
     var datos = excel_data.slice(1);
     var datos_formateados = [];
-    console.log("columns_aux: ", columns_aux);
 
     for (let i = 0; i < datos.length; i++) {
-      console.log("datos[i][0]: ", datos[i][1]);
       // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
       var formattedDate = "";
       if (typeof datos[i][0] === "number") {
@@ -518,8 +515,6 @@ export default function TarjetaDCAMR() {
 
       datos_formateados.push(info);
     }
-    console.log("datos: ", datos);
-    console.log("datos_formateados: ", datos_formateados);
     var params = {
       movimientos: datos_formateados,
     };
@@ -531,17 +526,40 @@ export default function TarjetaDCAMR() {
   }
 
   async function onMovimientosGuardados(data) {
-    console.log("data: ", data);
-    setIsLoading(false);
-    Swal.fire({
-      title: "Info",
-      icon: "info",
-      text: "Cantidad De Registros Nuevos Guardados: " + data.datos,
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: false,
-      confirmButtonText: "Aceptar",
-    });
+    setLoading(false);
+    if (data.success) {
+      if (data.datos == 0) {
+        Swal.fire({
+          title: "Sin cambios",
+          icon: "warning",
+          text: "No se han registrado cambios",
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: false,
+          confirmButtonText: "Aceptar",
+        });
+      } else {
+        Swal.fire({
+          title: "Info",
+          icon: "info",
+          text: "Cantidad De Registros Nuevos Guardados: " + data.datos,
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: false,
+          confirmButtonText: "Aceptar",
+        });
+      }
+    } else {
+      Swal.fire({
+        title: "Ha ocurrido un Error",
+        icon: "warning",
+        text: data.message,
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
   }
   function excelDateToJSDate(serial) {
     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));

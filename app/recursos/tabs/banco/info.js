@@ -139,49 +139,98 @@ export default function Banco() {
           cod_transaccion: parseInt(datos[i][5]),
           cheque: datos[i][12],
         };
-      } else {
-        var formattedDate = "";
-        if (typeof datos[i][0] === "number") {
-          let fecha = excelDateToJSDate(datos[i][0]);
-          formattedDate = fecha.toISOString().split("T")[0];
-          formattedDate = convertDateFormat(formattedDate);
-        } else {
-          formattedDate = formatDateString(datos[i][0]);
-        }
-        var info = {
-          cuenta_id: 1,
-          fecha_operacion: formattedDate,
-          descripcion: datos[i][1],
-          cargo: parseFloat(datos[i][2]),
-          abono: parseFloat(datos[i][3]),
-          saldo: parseFloat(datos[i][4]),
+        datos_formateados.push(info);
+
+        var params = {
+          movimientos: datos_formateados,
         };
+        pagosService.GuardarMovimientosBanco(
+          params,
+          onMovimientosGuardados,
+          onError
+        );
+      } else {
+        Swal.fire({
+          title: "Confirme para continuar",
+          icon: "question",
+          text: '¿El archivo corresponde a la cuenta "Personal Alonso"? ',
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: true,
+          confirmButtonText: "Confirmar",
+          denyButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            var formattedDate = "";
+            if (typeof datos[i][0] === "number") {
+              let fecha = excelDateToJSDate(datos[i][0]);
+              formattedDate = fecha.toISOString().split("T")[0];
+              formattedDate = convertDateFormat(formattedDate);
+            } else {
+              formattedDate = formatDateString(datos[i][0]);
+            }
+            var info = {
+              cuenta_id: 1,
+              fecha_operacion: formattedDate,
+              descripcion: datos[i][1],
+              cargo: parseFloat(datos[i][2]),
+              abono: parseFloat(datos[i][3]),
+              saldo: parseFloat(datos[i][4]),
+            };
+            datos_formateados.push(info);
+
+            var params = {
+              movimientos: datos_formateados,
+            };
+            pagosService.GuardarMovimientosBanco(
+              params,
+              onMovimientosGuardados,
+              onError
+            );
+          } else {
+            setLoading(false);
+          }
+        });
       }
-      datos_formateados.push(info);
     }
-    var params = {
-      movimientos: datos_formateados,
-    };
-    pagosService.GuardarMovimientosBanco(
-      params,
-      onMovimientosGuardados,
-      onError
-    );
   }
-async function onMovimientosGuardados(data) {
-  debugger
-    console.log("data: ", data.movimientos_guardados);
-    let aux = data.movimientos_guardados;
+  async function onMovimientosGuardados(data) {
     setLoading(false);
-    Swal.fire({
-      title: "Info",
-      icon: "info",
-      text: "Cantidad De Registros Nuevos Guardados: " + data.movimientos_guardados,
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: false,
-      confirmButtonText: "Aceptar",
-    });
+    if (data.success) {
+      if (data.movimientos_guardados == 0) {
+        Swal.fire({
+          title: "Sin cambios",
+          icon: "warning",
+          text: "No se han registrado cambios",
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: false,
+          confirmButtonText: "Aceptar",
+        });
+      } else {
+        Swal.fire({
+          title: "Info",
+          icon: "info",
+          text:
+            "Cantidad De Registros Nuevos Guardados: " +
+            data.movimientos_guardados,
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: false,
+          confirmButtonText: "Aceptar",
+        });
+      }
+    } else {
+      Swal.fire({
+        title: "Ha ocurrido un Error",
+        icon: "warning",
+        text: data.message,
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: false,
+        confirmButtonText: "Aceptar",
+      });
+    }
   }
   function excelDateToJSDate(serial) {
     const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
@@ -606,7 +655,6 @@ async function onMovimientosGuardados(data) {
               </TableContainer>
             </Row>
           </Col>
-          
         </Row>
 
         <Modal
