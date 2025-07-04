@@ -103,20 +103,26 @@ export default function Banco() {
   };
 
   function guardarEstadoCuenta(excel_data) {
+    // Crear el arreglo de columnas y convertir todos los títulos a minúsculas para evitar problemas con mayúsculas/minúsculas
     const columns_aux =
       excel_data.length > 0
         ? excel_data[0].map((header, index) => ({
-            title: header,
+            title: header.toLowerCase(), // Convertimos el título a minúsculas
             dataIndex: index.toString(),
           }))
         : [];
-
     setLoading(true);
+    // Datos sin la fila de encabezados
     var datos = excel_data.slice(1);
+    // Mover esta variable fuera del bucle, para no re-declararla cada vez
     var datos_formateados = [];
-
-    for (let i = 0; i < datos.length; i++) {
-      if (columns_aux[0].title == "CUENTA") {
+    // Buscar el índice de la columna con el título "cuenta"
+    const columnaIndex = columns_aux.findIndex(
+      (column) => column.title === "cuenta"
+    );
+    if (columnaIndex !== -1) {
+      // Si encontramos la columna "cuenta"
+      for (let i = 0; i < datos.length; i++) {
         var formattedDate = "";
         if (typeof datos[i][1] === "number") {
           let fecha = excelDateToJSDate(datos[i][1]);
@@ -125,6 +131,7 @@ export default function Banco() {
         } else {
           formattedDate = formatDateString(datos[i][1]);
         }
+        // Crear solo un objeto por iteración y agregarlo a la lista
         var info = {
           fecha_operacion: formattedDate,
           fecha_ingreso: formattedDate,
@@ -139,28 +146,33 @@ export default function Banco() {
           cod_transaccion: parseInt(datos[i][5]),
           cheque: datos[i][12],
         };
+        // Añadir un solo registro por iteración
         datos_formateados.push(info);
-
-        var params = {
-          movimientos: datos_formateados,
-        };
-        pagosService.GuardarMovimientosBanco(
-          params,
-          onMovimientosGuardados,
-          onError
-        );
-      } else {
-        Swal.fire({
-          title: "Confirme para continuar",
-          icon: "question",
-          text: '¿El archivo corresponde a la cuenta "Personal Alonso"? ',
-          confirmButtonColor: "#4096ff",
-          cancelButtonColor: "#ff4d4f",
-          showDenyButton: true,
-          confirmButtonText: "Confirmar",
-          denyButtonText: "Cancelar",
-        }).then((result) => {
-          if (result.isConfirmed) {
+      }
+      // Enviar todos los registros al backend después de procesar todos los datos
+      var params = {
+        movimientos: datos_formateados,
+      };
+      console.log(params);
+      pagosService.GuardarMovimientosBanco(
+        params,
+        onMovimientosGuardados,
+        onError
+      );
+    } else {
+      // Si no encontramos la columna "cuenta"
+      Swal.fire({
+        title: "Confirme para continuar",
+        icon: "question",
+        text: '¿El archivo corresponde a la cuenta "Personal Alonso"? ',
+        confirmButtonColor: "#4096ff",
+        cancelButtonColor: "#ff4d4f",
+        showDenyButton: true,
+        confirmButtonText: "Confirmar",
+        denyButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          for (let i = 0; i < datos.length; i++) {
             var formattedDate = "";
             if (typeof datos[i][0] === "number") {
               let fecha = excelDateToJSDate(datos[i][0]);
@@ -169,31 +181,35 @@ export default function Banco() {
             } else {
               formattedDate = formatDateString(datos[i][0]);
             }
+            // Crear solo un objeto por iteración y agregarlo a la lista
             var info = {
               cuenta_id: 1,
               fecha_operacion: formattedDate,
-              descripcion: datos[i][1],
+              concepto: datos[i][1],
               cargo: parseFloat(datos[i][2]),
               abono: parseFloat(datos[i][3]),
               saldo: parseFloat(datos[i][4]),
             };
+            // Añadir un solo registro por iteración
             datos_formateados.push(info);
-
-            var params = {
-              movimientos: datos_formateados,
-            };
-            pagosService.GuardarMovimientosBanco(
-              params,
-              onMovimientosGuardados,
-              onError
-            );
-          } else {
-            setLoading(false);
           }
-        });
-      }
+          // Enviar todos los registros al backend después de procesar todos los datos
+          var params = {
+            movimientos: datos_formateados,
+          };
+          console.log(params);
+          pagosService.GuardarMovimientosBanco(
+            params,
+            onMovimientosGuardados,
+            onError
+          );
+        } else {
+          setLoading(false);
+        }
+      });
     }
   }
+
   async function onMovimientosGuardados(data) {
     setLoading(false);
     if (data.success) {
