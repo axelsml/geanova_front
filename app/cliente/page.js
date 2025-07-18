@@ -246,9 +246,15 @@ export default function ClientesInfo() {
       setInfoLote(data.info_lote);
       setProximoPago(data.fecha_proximo_pago);
       setTieneLuzPantalla(data.tiene_luz);
-      plazosService.getPlazos({ terreno_id: data.info_lote.terreno_id },setPlazos, onError);
-      setPlazoId(data.info_lote.plazo_id)
-      setPlazoNombre(data.info_lote.plazo)
+      plazosService.getPlazos(
+        { terreno_id: data.info_lote.terreno_id },
+        setPlazos,
+        onError
+      );
+      setPlazoId(data.info_lote.plazo_id);
+      setPlazoNombre(data.info_lote.plazo);
+      setFinanciamientoId(data.info_lote.financiamiento_id);
+      setFinanciamientoNombre(data.info_lote.financiamiento_nombre);
     } else {
       Swal.fire({
         title: "Error",
@@ -329,13 +335,14 @@ export default function ClientesInfo() {
       solicitud_id: info_lote.solicitud_id,
       nueva_cantidad_pagos: cantidadPagos,
     };
-    debugger
+    debugger;
     ventasService.borrarAmortizacion(params, onAmortizacionBorrada, onError);
   }
   async function onAmortizacionBorrada(data) {
     if (data.success) {
       window.open(
         `https://api.santamariadelaluz.com/iUsuarios/${info_lote.solicitud_id}.pdf`
+        // `http://localhost:3000/iUsuarios/${info_lote.solicitud_id}.pdf`
       );
     } else {
       Swal.fire({
@@ -491,10 +498,10 @@ export default function ClientesInfo() {
       tieneLuz: tieneLuz,
       financiamiento_id: financiamientoId,
       fecha_solicitud: fechaSolicitud,
-      plazoId:plazoId
+      plazoId: plazoId,
     };
 
-    debugger
+    debugger;
     await Swal.fire({
       title: "Guardar cambios en la información del cliente?",
       icon: "question",
@@ -505,9 +512,6 @@ export default function ClientesInfo() {
     }).then((result) => {
       if (result.isConfirmed) {
         lotesService.updateClienteByLote(form, onClienteActualizado, onError);
-        if (newAmortizacion) {
-          borrarAmortizacion();
-        }
       }
     });
   }
@@ -589,7 +593,7 @@ export default function ClientesInfo() {
 
   const formatValue = (value) => {
     if (value === "" || value === undefined) return "";
-    const fixedValue = Number(value).toFixed(0);
+    const fixedValue = Number(value).toFixed(2);
     return `$ ${fixedValue}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
@@ -599,11 +603,13 @@ export default function ClientesInfo() {
 
   const onClienteActualizado = (data) => {
     setShowModalEditar(false);
-    setCantidadPagos(data.cantidad_pagos)
+    setCantidadPagos(data.cantidad_pagos);
     // if (data.montoModificado) {
-      //Borrar mortizaciones con la funcion borrarAmortizacion()
-      borrarAmortizacion();
+    //Borrar mortizaciones con la funcion borrarAmortizacion()
     // }
+    if (newAmortizacion) {
+      borrarAmortizacion();
+    }
     setIsLoading(false);
     if (data.type == "success") {
       BuscarInfoLote();
@@ -921,7 +927,10 @@ export default function ClientesInfo() {
                       Cantidad Pagos: {info_lote.cantidad_pagos}
                     </TableCell>
                     <TableCell style={{ color: "#FFFFFF" }}>
-                      Anticipo: ${formatPrecio(info_lote.anticipo)}
+                      Anticipo: $
+                      {info_lote.anticipo
+                        ? formatPrecio(info_lote.anticipo)
+                        : 0}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -1666,7 +1675,7 @@ export default function ClientesInfo() {
                   }
                   style={{ width: "100%" }}
                   onChange={(value, label) => {
-                    console.log("valuie? "+ value)
+                    console.log("valuie? " + value);
                     setFinanciamientoId(value);
                     setFinanciamientoNombre(label);
                   }}
@@ -1682,11 +1691,7 @@ export default function ClientesInfo() {
                 <Select
                   placeholder={"Plazos"}
                   optionLabelProp="label"
-                  value={
-                    plazoNombre
-                      ? plazoNombre
-                      : " "
-                  }
+                  value={plazoNombre ? plazoNombre : " "}
                   style={{ width: "100%" }}
                   onChange={(value, label) => {
                     setPlazoId(value);
@@ -1694,7 +1699,11 @@ export default function ClientesInfo() {
                   }}
                 >
                   {plazos?.map((item, index) => (
-                    <Option key={index} value={item.id} label={item.descripcion}>
+                    <Option
+                      key={index}
+                      value={item.id}
+                      label={item.descripcion}
+                    >
                       {item?.descripcion}
                     </Option>
                   ))}
