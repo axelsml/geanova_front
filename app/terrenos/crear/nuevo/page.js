@@ -22,7 +22,7 @@ export default function NuevoTerreno() {
   const [precio_compra, setPrecioCompra] = useState(0.0);
   const [superficie_total_proyecto, setSuperficieTotalProyecto] = useState(0.0);
 
-  const [imagen, setImagen] = useState("");
+  const [pdf, setPdf] = useState("");
   const [imagenRecortada, setImagenRecortada] = useState("");
   const [resetCroquis, setResetCroquis] = useState(() => () => {});
 
@@ -52,7 +52,7 @@ export default function NuevoTerreno() {
       if (result.isConfirmed) {
         setLoading(true);
         terrenosService.createTerreno(
-          { ...values, imagenBase64: imagen, recorteBase64: imagenRecortada },
+          { ...values, pdf: pdf, recorte: imagenRecortada },
           onTerrenoGuardado,
           onerror
         );
@@ -77,7 +77,7 @@ export default function NuevoTerreno() {
           formRef.current.resetFields();
         }
         resetCroquis();
-        setImagen("");
+        setPdf("");
         setImagenRecortada("");
         setPrecioCompra(0.0);
         setSuperficieTotalProyecto(0.0);
@@ -121,9 +121,8 @@ export default function NuevoTerreno() {
     }
   };
 
-  const handleImageSelected = (imagen, recorte) => {
-    setImagen(imagen);
-    setImagenRecortada(recorte);
+  const handleFileSelected = (pdf) => {
+    setPdf(pdf);
   };
 
   const handleCroquisReset = useCallback((resetFunc) => {
@@ -230,9 +229,9 @@ export default function NuevoTerreno() {
                   },
                 ]}
               />
-              <p>Imagen del Terreno</p>
+              <p>Croquis</p>
               <CroquisUploader
-                onImageSelected={handleImageSelected}
+                onFileSelected={handleFileSelected}
                 onReset={handleCroquisReset}
               />
               <p>Colonia/Localidad</p>

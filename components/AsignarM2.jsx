@@ -7,7 +7,7 @@ import {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import { Row, Col, Form, Button, Modal, InputNumber, Typography } from "antd";
+import { Row, Form, Button, Modal, InputNumber, Typography } from "antd";
 const { Title } = Typography;
 import { useForm } from "antd/es/form/Form";
 import Swal from "sweetalert2";
@@ -27,12 +27,13 @@ import {
 import lotesService from "@/services/lotesService";
 import { formatPrecio } from "@/helpers/formatters";
 import CroquisUploader from "@/components/CroquisUploader";
+import CroquisCropped from "./CroquisCropper";
 
 const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
   const [loading, setLoading] = useState(false);
   const [form] = useForm();
   const [lotes, setLotes] = useState(null);
-  const [loteId, setLoteId] = useState(null);
+  const [loteId, setLoteId] = useState(0);
   const [initialLotes, setInitialLotes] = useState(null);
   const [areaVendible, setAreaVendible] = useState(0);
   const [areaAsignada, setAreaAsignada] = useState(0);
@@ -41,10 +42,10 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
   const [lotesData, setLotesData] = useState([]);
 
   const [show, setShow] = useState(false);
+  const [show2, setShow2] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
-  const [imagen, setImagen] = useState("");
-  const [recorte, setRecorte] = useState("");
+  const [pdf, setPdf] = useState("");
   const [resetCroquis, setResetCroquis] = useState(() => () => {});
 
   const handleChangePage = (event, newPage) => {
@@ -146,21 +147,20 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
     }
   };
 
-  const handleSaveImages = () => {
+  const handleSaveFile = () => {
     let params = {
       lote_id: loteId,
-      imagen: imagen,
-      recorte: recorte,
+      pdf: pdf,
     };
-    lotesService.postLoteCroquis(params, onSaveImages, onerror);
+    lotesService.postLoteCroquis(params, onSaveFile, onerror);
   };
 
-  async function onSaveImages(data) {
+  async function onSaveFile(data) {
     if (data.success) {
       Swal.fire({
         title: "Guardado",
         icon: "success",
-        text: "Se ha guardado la imagen",
+        text: "Se ha guardado el archivo",
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
         showCancelButton: false,
@@ -179,7 +179,7 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
       Swal.fire({
         title: "Error al guardar",
         icon: "error",
-        text: `Ha ocurrido un error al intentar guardar la imagen: ${data.message}`,
+        text: `Ha ocurrido un error al intentar guardar el archivo: ${data.message}`,
         confirmButtonColor: "#4096ff",
         cancelButtonColor: "#ff4d4f",
         showCancelButton: false,
@@ -221,9 +221,8 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
     });
   };
 
-  const handleImageSelected = (imagen, recorte) => {
-    setImagen(imagen);
-    setRecorte(recorte);
+  const handleFileSelected = (pdf) => {
+    setPdf(pdf);
   };
 
   const handleCroquisReset = useCallback((resetFunc) => {
@@ -233,9 +232,9 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
   const handleClose = () => {
     resetCroquis();
     setShow(false);
-    setImagen("");
-    setRecorte("");
-    setLoteId(null);
+    setShow2(false);
+    setPdf("");
+    setLoteId(0);
   };
 
   useImperativeHandle(ref, () => ({
@@ -286,10 +285,10 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
                       <b style={{ fontWeight: "bold" }}>N° de Lote</b>
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      <b style={{ fontWeight: "bold" }}>Superficie en M2</b>
+                      <b style={{ fontWeight: "bold" }}>Superficie en M²</b>
                     </TableCell>
-                    <TableCell>
-                      <b style={{ fontWeight: "bold" }}>Imagen del Lote</b>
+                    <TableCell style={{ textAlign: "center" }}>
+                      <b style={{ fontWeight: "bold" }}>Croquis del lote</b>
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -310,9 +309,9 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
                             ]}
                           >
                             <InputNumber
-                              style={{ width: "100%", marginTop: "25px" }}
+                              style={{ width: "80px", marginTop: "25px" }}
                               placeholder="Ingrese la Superficie"
-                              suffix={"M2"}
+                              suffix={"M²"}
                               value={lote.superficie}
                               onChange={(e) =>
                                 handleSuperficieChange(lote.id, e)
@@ -322,12 +321,24 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
                         </TableCell>
                         <TableCell align="center">
                           <Button
+                            style={{ width: "120px" }}
                             onClick={() => {
                               setShow(true);
                               setLoteId(lote.id);
                             }}
                           >
-                            {lote.imagen ? "Actualizar imagen" : "Subir imagen"}
+                            {lote.pdf ? "Actualizar" : "Subir archivo"}
+                          </Button>
+                          <Button
+                            style={{ width: "120px" }}
+                            onClick={() => {
+                              setShow2(true);
+                              setLoteId(lote.id);
+                            }}
+                          >
+                            {lote.recorte
+                              ? "Actualizar cuadro"
+                              : "Recortar cuadro"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -373,7 +384,7 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
             className="formulario"
             style={{ textAlign: "center", color: "#FFFFFF", margin: "8px" }}
           >
-            Imagen del Lote
+            Croquis del Lote
           </Title>
         }
         open={show}
@@ -386,15 +397,50 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
         <div className="formulario">
           <div style={{ margin: "16px", textAlign: "center" }}>
             <CroquisUploader
-              onImageSelected={handleImageSelected}
+              onFileSelected={handleFileSelected}
               onReset={handleCroquisReset}
             />
           </div>
           <Row justify={"center"}>
-            <Button onClick={handleSaveImages}>Guardar</Button>
+            <Button disabled={pdf == ""} onClick={handleSaveFile}>
+              Guardar
+            </Button>
           </Row>
         </div>
       </Modal>
+      {show2 && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            zIndex: 9999,
+            overflow: "auto",
+            padding: "24px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              maxWidth: "90vw",
+              margin: "auto",
+              padding: "16px",
+              borderRadius: "8px",
+            }}
+          >
+            <CroquisCropped
+              id={loteId}
+              onCloseRequest={() => setShow2(false)}
+            />
+            <div style={{ textAlign: "center", marginTop: 16 }}>
+              <Button onClick={() => setShow2(false)}>Cerrar</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

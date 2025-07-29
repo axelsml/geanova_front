@@ -28,7 +28,7 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
   const [totalLotes, setTotalLotes] = useState(terreno.cantidad_lotes);
   const [opcion, setOpcion] = useState(null);
 
-  const [imagen, setImagen] = useState("");
+  const [pdf, setPdf] = useState("");
   const [imagenRecortada, setImagenRecortada] = useState("");
 
   const [resetCroquis, setResetCroquis] = useState(() => () => {});
@@ -36,7 +36,7 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
   const clear = () => {
     form.resetFields();
     resetCroquis();
-    setImagen("");
+    setPdf("");
     setImagenRecortada("");
   };
 
@@ -63,7 +63,7 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
           {
             ...values,
             terreno_id: terrenoId,
-            imagen: imagen,
+            pdf: pdf,
             recorte: imagenRecortada,
           },
           onTerrenoGuardado,
@@ -88,7 +88,7 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
       if (result.isConfirmed) {
         form.resetFields();
         resetCroquis();
-        setImagen("");
+        setPdf("");
         setImagenRecortada("");
       }
     });
@@ -235,9 +235,8 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
     }
   }
 
-  const handleImageSelected = (imagen, recorte) => {
-    setImagen(imagen);
-    setImagenRecortada(recorte);
+  const handleFileSelected = (pdf) => {
+    setPdf(pdf);
   };
 
   return (
@@ -365,9 +364,9 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
               style={{ marginTop: "12px", textAlign: "center" }}
             >
               <div style={{ textAlign: "center" }}>
-                <span>Actualizar imagen</span>
+                <span>Croquis</span>
                 <CroquisUploader
-                  onImageSelected={handleImageSelected}
+                  onFileSelected={handleFileSelected}
                   onReset={handleCroquisReset}
                 />
               </div>
