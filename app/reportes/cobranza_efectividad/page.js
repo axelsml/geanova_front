@@ -587,20 +587,37 @@ export default function EfectividadCobranza() {
                           "clientes por cobrar: ",
                           dato.clientes_por_cobrar
                         );
+                        debugger
                         if (dato.lapso != "Otros") {
                           handleClientesPorPagarClick(
                             dato.registros_clientes_por_cobrar
                           );
+                          debugger
                         }
                       }}
                     >
                       {dato.clientes_por_cobrar}
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => {
+                        e.stopPropagation(); // Evita que el evento se propague al TableRow
+                        console.log(
+                          "clientes por cobrar: ",
+                          dato.clientes_por_cobrar
+                        );
+                        debugger
+                        if (dato.lapso != "Otros") {
+                          handleClientesPorPagarClick(
+                            dato.registros_clientes_por_cobrar
+                          );
+                          debugger
+                        }
+                      }}
+                    >
                       $
                       {formatPrecio(
                         parseFloat(dato.pendiente_por_cobrar.toFixed(2))
                       )}
+
                     </TableCell>
                     <TableCell>
                       {isNaN(formatPrecio(parseFloat(dato.porcentaje_importe)))
