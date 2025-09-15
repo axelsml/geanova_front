@@ -7,7 +7,7 @@ import Loader from "@/components/Loader";
 import InputIn from "@/components/Input";
 import { useRef, useState, useCallback } from "react";
 import terrenosService from "@/services/terrenosService";
-import AsignarM2 from "@/components/AsignarM2";
+// import AsignarM2 from "@/components/AsignarM2";
 import CrearPlazo from "@/components/CrearPlazo";
 import CroquisUploader from "@/components/CroquisUploader";
 
@@ -490,7 +490,7 @@ export default function NuevoTerreno() {
         okButtonProps={{ style: { display: "none" } }}
         cancelButtonProps={{ style: { display: "none" } }}
       >
-        <AsignarM2 terrenoId={terreno_info?.id} ref={asignarM2Ref} />
+        {/* <AsignarM2 terrenoId={terreno_info?.id} ref={asignarM2Ref} /> */}
       </Modal>
       <Modal
         open={plazos}

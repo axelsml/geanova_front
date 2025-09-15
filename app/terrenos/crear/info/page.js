@@ -2,7 +2,7 @@
 
 import { Button, Row, Col } from "antd";
 import { useEffect, useState, useCallback, useRef } from "react";
-import AsignarM2 from "@/components/AsignarM2";
+// import AsignarM2 from "@/components/AsignarM2";
 import CrearPlazo from "@/components/CrearPlazo";
 import EditarTerreno from "@/components/EditarTerreno";
 import terrenosService from "@/services/terrenosService";
@@ -194,7 +194,7 @@ export default function TerrenoInfo() {
         okButtonProps={{ style: { display: "none" } }}
         cancelButtonProps={{ style: { display: "none" } }}
       >
-        <AsignarM2 terrenoId={terreno?.id} ref={asignarM2Ref} />
+        {/* <AsignarM2 terrenoId={terreno?.id} ref={asignarM2Ref} /> */}
       </Modal>
       <Modal
         open={plazos}
