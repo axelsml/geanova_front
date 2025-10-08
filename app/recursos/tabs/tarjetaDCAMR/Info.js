@@ -398,7 +398,7 @@ export default function TarjetaDCAMR() {
   const sumValuesByStatus = (obj, tipo_ingreso) => {
     
     return Object.values(obj)
-      .filter(item => item.tipo_ingreso === tipo_ingreso && item.tipo_id !== 15)
+      .filter(item => item.tipo_ingreso === tipo_ingreso && parseInt(item.tipo_id) != 15)
       .reduce((acc, item) => acc + item.total, 0);
   };
 

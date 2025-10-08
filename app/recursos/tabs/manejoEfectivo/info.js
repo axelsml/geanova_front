@@ -376,7 +376,7 @@ export default function ManejoEfectivo() {
   }
   const sumValuesByStatus = (obj, tipo_ingreso) => {
     return Object.values(obj)
-     .filter(item => item.tipo_ingreso === tipo_ingreso && item.tipo_id !== 2)
+     .filter(item => item.tipo_ingreso === tipo_ingreso && parseInt(item.tipo_id) != 2)
       .reduce((acc, item) => acc + item.total, 0);
   };
 
