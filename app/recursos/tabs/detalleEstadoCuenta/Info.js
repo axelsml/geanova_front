@@ -421,9 +421,14 @@ export default function DetalleEstadoCuenta() {
   }
 
   const sumValuesByStatus = (obj, tipo_ingreso) => {
-    return Object.values(obj)
-      .filter(item => item.tipo_ingreso === tipo_ingreso && parseInt(item.tipo_id) != 32)
-      .reduce((acc, item) => acc + item.total, 0);
+   var ayuda = Object.values(obj)
+    .filter(item => item.tipo_ingreso === tipo_ingreso )
+
+    ayuda = Object.values(obj)
+    .filter(item => parseInt(item.tipo_id) != 32)
+    .reduce((acc, item) => acc + item.total, 0);
+
+    return ayuda
   };
 
   const handleChange = (value, name) => {
