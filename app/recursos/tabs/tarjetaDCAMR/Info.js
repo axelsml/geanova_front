@@ -291,6 +291,7 @@ export default function TarjetaDCAMR() {
     if (tiposMovimientos !== null) {
       totalSumStatus1 = sumValuesByStatus(tiposMovimientos, 1);
       totalSumStatus2 = sumValuesByStatus(tiposMovimientos, 2);
+
       totalAbonos = parseFloat(totalSumStatus1);
       totalCargo = parseFloat(totalSumStatus2);
       setTotalAbono(formatPrecio(totalAbonos));
@@ -395,8 +396,9 @@ export default function TarjetaDCAMR() {
   }
 
   const sumValuesByStatus = (obj, tipo_ingreso) => {
+    
     return Object.values(obj)
-      .filter((item) => item.tipo_ingreso === tipo_ingreso)
+      .filter(item => item.tipo_ingreso === tipo_ingreso && item.tipo_id !== 15)
       .reduce((acc, item) => acc + item.total, 0);
   };
 

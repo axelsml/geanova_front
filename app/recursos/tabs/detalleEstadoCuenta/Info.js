@@ -422,7 +422,7 @@ export default function DetalleEstadoCuenta() {
 
   const sumValuesByStatus = (obj, tipo_ingreso) => {
     return Object.values(obj)
-      .filter((item) => item.tipo_ingreso === tipo_ingreso)
+      .filter(item => item.tipo_ingreso === tipo_ingreso && item.tipo_id !== 32)
       .reduce((acc, item) => acc + item.total, 0);
   };
 
