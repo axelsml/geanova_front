@@ -1,6 +1,6 @@
 "use client";
 
-// import TerrenoEditForm from "@/components/TerrenoEditForm";
+import TerrenoEditForm from "@/components/TerrenoEditForm";
 import { Col, Row } from "antd";
 import { useState } from "react";
 
@@ -13,13 +13,13 @@ export default function TerrenoEdit({ terrenoId, terreno }) {
       {terreno && (
         <Row justify={"center"}>
           <Col span={24}>
-            {/* <TerrenoEditForm
+            <TerrenoEditForm
               setTerrenoEditado={setTerrenoEditado}
               setWatch={setChangeState}
               watch={changeState}
               terrenoId={terrenoId}
               terreno={terreno}
-            /> */}
+            />
           </Col>
         </Row>
       )}
