@@ -118,36 +118,36 @@ export default function TerrenosCrear() {
       )}
       <Row justify={"center"}>
         <Col span={24}>
-          {nuevoTerreno && (
+          {/* {nuevoTerreno && (
             <TerrenoForm
               setTerrenoNuevo={setNuevoTerreno}
               setWatch={setChangeState}
               watch={changeState}
             />
-          )}
+          )} */}
         </Col>
       </Row>
 
       <Row justify={"center"}>
         <Col span={24}>
-          {infoTerreno && (
+          {/* {infoTerreno && (
             <TerrenoInfoForm
               setTerrenoNuevo={setNuevoTerreno}
               terrenoSeleccionado={terreno}
             />
-          )}
+          )} */}
         </Col>
       </Row>
 
       <Row justify={"center"}>
         <Col span={24}>
-          {reporteProyecto && (
+          {/* {reporteProyecto && (
             <ReporteProyectoForm
               setReporteNuevo={setReporteProyecto}
               setWatch={setChangeState}
               watch={changeState}
             />
-          )}
+          )} */}
         </Col>
       </Row>
 
