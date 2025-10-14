@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+// import TerrenoForm from "@/components/TerrenoForm";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
-import { Button, Col, Row, Tooltip } from "antd";
+import { Button, Col, Collapse, Row, Typography, Radio, Tooltip } from "antd";
 import { useState, useEffect } from "react";
 import {
   Paper,
@@ -17,25 +17,46 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
-import ReporteProyectoForm from "./ReporteProyectoForm";
+// import TerrenoInfoForm from "@/components/TerrenoInfoForm";
+// import ReporteProyectoForm from "@/components/ReporteProyectoForm";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
-
 export default function TerrenosCrear() {
+  const [nuevoTerreno, setNuevoTerreno] = useState(false);
+  const [infoTerreno, setInfoTerreno] = useState(false);
+
   const [reporteProyecto, setReporteProyecto] = useState(false);
 
   const [terrenos, setTerrenos] = useState(null);
   const [terreno, setTerreno] = useState(null);
 
   const [changeState, setChangeState] = useState(false);
+  const [value, setValue] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [cookiePermisos, setCookiePermisos] = useState([]);
+  const empresas = [
+    {
+      id: 1,
+      nombre: "Sucursal 1",
+    },
+  ];
+
+  const onChange = (e) => {
+    setValue(e.target.value);
+  };
 
   useEffect(() => {
     terrenosService.getTerrenos(setTerrenos, Error);
     getCookiePermisos("lista de terrenos", setCookiePermisos);
   }, [changeState]);
 
+  async function onTerreno(terrenos) {
+    setProyectos(terrenos);
+  }
+
+  const CreateNuevoTerreno = () => {
+    setNuevoTerreno(!nuevoTerreno);
+  };
   const CreateReporteProyecto = () => {
     setReporteProyecto(!reporteProyecto);
   };
@@ -48,32 +69,39 @@ export default function TerrenosCrear() {
     setPage(0);
   };
   return (
-    <>
-      {!reporteProyecto && (
+    <div className="p-8 grid gap-4">
+      {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
         <>
           <Row justify={"center"}>
-            <Col className="titulo_pantallas">
-              <span className="titulo_pantallas-text">LISTA DE TERRENOS</span>
+            <Col
+              xs={24}
+              sm={20}
+              md={16}
+              lg={12}
+              xl={8}
+              xxl={4}
+              className="titulo_pantallas"
+            >
+              <b>LISTA DE TERRENOS</b>
             </Col>
           </Row>
         </>
       )}
-      {!reporteProyecto && (
+      {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
         <>
           <Row
             style={{ marginTop: "100px", marginRight: "12%" }}
             justify={"end"}
           >
             <Col>
-              <Link href="/terrenos/crear/nuevo" passHref>
-                <Button
-                  className="boton"
-                  size={"large"}
-                  disabled={cookiePermisos >= 2 ? false : true}
-                >
-                  Nuevo Terreno
-                </Button>
-              </Link>
+              <Button
+                className="boton"
+                size={"large"}
+                disabled={cookiePermisos >= 2 ? false : true}
+                onClick={CreateNuevoTerreno}
+              >
+                Crear Nuevo Terreno
+              </Button>
             </Col>
             <Col>
               <Button
@@ -88,6 +116,28 @@ export default function TerrenosCrear() {
           </Row>
         </>
       )}
+      <Row justify={"center"}>
+        <Col span={24}>
+          {nuevoTerreno && (
+            <TerrenoForm
+              setTerrenoNuevo={setNuevoTerreno}
+              setWatch={setChangeState}
+              watch={changeState}
+            />
+          )}
+        </Col>
+      </Row>
+
+      <Row justify={"center"}>
+        <Col span={24}>
+          {infoTerreno && (
+            <TerrenoInfoForm
+              setTerrenoNuevo={setNuevoTerreno}
+              terrenoSeleccionado={terreno}
+            />
+          )}
+        </Col>
+      </Row>
 
       <Row justify={"center"}>
         <Col span={24}>
@@ -101,75 +151,81 @@ export default function TerrenosCrear() {
         </Col>
       </Row>
 
-      {terrenos?.length > 0 && !reporteProyecto && (
-        <Row justify={"center"}>
-          <Row justify={"center"} className="w-3/4 m-auto">
-            <TableContainer component={Paper} className="tabla">
-              <Table>
-                <TableHead>
-                  <TableRow className="tabla_encabezado">
-                    <TableCell>
-                      <p>Proyecto</p>
-                    </TableCell>
-                    <TableCell>
-                      <p>Propietario</p>
-                    </TableCell>
-                    <TableCell>
-                      <p>Domicilio</p>
-                    </TableCell>
-                    <TableCell>
-                      <p>Colonia/Localidad</p>
-                    </TableCell>
-                    <TableCell>
-                      <p>Ciudad</p>
-                    </TableCell>
-                    <TableCell>
-                      <p>Superficie</p>
-                    </TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {terrenos?.map((terreno, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{terreno.nombre}</TableCell>
-                      <TableCell>{terreno.propietario}</TableCell>
-                      <TableCell>{terreno.domicilio}</TableCell>
-                      <TableCell>{terreno.colonia}</TableCell>
-                      <TableCell>{terreno.ciudad}</TableCell>
+      {!nuevoTerreno &&
+        !infoTerreno &&
+        terrenos?.length > 0 &&
+        !reporteProyecto && (
+          <Row justify={"center"}>
+            {/* <Col span={21}>
+              <Typography>Lista de Terrenos</Typography>
+              <br />
+            </Col> */}
+            <Row justify={"center"} className="w-3/4 m-auto">
+              <TableContainer component={Paper} className="tabla">
+                <Table>
+                  <TableHead>
+                    <TableRow className="tabla_encabezado">
                       <TableCell>
-                        {formatPrecio(terreno.superficie_total)}
+                        <p>Proyecto</p>
                       </TableCell>
                       <TableCell>
-                        <Tooltip
-                          title={
-                            "Datos del terreno seleccionado " + terreno.nombre
-                          }
-                        >
-                          <Link
-                            href={{
-                              pathname: "/terrenos/crear/info",
-                              query: { id: terreno.id },
-                            }}
-                            passHref
+                        <p>Propietario</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Domicilio</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Colonia/Localidad</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Ciudad</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>Superficie</p>
+                      </TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {terrenos?.map((terreno, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{terreno.nombre}</TableCell>
+                        <TableCell>{terreno.propietario}</TableCell>
+                        <TableCell>{terreno.domicilio}</TableCell>
+                        <TableCell>{terreno.colonia}</TableCell>
+                        <TableCell>{terreno.ciudad}</TableCell>
+                        <TableCell>
+                          {formatPrecio(terreno.superficie_total)}
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip
+                            title={
+                              "Datos del terreno seleccionado " + terreno.nombre
+                            }
                           >
-                            <Button className="boton" size="large">
+                            <Button
+                              className="boton"
+                              onClick={() => {
+                                setTerreno(terreno);
+                                setInfoTerreno(true);
+                              }}
+                              size="large"
+                            >
                               <FaArrowUpRightFromSquare
                                 className="m-auto"
                                 size={"20px"}
                               />
                             </Button>
-                          </Link>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Row>
           </Row>
-        </Row>
-      )}
+        )}
       <div>
         {terreno != null && (
           <>
@@ -184,6 +240,6 @@ export default function TerrenosCrear() {
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }

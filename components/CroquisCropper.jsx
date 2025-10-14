@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, Image, Modal } from "antd";
 import Swal from "sweetalert2";
-import * as pdfjsLib from "pdfjs-dist/webpack";
-import html2canvas from "html2canvas";
+// import * as pdfjsLib from "pdfjs-dist/webpack";
+// import html2canvas from "html2canvas";
 import lotesService from "@/services/lotesService";
 import Loader from "./Loader";
 
