@@ -1,6 +1,6 @@
 "use client";
 
-// import TerrenoForm from "@/components/TerrenoForm";
+import TerrenoForm from "@/components/TerrenoForm";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
@@ -17,8 +17,8 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
-// import TerrenoInfoForm from "@/components/TerrenoInfoForm";
-// import ReporteProyectoForm from "@/components/ReporteProyectoForm";
+import TerrenoInfoForm from "@/components/TerrenoInfoForm";
+import ReporteProyectoForm from "@/components/ReporteProyectoForm";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 export default function TerrenosCrear() {
   const [nuevoTerreno, setNuevoTerreno] = useState(false);
@@ -118,36 +118,36 @@ export default function TerrenosCrear() {
       )}
       <Row justify={"center"}>
         <Col span={24}>
-          {/* {nuevoTerreno && (
+          {nuevoTerreno && (
             <TerrenoForm
               setTerrenoNuevo={setNuevoTerreno}
               setWatch={setChangeState}
               watch={changeState}
             />
-          )} */}
+          )}
         </Col>
       </Row>
 
       <Row justify={"center"}>
         <Col span={24}>
-          {/* {infoTerreno && (
+          {infoTerreno && (
             <TerrenoInfoForm
               setTerrenoNuevo={setNuevoTerreno}
               terrenoSeleccionado={terreno}
             />
-          )} */}
+          )}
         </Col>
       </Row>
 
       <Row justify={"center"}>
         <Col span={24}>
-          {/* {reporteProyecto && (
+          {reporteProyecto && (
             <ReporteProyectoForm
               setReporteNuevo={setReporteProyecto}
               setWatch={setChangeState}
               watch={changeState}
             />
-          )} */}
+          )}
         </Col>
       </Row>
 
