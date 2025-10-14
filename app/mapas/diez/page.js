@@ -288,7 +288,7 @@ export default function Diez() {
             margin: "0 auto",
           }}
         >
-          <img
+          {/* <img
             src={"/azeroth-map.jpg"}
             alt="Mapa"
             style={{
@@ -297,7 +297,7 @@ export default function Diez() {
               objectFit: "cover",
               boxShadow: "4px 4px 4px 4px rgba(0, 0, 0, 0.4)",
             }}
-          />
+          /> */}
           <svg
             ref={svgRef}
             width="100%"
