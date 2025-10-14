@@ -12,7 +12,7 @@ import { useForm } from "antd/es/form/Form";
 const { Option } = Select;
 import Swal from "sweetalert2";
 import Loader from "@/components/Loader";
-import CroquisUploader from "@/components/CroquisUploader";
+// import CroquisUploader from "@/components/CroquisUploader";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
 import lotesService from "@/services/lotesService";
@@ -365,10 +365,10 @@ const EditarTerreno = forwardRef(({ terreno, terrenoId }, ref) => {
             >
               <div style={{ textAlign: "center" }}>
                 <span>Croquis</span>
-                <CroquisUploader
+                {/* <CroquisUploader
                   onFileSelected={handleFileSelected}
                   onReset={handleCroquisReset}
-                />
+                /> */}
               </div>
             </div>
             <div className="formulario" style={{ marginTop: "12px" }}>

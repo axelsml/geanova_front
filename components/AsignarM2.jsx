@@ -26,8 +26,8 @@ import {
 } from "@mui/material";
 import lotesService from "@/services/lotesService";
 import { formatPrecio } from "@/helpers/formatters";
-import CroquisUploader from "@/components/CroquisUploader";
-import CroquisCropped from "./CroquisCropper";
+// import CroquisUploader from "@/components/CroquisUploader";
+// import CroquisCropped from "./CroquisCropper";
 
 const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
   const [loading, setLoading] = useState(false);
@@ -396,10 +396,10 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
       >
         <div className="formulario">
           <div style={{ margin: "16px", textAlign: "center" }}>
-            <CroquisUploader
+            {/* <CroquisUploader
               onFileSelected={handleFileSelected}
               onReset={handleCroquisReset}
-            />
+            /> */}
           </div>
           <Row justify={"center"}>
             <Button disabled={pdf == ""} onClick={handleSaveFile}>
@@ -431,10 +431,10 @@ const AsignarM2 = forwardRef(({ terrenoId }, ref) => {
               borderRadius: "8px",
             }}
           >
-            <CroquisCropped
+            {/* <CroquisCropped
               id={loteId}
               onCloseRequest={() => setShow2(false)}
-            />
+            /> */}
             <div style={{ textAlign: "center", marginTop: 16 }}>
               <Button onClick={() => setShow2(false)}>Cerrar</Button>
             </div>

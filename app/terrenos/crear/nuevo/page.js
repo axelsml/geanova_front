@@ -9,7 +9,7 @@ import { useRef, useState, useCallback } from "react";
 import terrenosService from "@/services/terrenosService";
 // import AsignarM2 from "@/components/AsignarM2";
 import CrearPlazo from "@/components/CrearPlazo";
-import CroquisUploader from "@/components/CroquisUploader";
+// import CroquisUploader from "@/components/CroquisUploader";
 
 export default function NuevoTerreno() {
   const [loading, setLoading] = useState(false);
@@ -230,10 +230,10 @@ export default function NuevoTerreno() {
                 ]}
               />
               <p>Croquis</p>
-              <CroquisUploader
+              {/* <CroquisUploader
                 onFileSelected={handleFileSelected}
                 onReset={handleCroquisReset}
-              />
+              /> */}
               <p>Colonia/Localidad</p>
               <InputIn
                 className="input_formulario"
