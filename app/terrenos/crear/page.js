@@ -1,5 +1,7 @@
 "use client";
 
+import AsignarM2 from "@/app/lotes/asignar/page";
+import PlazosCrear from "@/app/plazos/crear/page";
 import TerrenoForm from "@/components/TerrenoForm";
 import { formatPrecio } from "@/helpers/formatters";
 import terrenosService from "@/services/terrenosService";
@@ -134,6 +136,8 @@ export default function TerrenosCrear() {
             <TerrenoInfoForm
               setTerrenoNuevo={setNuevoTerreno}
               terrenoSeleccionado={terreno}
+              setWatch={setChangeState}
+              watch={changeState}
             />
           )}
         </Col>
