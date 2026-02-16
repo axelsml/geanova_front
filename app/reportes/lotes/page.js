@@ -54,6 +54,8 @@ export default function ReporteLotes() {
   const [totalCobranza, setTotalCobranza] = useState(0);
 
   const [info2, setInfo2] = useState([]);
+  const [data_completa, setDataCompleta] = useState([]);
+
   const [totalLotes2, setTotalLotes2] = useState(0);
   const [totalPagados2, setTotalPagados2] = useState(0);
   const [montoTotalContrato2, setMontoTotalContrato2] = useState(0);
@@ -181,6 +183,7 @@ export default function ReporteLotes() {
   async function onInfoClienteCargado2(data) {
     setLoading(false);
     if (data.encontrado) {
+      setDataCompleta(data)
       setInfo2(data.response);
       setTotalLotes2(data.lotes);
       setTotalPagados2(data.pagados);
@@ -605,6 +608,34 @@ export default function ReporteLotes() {
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
                 >
+                  Lotes Disponibles
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="mensual"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    pendientePorContratar !== 0
+                      ? 
+                        lotesDisponibles 
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    pendientePorContratar !== 0
+                      ? 
+                        lotesDisponibles 
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
                   Pend. Por Contratar
                 </Text>
               </Row>
@@ -614,18 +645,14 @@ export default function ReporteLotes() {
                   style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
                   value={
                     pendientePorContratar !== 0
-                      ? "(" +
-                        lotesDisponibles +
-                        "),$" +
+                      ? "$" +
                         formatPrecio(parseFloat(pendientePorContratar))
                       : "$ 0.0"
                   }
                   disabled={true}
                   placeholder={
                     pendientePorContratar !== 0
-                      ? "(" +
-                        lotesDisponibles +
-                        "),$" +
+                      ? "$" +
                         formatPrecio(parseFloat(pendientePorContratar))
                       : "$ 0.0"
                   }
@@ -653,6 +680,110 @@ export default function ReporteLotes() {
                   placeholder={
                     montoTotalInteres !== 0
                       ? "$ " + formatPrecio(parseFloat(montoTotalInteres))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  M2 Vendidos
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.total_metros_vendidos !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.total_metros_vendidos))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.total_metros_vendidos !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.total_metros_vendidos))
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  M2 Costo
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.costo_m2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.costo_m2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.costo_m2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.costo_m2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  M2 Pendientes
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.pendientes_vender !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.pendientes_vender))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.pendientes_vender !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.pendientes_vender))
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Posible Venta
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.posible_ganancia !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.posible_ganancia))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.posible_ganancia !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.posible_ganancia))
                       : "$ 0.0"
                   }
                 />
@@ -1037,6 +1168,34 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
+           <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Lotes Disponibles
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="mensual"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    pendientePorContratar !== 0
+                      ? 
+                        lotesDisponibles 
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    pendientePorContratar !== 0
+                      ? 
+                        lotesDisponibles 
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
             <Col style={{ margin: "0px 5px 0px 5px" }}>
               <Row justify={"center"}>
                 <Text
@@ -1050,14 +1209,16 @@ export default function ReporteLotes() {
                   id="mensual"
                   style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
                   value={
-                    pendientePorContratar2 !== 0
-                      ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
+                    pendientePorContratar !== 0
+                      ? "$" +
+                        formatPrecio(parseFloat(pendientePorContratar))
                       : "$ 0.0"
                   }
                   disabled={true}
                   placeholder={
-                    pendientePorContratar2 !== 0
-                      ? "$ " + formatPrecio(parseFloat(pendientePorContratar2))
+                    pendientePorContratar !== 0
+                      ? "$" +
+                        formatPrecio(parseFloat(pendientePorContratar))
                       : "$ 0.0"
                   }
                 />
@@ -1084,6 +1245,110 @@ export default function ReporteLotes() {
                   placeholder={
                     montoTotalInteres2 !== 0
                       ? "$ " + formatPrecio(parseFloat(montoTotalInteres2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  M2 Vendidos
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.total_metros_vendidos !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.total_metros_vendidos))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.total_metros_vendidos !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.total_metros_vendidos))
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  M2 Costo
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.costo_m2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.costo_m2))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.costo_m2 !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.costo_m2))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  M2 Pendientes
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.pendientes_vender !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.pendientes_vender))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.pendientes_vender !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.pendientes_vender))
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Posible Venta
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.posible_ganancia !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.posible_ganancia))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.posible_ganancia !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.posible_ganancia))
                       : "$ 0.0"
                   }
                 />
