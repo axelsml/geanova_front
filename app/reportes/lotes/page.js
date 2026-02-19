@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Loader80 from "@/components/Loader80";
 
 import { formatPrecio } from "@/helpers/formatters";
-import { Button, Col, Row, Form, Select, Modal, Typography } from "antd";
+import { Button, Col, Row, Form, Select, Modal, Typography,Tooltip,  Table as AntTable } from "antd";
 const { Text } = Typography;
 import {
   Paper,
@@ -24,6 +24,13 @@ import lotesService from "@/services/lotesService";
 import PagoForm from "@/components/PagoForm";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
+
+
+const columnas = [
+  { title: "Tipo", dataIndex: "tipo", key: "tipo" },
+  { title: "Cantidad", dataIndex: "cantidad", key: "cantidad" },
+  { title: "Dinero", dataIndex: "dinero", key: "dinero", align: "right" },
+];
 
 export default function ReporteLotes() {
   const [loading, setLoading] = useState(false);
@@ -83,6 +90,25 @@ export default function ReporteLotes() {
   const [cookiePermisos, setCookiePermisos] = useState([]);
 
   const [form] = Form.useForm();
+
+   const dataSource =
+    (data_completa?.resumen_credito || []).map((x, i) => ({
+      key: i,
+      tipo: x.tipo,
+      cantidad: x.cantidad,
+      dinero: formatPrecio(parseFloat(x.dinero)),
+    })) || [];
+    
+   const tooltipContent = (
+    <div style={{ width: 320 }}>
+      <AntTable
+        columns={columnas}
+        dataSource={dataSource}
+        size="small"
+        pagination={false}
+      />
+    </div>
+  );
 
   let periodos = [
     {
@@ -789,6 +815,124 @@ export default function ReporteLotes() {
                 />
               </Row>
             </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Contado
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_contado !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_contado))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_contado !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_contado))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+              
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Contado Dinero
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_contado_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_contado_venta))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_contado_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_contado_venta))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Credito
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                  <Tooltip
+                title={tooltipContent}
+                placement="bottom"
+                overlayStyle={{ maxWidth: "none" }} // evita que lo "apriete"
+              >
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_credito !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_credito))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_credito !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_credito))
+                      : "0.0"
+                  }
+                />
+               
+                {/* <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={0}
+                  disabled
+                /> */}
+              </Tooltip>
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Credito Dinero
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_credito_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_credito_venta))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_credito_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_credito_venta))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
           </Row>
         </div>
       </div>
@@ -1349,6 +1493,110 @@ export default function ReporteLotes() {
                   placeholder={
                     data_completa?.posible_ganancia !== 0
                       ? "$ " + formatPrecio(parseFloat(data_completa?.posible_ganancia))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Contado
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_contado !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_contado))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_contado !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_contado))
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Contado Dinero
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_contado_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_contado_venta))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_contado_venta !== 0
+                      ? "$" + formatPrecio(parseFloat(data_completa?.lotes_contado_venta))
+                      : "$ 0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Credito
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_credito !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_credito))
+                      : "0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_credito !== 0
+                      ? "" + formatPrecio(parseFloat(data_completa?.lotes_credito))
+                      : "0.0"
+                  }
+                />
+              </Row>
+            </Col>
+            <Col style={{ margin: "0px 5px 0px 5px" }}>
+              <Row justify={"center"}>
+                <Text
+                  style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
+                >
+                  Ventas Credito Dinero
+                </Text>
+              </Row>
+              <Row justify={"center"}>
+                <input
+                  id="semanal"
+                  style={{ textAlign: "center", backgroundColor: "#C8D1DB" }}
+                  value={
+                    data_completa?.lotes_credito_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_credito_venta))
+                      : "$ 0.0"
+                  }
+                  disabled={true}
+                  placeholder={
+                    data_completa?.lotes_credito_venta !== 0
+                      ? "$ " + formatPrecio(parseFloat(data_completa?.lotes_credito_venta))
                       : "$ 0.0"
                   }
                 />
