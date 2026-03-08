@@ -357,6 +357,7 @@ export default function DetalleEstadoCuenta() {
       tipo: tipoSelected,
       proyecto: terrenoSelected,
     };
+
     recursosService
       .getDepositos(
         form,
@@ -387,18 +388,31 @@ export default function DetalleEstadoCuenta() {
     });
     setFormValues(initialValues);
     setDatos(responseResumen);
+
     setOtroAbonos(responseOtrosAbono);
     setOtroCargo(responseOtrosCargos);
     setResumenConciliados(responseConciliados);
     setMovimientosGenerales();
-    const totalSumStatus1 = sumValuesByStatus(responseResumen, 1);
-    const totalSumStatus2 = sumValuesByStatus(responseResumen, 2);
-    let totalAbonos =
-      totalSumStatus1 + responseOtrosAbono + responseConciliados;
-    let totalCargo = totalSumStatus2 + responseOtrosCargos;
+    const totalSumStatus1 = Number(sumValuesByStatus(responseResumen, 1) || 0);
+    const totalSumStatus2 = Number(sumValuesByStatus(responseResumen, 2) || 0);
+
+    const totalAbonos =
+      totalSumStatus1 +
+      Number(responseOtrosAbono || 0) +
+      Number(responseConciliados || 0);
+
+    const totalCargo =
+      totalSumStatus2 +
+      Number(responseOtrosCargos || 0);
 
     setTotalAbono(formatPrecio(totalAbonos));
     setTotalCargo(formatPrecio(totalCargo));
+
+    console.log("totalSumStatus1", totalSumStatus1, typeof totalSumStatus1);
+    console.log("responseOtrosAbono", responseOtrosAbono, typeof responseOtrosAbono);
+    console.log("responseConciliados", responseConciliados, typeof responseConciliados);
+    console.log("totalSumStatus2", totalSumStatus2, typeof totalSumStatus2);
+    console.log("responseOtrosCargos", responseOtrosCargos, typeof responseOtrosCargos);
   }
   function onTablaSucursalSet(response) {
     // Inicializar formValues con los valores obtenidos
@@ -420,16 +434,14 @@ export default function DetalleEstadoCuenta() {
     setMovimientosConciliados(responseConciliados);
   }
 
-  const sumValuesByStatus = (obj, tipo_ingreso) => {
-   var ayuda = Object.values(obj)
-    .filter(item => item.tipo_ingreso === tipo_ingreso )
+  const sumValuesByStatus = (items, tipo_ingreso) => {
+  return (items || [])
+    .filter(item => Number(item.tipo_ingreso) === Number(tipo_ingreso))
+    .filter(item => Number(item.tipo_id) !== 32)
+    .reduce((acc, item) => acc + Number(item.total || 0), 0);
+};
 
-    ayuda = Object.values(obj)
-    .filter(item => parseInt(item.tipo_id) != 32)
-    .reduce((acc, item) => acc + item.total, 0);
 
-    return ayuda
-  };
 
   const handleChange = (value, name) => {
     let params = {
