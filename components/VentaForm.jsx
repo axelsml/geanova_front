@@ -683,6 +683,15 @@ export default function VentaForm() {
               />
             </Form.Item>
 
+            {plazoSelected?.monto_anualidad > 0 &&(<>
+              <Row justify={"center"} style={{ marginBottom: "8px" }}>
+                <Text style={{ color: "#FFFFFF" }}>Monto Anualidad</Text>
+              </Row> 
+              <Row justify={"center"} style={{ marginBottom: "8px" }}>
+                <Text style={{ color: "#FFFFFF" }}>{plazoSelected.monto_anualidad}</Text>
+              </Row>   
+            </>)}
+
             <Row justify={"center"} style={{ marginBottom: "8px" }}>
               <Text style={{ color: "#FFFFFF" }}>Sistema de Pago</Text>
             </Row>

@@ -114,6 +114,7 @@ export default function PlazosCrear({ terrenoId }) {
       >
         <Typography>{plazo.descripcion}</Typography>
         {editar ? (
+          <>
           <Form.Item
             name={"precio"}
             rules={[
@@ -124,7 +125,7 @@ export default function PlazosCrear({ terrenoId }) {
               },
             ]}
             className=" m-0"
-          >
+            >
             <InputNumber
               placeholder="Precio por M2"
               className="w-full m-0"
@@ -132,10 +133,36 @@ export default function PlazosCrear({ terrenoId }) {
               parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               prefix="$"
               suffix="MXN"
+              />
+          </Form.Item>
+            
+            <Form.Item
+            name={"monto_anualidad"}
+            rules={[
+              {
+                type: "number",
+                min: 1,
+                required: true,
+              },
+            ]}
+            className=" m-0"
+          >
+            <InputNumber
+              placeholder="Precio por Anualidad"
+              className="w-full m-0"
+              formatter={formatPrecio}
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              prefix="$"
+              suffix="MXN"
             />
           </Form.Item>
+            </>
+          
         ) : (
+          <>
           <Typography>${formatPrecio(plazo.precio)}</Typography>
+          <Typography>${formatPrecio(plazo.monto_anualidad)}</Typography>
+          </>
         )}
 
         <Checkbox

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState,useContext,useMemo } from "react";
+import { LoadingContext } from "@/contexts/loading";
+
 import Loader80 from "@/components/Loader80";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 import { formatPrecio } from "@/helpers/formatters";
@@ -13,6 +15,7 @@ const { Text } = Typography;
 const { Option } = Select;
 import {
   Paper,
+  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -22,17 +25,25 @@ import {
   TableSortLabel,
   TablePagination,
   TableFooter,
+  TextField,
 } from "@mui/material";
 
 import pagosService from "@/services/pagosService";
 import terrenosService from "@/services/terrenosService";
+import lotesService from "@/services/lotesService";
 
 export default function Banco() {
+
+  
+
   const [cookiePermisos, setCookiePermisos] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [excelData, setExcelData] = useState([]);
   const [message, setMessage] = useState("");
+
+  const [filterText, setFilterText] = useState("");
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
 
   const [terrenos, setTerrenos] = useState([]);
   const [terrenoSelected, setTerrenoSelected] = useState(null);
@@ -44,6 +55,10 @@ export default function Banco() {
   const [monto_pendientes2, setMovimientosPendientesMonto2] = useState(0);
   const [pago_seleccionado, setPagoSeleccionado] = useState({});
 
+
+  const [lotes, setLotes] = useState(null);
+  const [loteSelected, setLoteSelected] = useState(null);
+
   const [visible, setVisible] = useState(false);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("fecha_operacion");
@@ -52,6 +67,57 @@ export default function Banco() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page2, setPage2] = useState(0);
   const [rowsPerPage2, setRowsPerPage2] = useState(5);
+   const [clienteInfo, setClienteInfo] = useState([]);
+    const [info_cliente, setInfoCliente] = useState(null);
+  const [info_lote, setInfoLote] = useState(null);
+  const [fecha_proximo_pago, setProximoPago] = useState(null);
+      const [financiamientoId, setFinanciamientoId] = useState(0);
+  const [financiamientoNombre, setFinanciamientoNombre] = useState(null);
+  const { setIsLoading } = useContext(LoadingContext);
+
+  const BuscarInfoLote = () => {
+      setInfoCliente(null);
+      setInfoLote(null);
+      setProximoPago(null);
+      setIsLoading(true);
+      setFinanciamientoId(0);
+      setFinanciamientoNombre(null);
+      lotesService.getClienteByLote(
+        terrenoSelected.id,
+        loteSelected.id,
+        onInfoClienteCargado,
+        onError
+      );
+    };
+  
+    async function onInfoClienteCargado(data) {
+      setIsLoading(false);
+      if (data.encontrado) {
+        setInfoCliente(data.info_cliente);
+        setInfoLote(data.info_lote);
+        setProximoPago(data.fecha_proximo_pago);
+        setTieneLuzPantalla(data.tiene_luz);
+        plazosService.getPlazos(
+          { terreno_id: data.info_lote.terreno_id },
+          setPlazos,
+          onError
+        );
+        setPlazoId(data.info_lote.plazo_id);
+        setPlazoNombre(data.info_lote.plazo);
+        setFinanciamientoId(data.info_lote.financiamiento_id);
+        setFinanciamientoNombre(data.info_lote.financiamiento_nombre);
+      } else {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: "No Se Pudo Encontrar La Informacion",
+          confirmButtonColor: "#4096ff",
+          cancelButtonColor: "#ff4d4f",
+          showDenyButton: true,
+          confirmButtonText: "Aceptar",
+        });
+      }
+    }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -76,15 +142,6 @@ export default function Banco() {
 
   const onError = (data) => {
     setLoading(false);
-    Swal.fire({
-      title: "Error",
-      icon: "error",
-      text: "FALLO AL INTENTAR GUARDAR",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      confirmButtonText: "Aceptar",
-    });
   };
 
   const handleUpload = (file) => {
@@ -258,6 +315,17 @@ export default function Banco() {
     return `${year}-${month}-${day}`;
   }
 
+  const onBuscarLotes = (value) => {
+      setTerrenoSelected(terrenos.find((terreno) => terreno.id == value));
+      lotesService.getLotesAsignados(
+        value,
+        (data) => {
+          setLotes(data);
+        },
+        onError
+      );
+    };
+
   function formatDateString(dateString) {
     const [day, month, year] = dateString.split("/").map(Number);
     const date = new Date(year, month - 1, day); // Meses en JavaScript van de 0 a 11
@@ -367,6 +435,19 @@ export default function Banco() {
     pagosService.BuscarMovimientoBanco(params, onMovimientosCoinciden, onError);
   }
 
+  function buscarMovimientosPagos(mov) {
+    debugger
+    setLoading(true);
+    setPendientes([]);
+    setPagoSeleccionado(mov);
+    var params = {
+      fecha_operacion: mov.fecha_operacion,
+      monto_pago: mov.abono,
+    };
+    debugger;
+    // pagosService.BuscarMovimientoBanco(params, onMovimientosCoinciden, onError);
+  }
+
   async function onMovimientosCoinciden(data) {
     setLoading(false);
     if (data.pendientes.length == 0) {
@@ -387,6 +468,66 @@ export default function Banco() {
 
   const handleSelectChange = (value) => {
     setTerrenoSelected(value);
+  };
+
+   const filteredMovs = useMemo(() => {
+    const q = filterText.trim().toLowerCase();
+    if (!q) return movimientos_por_conciliar;
+
+    return movimientos_por_conciliar.filter((mov) => {
+      const haystack = [
+        mov.id,
+        mov.cuenta,
+        mov.fecha_operacion,
+        mov.descripcion,
+        mov.concepto,
+        mov.abono,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [movimientos_por_conciliar, filterText]);
+
+   const sortedMovs = useMemo(() => {
+    return stableSort(filteredMovs, getComparator(order, orderBy));
+  }, [filteredMovs, order, orderBy]);
+
+  const pagedMovs = useMemo(() => {
+    return sortedMovs.slice(
+      page2 * rowsPerPage2,
+      page2 * rowsPerPage2 + rowsPerPage2
+    );
+  }, [sortedMovs, page2, rowsPerPage2]);
+
+ const pageIds = useMemo(() => pagedMovs.map((m) => m.id), [pagedMovs]);
+  const allCheckedOnPage =
+    pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const someCheckedOnPage = pageIds.some((id) => selectedIds.has(id));
+
+  const toggleOne = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllOnPage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allCheckedOnPage) {
+        // deselecciona los de esta página
+        pageIds.forEach((id) => next.delete(id));
+      } else {
+        // selecciona los de esta página
+        pageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
   };
 
   return (
@@ -621,54 +762,162 @@ export default function Banco() {
                 <b>Movimientos Disponibles</b>
               </Text>
             </Row>
+            <Row>
+              <Row
+        justify={"center"}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <div style={{ display: "flex", textAlign: "center", margin: "0 auto" }}>
+          <Col
+            style={{
+              margin: "0.5rem",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Text>Proyecto</Text>
+            <Select
+              style={{ width: 150 }}
+              showSearch
+              placeholder="Seleccione un Proyecto"
+              optionLabelProp="label"
+              onChange={onBuscarLotes}
+            >
+              {terrenos?.map((item, index) => (
+                <Option key={index} value={item.id} label={item.nombre}>
+                  {item?.nombre}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+          <Col
+            style={{
+              margin: "0.5rem",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Text>Lote</Text>
+            <Select
+              style={{ width: 150 }}
+              showSearch
+              placeholder="Seleccione un Lote"
+              optionLabelProp="label"
+              onChange={(value) => {
+                const loteSelected = lotes.find((lote) => lote.id == value);
+                setLoteSelected(loteSelected);
+              }}
+            >
+              {lotes?.map((item, index) => (
+                <Option key={index} value={item.id} label={item.numero}>
+                  {item?.numero}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+        </div>
+        <div style={{ margin: "0.5rem auto" }}>
+          <Button
+            className="boton"
+            disabled={terrenoSelected == null || loteSelected == null}
+            onClick={BuscarInfoLote}
+          >
+            Buscar
+          </Button>
+        </div>
+      </Row>
+            </Row>
+
+             <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+              <TextField
+                size="small"
+                fullWidth
+                label="Filtrar movimientos (id, cuenta, descripción, monto...)"
+                value={filterText}
+                onChange={(e) => {
+                  setFilterText(e.target.value);
+                  // opcional: regresa a página 0 cuando filtras
+                  handleChangePage2?.(null, 0);
+                }}
+              />
+              {/* opcional: mostrar cuántos seleccionados */}
+              <div style={{ alignSelf: "center", whiteSpace: "nowrap" }}>
+                Seleccionados: {selectedIds.size}
+              </div>
+            </div>
+            
             <Row Row justify={"center"} style={{ marginBottom: "32px" }}>
               <TableContainer className="tabla">
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Cuenta</TableCell>
-                      <TableCell>Fecha Operacion</TableCell>
-                      <TableCell>Descripcion</TableCell>
-                      <TableCell>Descripcion Larga</TableCell>
-                      <TableCell>Monto</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {stableSort(
-                      movimientos_por_conciliar,
-                      getComparator(order, orderBy)
-                    )
-                      .slice(
-                        page2 * rowsPerPage2,
-                        page2 * rowsPerPage2 + rowsPerPage2
-                      )
-                      .map((mov, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{mov.cuenta}</TableCell>
-                          <TableCell>{mov.fecha_operacion}</TableCell>
-                          <TableCell>{mov.descripcion}</TableCell>
-                          <TableCell>{mov.concepto}</TableCell>
-                          <TableCell>
-                            ${formatPrecio(parseFloat(mov.abono))}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
-                        count={movimientos_por_conciliar.length}
-                        rowsPerPage={rowsPerPage2}
-                        page={page2}
-                        onPageChange={handleChangePage2}
-                        onRowsPerPageChange={handleChangeRowsPerPage2}
-                        labelRowsPerPage="Pendientes por Página"
-                      />
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {/* Checkbox select-all */}
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={allCheckedOnPage}
+                  indeterminate={!allCheckedOnPage && someCheckedOnPage}
+                  onChange={toggleAllOnPage}
+                  inputProps={{ "aria-label": "Seleccionar todos en la página" }}
+                />
+              </TableCell>
+
+              <TableCell>id</TableCell>
+              <TableCell>Cuenta</TableCell>
+              <TableCell>Fecha Operacion</TableCell>
+              <TableCell>Descripcion</TableCell>
+              <TableCell>Descripcion Larga</TableCell>
+              <TableCell>Monto</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {pagedMovs.map((mov) => {
+              const checked = selectedIds.has(mov.id);
+              return (
+                <TableRow
+                  key={mov.id}
+                  hover
+                  selected={checked}
+                  onClick={() => toggleOne(mov.id)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={checked}
+                      onChange={() => toggleOne(mov.id)}
+                      inputProps={{ "aria-label": `Seleccionar movimiento ${mov.id}` }}
+                    />
+                  </TableCell>
+
+                  <TableCell>{mov.id}</TableCell>
+                  <TableCell>{mov.cuenta}</TableCell>
+                  <TableCell>{mov.fecha_operacion}</TableCell>
+                  <TableCell>{mov.descripcion}</TableCell>
+                  <TableCell>{mov.concepto}</TableCell>
+                  <TableCell>${formatPrecio(parseFloat(mov.abono))}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                // OJO: count debe ser del filtrado, no del total
+                count={filteredMovs.length}
+                rowsPerPage={rowsPerPage2}
+                page={page2}
+                onPageChange={handleChangePage2}
+                onRowsPerPageChange={handleChangeRowsPerPage2}
+                labelRowsPerPage="Pendientes por Página"
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
             </Row>
           </Col>
         </Row>

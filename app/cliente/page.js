@@ -60,6 +60,8 @@ import plazosService from "@/services/plazosService";
 export default function ClientesInfo() {
   const [nuevaVenta, setNuevaVenta] = useState(false);
   const [nuevoPago, setNuevoPago] = useState(false);
+  const [tiene_anualidad, setAnualidad] = useState(false);
+
   const [errorNuevoPago, setErrorNuevoPago] = useState(false);
   const [usuarioInfo, setUsuarioInfo] = useState(null);
   const [changeState, setChangeState] = useState(false);
@@ -128,6 +130,8 @@ export default function ClientesInfo() {
 
   const [cookiePermisos, setCookiePermisos] = useState([]);
   const [clienteCongelado, setClienteCongelado] = useState([]);
+  const [tipo_pago_id, setTipoPagoId] = useState(1);
+  const [monto_requerido, setMontoRequerido] = useState(0);
 
   const opcionFinanciamiento = [
     { index: 0, id: 1, nombre: "Mensual" },
@@ -207,6 +211,26 @@ export default function ClientesInfo() {
 
   const CreateNuevoPago = () => {
     const cookieUsuario = getCookie("usuario");
+    setTipoPagoId(1);
+    setMontoRequerido(info_lote.monto_pago_requerido)
+    cookieUsuario
+      .then((cookie) => {
+        if (!cookie || !cookie.value) {
+          // Si cookie.value es null o false, activar nuevoPago
+          setErrorNuevoPago(!errorNuevoPago);
+        } else {
+          // Si cookie.value es true, desactivar nuevoPago
+          setNuevoPago(!nuevoPago);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener la cookie:", error); // Manejar cualquier error
+      });
+  };
+  const CreateNuevoPagoAnualidad = () => {
+    const cookieUsuario = getCookie("usuario");
+    setTipoPagoId(2);
+    setMontoRequerido(info_lote.monto_pago_requerido_anualidad)
 
     cookieUsuario
       .then((cookie) => {
@@ -255,6 +279,7 @@ export default function ClientesInfo() {
       setPlazoNombre(data.info_lote.plazo);
       setFinanciamientoId(data.info_lote.financiamiento_id);
       setFinanciamientoNombre(data.info_lote.financiamiento_nombre);
+      setAnualidad(data.info_lote.tiene_anualidad);
     } else {
       Swal.fire({
         title: "Error",
@@ -549,6 +574,8 @@ export default function ClientesInfo() {
       setMontoContrato(info_lote.monto_contrato);
       setCantidadPagos(info_lote.cantidad_pagos);
       setAnticipo(info_lote.anticipo);
+      setAnualidad(info_lote.tiene_anualidad);
+      debugger
       if (info_lote.sistema_pago == "Transferencia") {
         setSistemaPagoSelectedModal(2);
       } else {
@@ -1060,6 +1087,16 @@ export default function ClientesInfo() {
           >
             Nuevo Pago
           </Button>
+            {tiene_anualidad &&(<>
+            <Button
+              className="boton"
+              size={"large"}
+              disabled={cookiePermisos >= 1 ? false : true}
+              onClick={CreateNuevoPagoAnualidad}
+              >
+              Nuevo Pago Anualidad
+            </Button>
+            </>)}
 
           <Button
             className="boton"
@@ -1155,12 +1192,19 @@ export default function ClientesInfo() {
               proximoPago={fecha_proximo_pago}
               setWatch={setChangeState}
               watch={changeState}
+              tipo_pago_id_opcion={tipo_pago_id}
+              monto_requerido={monto_requerido}
             />
           )}
         </Col>
       </Row>
 
       {info_lote != null && (
+          <>
+          <Row justify={"center"}>
+            <h1>Pagos Solicitud</h1>
+          </Row>
+
         <Row justify={"center"} className="w-3/4 m-auto tabla">
           <TableContainer component={Paper}>
             <Table>
@@ -1270,6 +1314,122 @@ export default function ClientesInfo() {
             </Table>
           </TableContainer>
         </Row>
+        {tiene_anualidad && (<>
+        <Row justify={"center"}>
+          <h1>Pagos Anualidad</h1>
+        </Row>
+        <Row justify={"center"} className="w-3/4 m-auto tabla">
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow className="tabla_encabezado">
+                  <TableCell>
+                    <p>#</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Folio</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Operacion</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Fecha Captura</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Requerido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Realizado</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Saldo Pendiente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Sistema Pago</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Estatus Pago</p>
+                  </TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {info_lote.pagos2
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((pago, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{pago.no_pago}</TableCell>
+                      <TableCell>{pago.folio}</TableCell>
+                      <TableCell>{pago.fecha_operacion}</TableCell>
+                      <TableCell>{pago.fecha}</TableCell>
+                      <TableCell>
+                        ${formatPrecio(pago.monto_requerido)}
+                      </TableCell>
+                      <TableCell>${formatPrecio(pago.monto_pagado)}</TableCell>
+                      <TableCell>
+                        ${formatPrecio(pago.saldo_pendiente)}
+                      </TableCell>
+                      <TableCell>{pago.sistema_pago}</TableCell>
+                      <TableCell>{pago.estatus_pago}</TableCell>
+                      <TableCell>
+                        {usuario_id <= 2 && (
+                          <Tooltip title="Haz clic aquí para editar este pago">
+                            <Button
+                              className="boton"
+                              disabled={cookiePermisos >= 2 ? false : true}
+                              key={pago}
+                              onClick={() => {
+                                setShow(true);
+                                handleModalPago(pago);
+                              }}
+                              size="large"
+                            >
+                              <FaPencilAlt className="m-auto" size={"20px"} />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="Haz clic aquí para generar recibo de este pago">
+                          <Button
+                            className="boton"
+                            disabled={cookiePermisos >= 1 ? false : true}
+                            key={pago}
+                            onClick={() => {
+                              window.open(
+                                `https://api.santamariadelaluz.com/iPagos/recibo/${pago.pago_id}.pdf`
+                              );
+                            }}
+                            size="large"
+                          >
+                            <FaPrint className="m-auto" size={"20px"} />
+                          </Button>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={info_lote.pagos.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Amortizaciones por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Row>
+        </>)}
+
+        </>
       )}
       <Modal visible={show} footer={null} onCancel={() => handleCloseModal()}>
         <Row justify={"center"}>

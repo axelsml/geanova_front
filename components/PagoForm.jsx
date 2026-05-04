@@ -38,6 +38,7 @@ export default function PagoForm({
   proximoPago,
   setWatch,
   watch,
+  tipo_pago_id_opcion,monto_requerido
 }) {
   const { setIsLoading } = useContext(LoadingContext);
   const [sistemas_pago, setSistemasPago] = useState(null);
@@ -55,7 +56,7 @@ export default function PagoForm({
     monto_pago: lote.monto_pago_requerido,
     referenciaTransferencia: "",
   });
-  const [valor, setValor] = useState(lote.monto_pago_requerido);
+  const [valor, setValor] = useState(monto_requerido);
 
   const [fecha_movimiento, setFechaMovimiento] = useState("");
   const [movimientos_pendientes, setPendientes] = useState([]);
@@ -86,6 +87,8 @@ export default function PagoForm({
     //   });
     // } else {
       values["fecha"] = formatDate(values.fecha);
+      values["tipo_pago_id"] = tipo_pago_id_opcion;
+
       Swal.fire({
         title: "Verifique que los datos sean correctos",
         icon: "info",

@@ -172,6 +172,30 @@ const PlazosForm = forwardRef(({ terrenoId }, ref) => {
           />
         </Form.Item>
 
+        <Form.Item
+          name={"monto_anualidad"}
+          label={"Precio Anualidad"}
+          style={{ width: "100%" }}
+          rules={[
+            {
+              type: "number",
+              min: 1,
+              required: true,
+            },
+          ]}
+        >
+          <InputNumber
+            placeholder="Ingrese el Precio Anualidad"
+            style={{
+              width: "100%",
+            }}
+            formatter={formatPrecio}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+            prefix="$"
+            suffix="MXN"
+          />
+        </Form.Item>
+
         <Row className="flex gap-2 justify-end">
           <Button htmlType="submit" size="large">
             Guardar
