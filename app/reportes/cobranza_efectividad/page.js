@@ -69,6 +69,7 @@ export default function EfectividadCobranza() {
 
   const [datos, setDatos] = useState([]);
   const [datosClientesCongelados, setDatosClientesCongelados] = useState([]);
+  const [datosClientesAnualidad, setDatosClientesAnualidad] = useState([]);
   const [datosModal, setDatosModal] = useState([]);
   const [datosModalClientesPagados, setDatosModalClientesPagados] = useState(
     []
@@ -284,6 +285,7 @@ export default function EfectividadCobranza() {
 
     setDatos(params.datos);
     setDatosClientesCongelados(params.clientesCongelados);
+    setDatosClientesAnualidad(params.anualidad_clientes);
     setTotalClientes(params.totalClientes);
     setTotalMontoAnticipo(params.totalMontoAnticipo);
     setTotalMontoCobrado(params.totalMontoCobrado);
@@ -759,6 +761,122 @@ export default function EfectividadCobranza() {
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     count={datosClientesCongelados.length}
+                    rowsPerPage={rowsPerPage2}
+                    page={page2}
+                    onPageChange={handleChangePage2}
+                    onRowsPerPageChange={handleChangeRowsPerPage2}
+                    labelRowsPerPage="Registros por Página"
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col style={{ margin: "auto" }}>
+          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
+            Anualidades Mes
+          </p>
+        </Col>
+      </Row>
+
+      <Row justify={"center"} className="mb-5 mt-2">
+        <Col xs={24} sm={12} md={22} lg={22} xl={22} xxl={22}>
+          <TableContainer component={Paper} className="tabla">
+            <Table>
+              <TableHead className="tabla_encabezado">
+                <TableRow>
+                  <TableCell>
+                    <p>Terreno/Lote</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Nombre Cliente</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Importe Vencido</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>Saldo Restante</p>
+                  </TableCell>
+                   <TableCell>
+                    <p>Monto Requerido</p>
+                  </TableCell>
+                   <TableCell>
+                    <p>Requerido ala Fecha</p>
+                  </TableCell>
+                   <TableCell>
+                    <p></p>
+                  </TableCell>
+                   <TableCell>
+                    <p></p>
+                  </TableCell>
+                  
+                 
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stableSort2(
+                  datosClientesAnualidad,
+                  getComparator2(order2, orderBy2)
+                )
+                  .slice(
+                    page2 * rowsPerPage2,
+                    page2 * rowsPerPage2 + rowsPerPage2
+                  )
+                  .map((dato, index) => (
+                    <TableRow key={dato.id}>
+                      <TableCell>{dato.info_lote.lote}</TableCell>
+                      <TableCell>{dato.info_cliente.nombre_completo}</TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat(dato.info_lote.monto_vencido_anualidades))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat((dato.info_lote.monto_total_anualidades - dato.info_lote.monto_pagado_anualidades)))}
+                      </TableCell>
+                       <TableCell>
+                        ${formatPrecio(parseFloat((dato.info_lote.monto_pago_requerido_anualidad)))}
+                      </TableCell>
+                      <TableCell>
+                        ${formatPrecio(parseFloat((dato.info_lote.esperado_ala_fecha_anualidad)))}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="boton"
+                          size="large"
+                          onClick={() => {
+                            // terrenoSelected.id,loteSelected.id
+                            window.open(
+                                `https://api.santamariadelaluz.com/iUsuarios/${dato.info_lote.solicitud_id}.pdf`
+                            );
+                          }}
+                        >
+                          Estado De Cuenta
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="boton"
+                          size="large"
+                          onClick={() => {
+                            // terrenoSelected.id,loteSelected.id
+                            window.open(
+                              `https://api.santamariadelaluz.com/getClienteByLote/${dato.info_lote.terreno_id}/${dato.info_lote.lote_id}.pdf`
+                            );
+                          }}
+                        >
+                          Amortizacion
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    count={datosClientesAnualidad.length}
                     rowsPerPage={rowsPerPage2}
                     page={page2}
                     onPageChange={handleChangePage2}
