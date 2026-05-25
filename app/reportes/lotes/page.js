@@ -794,7 +794,7 @@ export default function ReporteLotes() {
                 <Text
                   style={{ color: "rgb(67, 141, 204)", fontWeight: "bold" }}
                 >
-                  Posible Venta
+                  Posible Venta Simulada(4 Meses)
                 </Text>
               </Row>
               <Row justify={"center"}>

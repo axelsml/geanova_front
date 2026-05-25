@@ -452,6 +452,19 @@ export default function PagoForm({
               </div>
             )}
           </Col>
+           {sistemaSelected === 8 && (<>
+             <InputIn
+                    placeholder="Especifique tipo de pago"
+                    name="otro_pago"
+                    label="Otro"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Especifique tipo de pago",
+                      },
+                    ]}
+                  />
+           </>)}
 
           <span className="flex gap-2 justify-end">
             <Button htmlType="submit" size="large">
