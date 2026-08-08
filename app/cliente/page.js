@@ -1133,7 +1133,20 @@ export default function ClientesInfo() {
           >
             Estado De Cuenta
           </Button>
-
+            {info_lote?.situacion_solicitud == "Liquidado" && (
+              <Button
+                className="boton"
+                size="large"
+                onClick={() => {
+                  window.open(
+                    `https://api.santamariadelaluz.com/carta_liquidacion_pdf/${info_lote.terreno_id}/${info_lote.lote_id}.pdf`,
+                    "_blank"
+                  );
+                }}
+              >
+                Hoja de Liquidación
+              </Button>
+            )}
           <Button
             className="boton"
             disabled={cookiePermisos >= 1 ? false : true}

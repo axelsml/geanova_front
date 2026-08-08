@@ -693,6 +693,9 @@ export default function Banco() {
                           <p>Referencia de Transferencia</p>
                         </TableCell>
                         <TableCell>
+                          <p>Comprobante</p>
+                        </TableCell>
+                        <TableCell>
                           <p>Ingreso</p>
                         </TableCell>
                         <TableCell>
@@ -721,6 +724,26 @@ export default function Banco() {
                             <TableCell>
                               {pago.referencia_transferencia}
                             </TableCell>
+                            <TableCell>
+                              {pago.comprobante_url ? (
+                                <Button
+                                  size="small"
+                                  onClick={() => {
+                                    window.open(
+                                      pago.comprobante_url,
+                                      "_blank"
+                                    );
+                                  }}
+                                >
+                                  Ver
+                                </Button>
+                              ) : (
+                                <Text type="secondary">
+                                  Sin comprobante
+                                </Text>
+                              )}
+                            </TableCell>
+
                             <TableCell>{pago.usuario_ingreso}</TableCell>
                             <TableCell>
                               <Button
@@ -923,65 +946,266 @@ export default function Banco() {
         </Row>
 
         <Modal
-          visible={visible}
-          footer={null}
-          onCancel={() => setVisible(false)}
-        >
-          <div>
-            <Row Row justify={"center"} style={{ marginBottom: "24px" }}>
-              <Text className="titulo_pantallas">
-                <b>Estado de cuenta Coinciden</b>
-              </Text>
-            </Row>
-            {movimientos_pendientes.length != 0 && (
-              <Row Row justify={"center"}>
-                <TableContainer className="tabla">
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Fecha Operacion</TableCell>
-                        <TableCell>Descripcion</TableCell>
-                        <TableCell>Cantidad</TableCell>
-                        <TableCell></TableCell>
-                      </TableRow>
-                    </TableHead>
+            visible={visible}
+            footer={null}
+            width={900}
+            onCancel={() => {
+              setVisible(false);
+              setPagoSeleccionado({});
+              setPendientes([]);
+            }}
+          >
+            <div>
 
-                    <TableBody>
-                      {stableSort(
-                        movimientos_pendientes,
-                        getComparator(order, orderBy)
-                      ).map((movimiento, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{movimiento.fecha_operacion}</TableCell>
-                          <TableCell>{movimiento.concepto}</TableCell>
-                          <TableCell>
-                            ${formatPrecio(movimiento.abono)}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              className="boton"
-                              key={movimiento}
-                              onClick={() => {
-                                conciliarPago(movimiento);
-                                setPendientes([]);
-                              }}
-                              size="large"
-                            >
-                              Seleccionar
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                    <TableFooter>
-                      <TableRow></TableRow>
-                    </TableFooter>
-                  </Table>
-                </TableContainer>
+              {/* =========================================
+                  TITULO
+                  ========================================= */}
+
+              <Row
+                justify={"center"}
+                style={{ marginBottom: "20px" }}
+              >
+                <Text className="titulo_pantallas">
+                  <b>Conciliar Pago Bancario</b>
+                </Text>
               </Row>
-            )}
-          </div>
-        </Modal>
+
+
+              {/* =========================================
+                  DATOS DEL PAGO
+                  ========================================= */}
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 12,
+                  marginBottom: 20,
+                  padding: 14,
+                  background: "#f8fafc",
+                  borderRadius: 8,
+                }}
+              >
+                <div>
+                  <Text type="secondary">
+                    Cliente
+                  </Text>
+
+                  <div>
+                    <Text strong>
+                      {pago_seleccionado?.nombre_cliente}
+                    </Text>
+                  </div>
+                </div>
+
+                <div>
+                  <Text type="secondary">
+                    Lote
+                  </Text>
+
+                  <div>
+                    <Text strong>
+                      {pago_seleccionado?.lote}
+                    </Text>
+                  </div>
+                </div>
+
+                <div>
+                  <Text type="secondary">
+                    Monto
+                  </Text>
+
+                  <div>
+                    <Text strong>
+                      $
+                      {formatPrecio(
+                        pago_seleccionado?.monto_pagado || 0
+                      )}
+                    </Text>
+                  </div>
+                </div>
+
+                <div>
+                  <Text type="secondary">
+                    Fecha transferencia
+                  </Text>
+
+                  <div>
+                    <Text strong>
+                      {pago_seleccionado?.fecha_transferencia}
+                    </Text>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* =========================================
+                  COMPROBANTE
+                  ========================================= */}
+
+              {pago_seleccionado?.comprobante_url ? (
+                <div
+                  style={{
+                    marginBottom: 24,
+                    textAlign: "center",
+                    padding: 16,
+                    background: "#f5f7fa",
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <Text
+                    strong
+                    style={{
+                      display: "block",
+                      marginBottom: 12,
+                    }}
+                  >
+                    Comprobante del pago
+                  </Text>
+
+                  <img
+                    src={pago_seleccionado.comprobante_url}
+                    alt="Comprobante del pago"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: 400,
+                      objectFit: "contain",
+                      borderRadius: 6,
+                    }}
+                  />
+
+                  <div style={{ marginTop: 12 }}>
+                    <Button
+                      onClick={() => {
+                        window.open(
+                          pago_seleccionado.comprobante_url,
+                          "_blank"
+                        );
+                      }}
+                    >
+                      Abrir imagen completa
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: 12,
+                    marginBottom: 20,
+                    background: "#fafafa",
+                    border: "1px solid #eeeeee",
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text type="secondary">
+                    Este pago no tiene comprobante adjunto
+                  </Text>
+                </div>
+              )}
+
+
+              {/* =========================================
+                  MOVIMIENTOS QUE COINCIDEN
+                  ========================================= */}
+
+              <Row
+                justify={"center"}
+                style={{ marginBottom: "14px" }}
+              >
+                <Text strong>
+                  Movimientos bancarios encontrados
+                </Text>
+              </Row>
+
+
+              {movimientos_pendientes.length != 0 && (
+                <Row justify={"center"}>
+
+                  <TableContainer className="tabla">
+
+                    <Table>
+
+                      <TableHead>
+
+                        <TableRow>
+
+                          <TableCell>
+                            Fecha Operacion
+                          </TableCell>
+
+                          <TableCell>
+                            Descripcion
+                          </TableCell>
+
+                          <TableCell>
+                            Cantidad
+                          </TableCell>
+
+                          <TableCell>
+                          </TableCell>
+
+                        </TableRow>
+
+                      </TableHead>
+
+
+                      <TableBody>
+
+                        {stableSort(
+                          movimientos_pendientes,
+                          getComparator(order, orderBy)
+                        ).map((movimiento, index) => (
+
+                          <TableRow key={index}>
+
+                            <TableCell>
+                              {movimiento.fecha_operacion}
+                            </TableCell>
+
+                            <TableCell>
+                              {movimiento.concepto}
+                            </TableCell>
+
+                            <TableCell>
+                              $
+                              {formatPrecio(
+                                movimiento.abono
+                              )}
+                            </TableCell>
+
+                            <TableCell>
+
+                              <Button
+                                className="boton"
+                                onClick={() => {
+                                  conciliarPago(movimiento);
+                                  setPendientes([]);
+                                }}
+                                size="large"
+                              >
+                                Conciliar
+                              </Button>
+
+                            </TableCell>
+
+                          </TableRow>
+
+                        ))}
+
+                      </TableBody>
+
+                    </Table>
+
+                  </TableContainer>
+
+                </Row>
+              )}
+
+            </div>
+          </Modal>
       </div>
     </>
   );

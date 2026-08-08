@@ -852,7 +852,7 @@ export default function EfectividadCobranza() {
                             );
                           }}
                         >
-                          Estado De Cuenta
+                          Amortizacion
                         </Button>
                       </TableCell>
                       <TableCell>
@@ -866,7 +866,7 @@ export default function EfectividadCobranza() {
                             );
                           }}
                         >
-                          Amortizacion
+                          Estado de Cuenta
                         </Button>
                       </TableCell>
                     </TableRow>

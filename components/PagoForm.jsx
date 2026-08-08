@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Typography,
   Tag,
@@ -10,7 +9,10 @@ import {
   Select,
   InputNumber,
   Row,
+  Upload,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+
 import Swal from "sweetalert2";
 import { useState, useContext, useEffect } from "react";
 import { formatPrecio, formatDate } from "@/helpers/formatters";
@@ -46,6 +48,7 @@ export default function PagoForm({
   const [tipoPagoSelected, setTipoPagoSelected] = useState(null);
   const [tipo_pagos, setTipoPagos] = useState(null);
   // const [cliente, setCliente] = useState(null);
+  const [comprobanteBanco, setComprobanteBanco] = useState(null);
   const [form] = Form.useForm();
   const { Option } = Select;
   const { Title, Text, Paragraph } = Typography;
@@ -74,50 +77,82 @@ export default function PagoForm({
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  const onGuardarPago = (values) => {
-    // if (usuario_id == 0 || usuario_id == null) {
-    //   Swal.fire({
-    //     title: "Error",
-    //     icon: "error",
-    //     text: "No se pudo verificar al usuario. Favor de iniciar sesión nuevamente.",
-    //     confirmButtonColor: "#4096ff",
-    //     cancelButtonColor: "#ff4d4f",
-    //     showDenyButton: false,
-    //     confirmButtonText: "Aceptar",
-    //   });
-    // } else {
-      values["fecha"] = formatDate(values.fecha);
-      values["tipo_pago_id"] = tipo_pago_id_opcion;
 
-      Swal.fire({
-        title: "Verifique que los datos sean correctos",
-        icon: "info",
-        html: `Cliente: ${cliente.nombre_completo}<br/><br/>Lote: ${
-          lote.lote
-        }<br/><br/>Monto de Pago:  $${formatPrecio(
-          values.monto_pagado
-        )}<br/><br/>Fecha: ${values.fecha}`,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: true,
-        showCancelButton: false,
-        allowOutsideClick: false,
-        confirmButtonText: "Aceptar",
-        denyButtonText: `Cancelar`,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          let params = {
-            ...values,
-            usuario_id: usuario_id,
-            solicitud_id: lote.solicitud_id,
-            conciliacion: movimiento_id_conciliar,
-          };
-          debugger;
-          pagosService.createPago({ pago: params }, onPagoGuardado, onError);
-        }
-      });
-    // }
-  };
+  const onGuardarPago = (values) => {
+  if (sistemaSelected === 2 && !comprobanteBanco) {
+    Swal.fire({
+      title: "Comprobante requerido",
+      icon: "warning",
+      text: "Debe adjuntar el comprobante del pago bancario.",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  values.fecha = formatDate(values.fecha);
+  values.tipo_pago_id = tipo_pago_id_opcion;
+
+  Swal.fire({
+    title: "Verifique que los datos sean correctos",
+    icon: "info",
+    html: `
+      Cliente: ${cliente.nombre_completo}
+      <br/><br/>
+      Lote: ${lote.lote}
+      <br/><br/>
+      Monto de Pago: $${formatPrecio(values.monto_pagado)}
+      <br/><br/>
+      Fecha: ${values.fecha}
+    `,
+    confirmButtonColor: "#4096ff",
+    cancelButtonColor: "#ff4d4f",
+    showDenyButton: true,
+    confirmButtonText: "Aceptar",
+    denyButtonText: "Cancelar",
+  }).then((result) => {
+
+    if (!result.isConfirmed) return;
+
+    const params = {
+      ...values,
+      usuario_id,
+      solicitud_id: lote.solicitud_id,
+      conciliacion: movimiento_id_conciliar,
+    };
+
+    const formData = new FormData();
+
+    Object.keys(params).forEach((key) => {
+      if (
+        params[key] !== undefined &&
+        params[key] !== null
+      ) {
+        formData.append(
+          `pago[${key}]`,
+          params[key]
+        );
+      }
+    });
+
+    if (comprobanteBanco) {
+      formData.append(
+        "pago[comprobante]",
+        comprobanteBanco
+      );
+    }
+
+    setIsLoading(true);
+
+    pagosService.createPago(
+      formData,
+      onPagoGuardado,
+      onError
+    );
+  });
+};
+     
+      
 
   const handleCancel = async () => {
     //MENSAJE EMERGENTE PARA REAFIRMAR QUE SE VA A
@@ -298,6 +333,12 @@ export default function PagoForm({
                 optionLabelProp="label"
                 onChange={(value) => {
                   setSistemaSelected(value);
+
+                  if (value !== 2) {
+                    setComprobanteBanco(null);
+                    setMovimientoIdConciliar(0);
+                    setPendientes([]);
+                  }
                 }}
               >
                 {sistemas_pago?.map((item, index) => (
@@ -372,6 +413,57 @@ export default function PagoForm({
                     style={{ width: "100%" }}
                     placeholder="Ingrese la Fecha en la que se Realizó la Transferencia"
                   />
+                </Form.Item>
+                <Form.Item
+                  label="Comprobante de pago"
+                  required
+                  extra="Formatos permitidos: JPG, JPEG o PNG"
+                >
+                  <Upload
+                    beforeUpload={(file) => {
+                      const tiposPermitidos = [
+                        "image/jpeg",
+                        "image/jpg",
+                        "image/png",
+                      ];
+
+                      if (!tiposPermitidos.includes(file.type)) {
+                        Swal.fire({
+                          title: "Archivo no válido",
+                          icon: "error",
+                          text: "Solo se permiten imágenes JPG, JPEG o PNG.",
+                        });
+
+                        return Upload.LIST_IGNORE;
+                      }
+
+                      const menor5MB = file.size / 1024 / 1024 < 5;
+
+                      if (!menor5MB) {
+                        Swal.fire({
+                          title: "Archivo demasiado grande",
+                          icon: "error",
+                          text: "La imagen debe pesar menos de 5 MB.",
+                        });
+
+                        return Upload.LIST_IGNORE;
+                      }
+
+                      setComprobanteBanco(file);
+
+                      // Evita que Ant Design intente subirlo automáticamente
+                      return false;
+                    }}
+                    onRemove={() => {
+                      setComprobanteBanco(null);
+                    }}
+                    maxCount={1}
+                    accept=".jpg,.jpeg,.png"
+                  >
+                    <Button icon={<UploadOutlined />}>
+                      Seleccionar comprobante
+                    </Button>
+                  </Upload>
                 </Form.Item>
                 <Form.Item
                   name="referenciaTransferencia"
