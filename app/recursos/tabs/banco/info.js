@@ -62,7 +62,7 @@ export default function Banco() {
   const [visible, setVisible] = useState(false);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("fecha_operacion");
-
+  const [cuentasBancarias, setCuentasBancarias] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page2, setPage2] = useState(0);
@@ -89,7 +89,42 @@ export default function Banco() {
         onError
       );
     };
+
+    useEffect(() => {
+  buscarUltimoRegistroBancos();
+
+  terrenosService.getTerrenos(
+    setTerrenos,
+    onError
+  );
+
+  getCookiePermisos(
+    "efectivo",
+    setCookiePermisos
+  );
+
+  pagosService.getBancosCuentasBancarias(
+    setCuentasBancarias,
+    onError
+  );
+}, []);
   
+const obtenerCuentaBancaria = (cuentaId) => {
+  if (!cuentaId) {
+    return "No especificada";
+  }
+
+  const cuenta = cuentasBancarias.find(
+    (item) => Number(item.id) === Number(cuentaId)
+  );
+
+  if (!cuenta) {
+    return "No especificada";
+  }
+
+  return cuenta.alias_nombre || "Sin alias";
+};
+
     async function onInfoClienteCargado(data) {
       setIsLoading(false);
       if (data.encontrado) {
@@ -699,6 +734,9 @@ export default function Banco() {
                           <p>Ingreso</p>
                         </TableCell>
                         <TableCell>
+                          <p>Cuenta Bancaria</p>
+                        </TableCell>
+                        <TableCell>
                           <p></p>
                         </TableCell>
                       </TableRow>
@@ -745,6 +783,11 @@ export default function Banco() {
                             </TableCell>
 
                             <TableCell>{pago.usuario_ingreso}</TableCell>
+                            <TableCell>
+                              {obtenerCuentaBancaria(
+                                pago.cuenta_bancaria_id
+                              )}
+                            </TableCell>
                             <TableCell>
                               <Button
                                 disabled={cookiePermisos >= 2 ? false : true}
