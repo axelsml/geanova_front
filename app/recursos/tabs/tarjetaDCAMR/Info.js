@@ -59,10 +59,12 @@ export default function TarjetaDCAMR() {
   const [showModalTarjetas, setShowModalTarjetas] = useState(false);
   const [showModalDetalles, setShowModalDetalles] = useState(false);
 
+  
   const [tabla, setTabla] = useState([]);
   const [tablaDetalles, setTablaDetalles] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+const [filtroEstadoDetalle, setFiltroEstadoDetalle] = useState("todos");
   const [titleDetalles, setTitleDetalles] = useState("");
 
   const [range, setRange] = useState([]);
@@ -98,6 +100,48 @@ export default function TarjetaDCAMR() {
     }
   };
 
+  const esMovimientoPendiente = (movimiento) => {
+  const tipoId = parseInt(movimiento.tipo_id, 10);
+
+  return (
+    movimiento.tipo_id === null ||
+    movimiento.tipo_id === undefined ||
+    movimiento.tipo_id === "" ||
+    isNaN(tipoId) ||
+    tipoId === 0 ||
+    tipoId === 15
+  );
+};
+
+const filtrarMovimientosPorEstado = (movimientos, filtro) => {
+  if (!Array.isArray(movimientos)) {
+    return [];
+  }
+
+  if (filtro === "pendientes") {
+    return movimientos.filter((movimiento) =>
+      esMovimientoPendiente(movimiento)
+    );
+  }
+
+  if (filtro === "asignados") {
+    return movimientos.filter(
+      (movimiento) => !esMovimientoPendiente(movimiento)
+    );
+  }
+
+  return movimientos;
+};
+const tablaFiltrada = filtrarMovimientosPorEstado(
+  tabla,
+  filtroEstado
+);
+
+const tablaDetallesFiltrada = filtrarMovimientosPorEstado(
+  tablaDetalles,
+  filtroEstadoDetalle
+);
+
   // Handlers para cerrar los modales
   const handleCloseModal = () => {
     setShowModal(false);
@@ -105,11 +149,13 @@ export default function TarjetaDCAMR() {
   const handleCloseModalTarjetas = () => {
     setShowModalTarjetas(false);
   };
-  const handleCloseModalDetalles = () => {
-    setShowModalDetalles(false);
-    setTablaDetalles([]);
-    setTitleDetalles("");
-  };
+const handleCloseModalDetalles = () => {
+  setShowModalDetalles(false);
+  setTablaDetalles([]);
+  setTitleDetalles("");
+  setFiltroEstadoDetalle("todos");
+  setPage2(0);
+};
 
   useEffect(() => {
     // Obtener la fecha actual
@@ -237,7 +283,70 @@ export default function TarjetaDCAMR() {
       setTablaDetalles(filtrarTabla);
     }
   };
+function automatizarMovimientos() {
+  Swal.fire({
+    title: "Clasificación automática",
+    text:
+      "Se clasificarán únicamente movimientos que todavía no tengan un tipo asignado.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Clasificar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#4096ff",
+  }).then((result) => {
+    if (!result.isConfirmed) {
+      return;
+    }
 
+    setLoading(true);
+
+    const params = {
+      fechaInicial: range[0],
+      fechaFinal: range[1],
+      tarjeta: tipoSelected,
+      minimo_registros: 3,
+      confianza: 0.80,
+    };
+
+    recursosService.automatizarTiposMovimientoTarjeta(
+      onAutomatizacionTerminada,
+      params,
+      onError
+    );
+  });
+}
+function onAutomatizacionTerminada(response) {
+  setLoading(false);
+
+  if (!response || !response.success) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text:
+        response && response.message
+          ? response.message
+          : "No se pudo realizar la clasificación.",
+    });
+
+    return;
+  }
+
+  Swal.fire({
+    icon: "success",
+    title: "Clasificación terminada",
+    html:
+      "Movimientos clasificados: <b>" +
+      response.total_clasificados +
+      "</b><br/>" +
+      "Pendientes de clasificar: <b>" +
+      response.total_sin_clasificar +
+      "</b>",
+    confirmButtonText: "Aceptar",
+    confirmButtonColor: "#4096ff",
+  }).then(() => {
+    onBuscar();
+  });
+}
   // Funcion para buscar datos en base a los filtros
   function onBuscar() {
     setMessage("");
@@ -263,6 +372,70 @@ export default function TarjetaDCAMR() {
         setLoading(false);
       });
   }
+
+  const handleChangeDetalle = (value, movimientoId) => {
+  const params = {
+    id: movimientoId,
+    tipo_movimiento_id: value,
+  };
+
+  setFormValues((prevValues) => ({
+    ...prevValues,
+    [`${movimientoId}`]: value,
+  }));
+
+  // Actualizamos inmediatamente la tabla del modal
+  setTablaDetalles((prev) =>
+    prev.map((movimiento) => {
+      if (movimiento.id !== movimientoId) {
+        return movimiento;
+      }
+
+      const tipo = datos.find(
+        (item) => parseInt(item.id) === parseInt(value)
+      );
+
+      return {
+        ...movimiento,
+        tipo_id: value,
+        descripcion: tipo ? tipo.descripcion : movimiento.descripcion,
+        codigo_color: tipo
+          ? tipo.codigo_color
+          : movimiento.codigo_color,
+      };
+    })
+  );
+
+  // También la tabla principal
+  setTabla((prev) =>
+    prev.map((movimiento) => {
+      if (movimiento.id !== movimientoId) {
+        return movimiento;
+      }
+
+      const tipo = datos.find(
+        (item) => parseInt(item.id) === parseInt(value)
+      );
+
+      return {
+        ...movimiento,
+        tipo_id: value,
+        descripcion: tipo ? tipo.descripcion : movimiento.descripcion,
+        codigo_color: tipo
+          ? tipo.codigo_color
+          : movimiento.codigo_color,
+      };
+    })
+  );
+
+  recursosService.updateTipoMovimientoTarjeta(
+    () => {
+      onBuscar();
+    },
+    params,
+    onError
+  );
+};
 
   function Consultado(response) {
     setLoading(false);
@@ -298,6 +471,15 @@ export default function TarjetaDCAMR() {
       setTotalCargo(formatPrecio(totalCargo));
     }
   }
+
+  const totalTodos = tabla.length;
+
+  const totalPendientes = tabla.filter(
+    (movimiento) => esMovimientoPendiente(movimiento)
+  ).length;
+
+  const totalAsignados =
+    totalTodos - totalPendientes;
 
   function onConsulta(response) {
     let { type, message, movimientos } = response;
@@ -690,6 +872,20 @@ export default function TarjetaDCAMR() {
               </Button>
             </div>
           </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+            <div>
+          <Button
+            className="boton"
+            type="primary"
+            block
+            disabled={cookiePermisos < 2}
+            onClick={automatizarMovimientos}
+            >
+            Clasificar automáticamente
+          </Button>
+            </div>
+          </Col>
+
         </Row>
 
         <Row
@@ -882,13 +1078,49 @@ export default function TarjetaDCAMR() {
         justify="center"
         style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
       >
-        <Row>
-          <Col style={{ margin: "auto" }}>
-            <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
-              Movimientos
-            </p>
-          </Col>
-        </Row>
+       <Row
+        justify="space-between"
+        align="middle"
+        style={{
+          width: "100%",
+          marginBottom: 10,
+        }}
+      >
+        <Col>
+          <p
+            className="titulo_pantallas"
+            style={{
+              fontSize: "24px",
+              marginBottom: 0,
+            }}
+          >
+            Movimientos
+          </p>
+        </Col>
+
+        <Col>
+          <Select
+            value={filtroEstado}
+            style={{ width: 190 }}
+            onChange={(value) => {
+              setFiltroEstado(value);
+              setPage(0);
+            }}
+          >
+            <Option value="todos">
+              Todos ({totalTodos})
+            </Option>
+
+            <Option value="asignados">
+              Asignados ({totalAsignados})
+            </Option>
+
+            <Option value="pendientes">
+              Pendientes ({totalPendientes})
+            </Option>
+          </Select>
+        </Col>
+      </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">
@@ -916,8 +1148,14 @@ export default function TarjetaDCAMR() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stableSort(tabla, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                {stableSort(
+                  tablaFiltrada,
+                  getComparator(order, orderBy)
+                )
+                  .slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
                   .map((dato, index) => (
                     <TableRow
                       key={dato.id}
@@ -960,7 +1198,7 @@ export default function TarjetaDCAMR() {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={tabla.length}
+                    count={tablaFiltrada.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -1038,7 +1276,46 @@ export default function TarjetaDCAMR() {
               justify="center"
               style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
             >
-              <Typography.Title level={3}>Movimientos</Typography.Title>
+              <Row
+                justify="space-between"
+                align="middle"
+                style={{
+                  width: "100%",
+                  marginBottom: 10,
+                }}
+              >
+                <Col>
+                  <Typography.Title
+                    level={3}
+                    style={{ marginBottom: 0 }}
+                  >
+                    Movimientos
+                  </Typography.Title>
+                </Col>
+
+                <Col>
+                  <Select
+                    value={filtroEstadoDetalle}
+                    style={{ width: 180 }}
+                    onChange={(value) => {
+                      setFiltroEstadoDetalle(value);
+                      setPage2(0);
+                    }}
+                  >
+                    <Option value="todos">
+                      Todos
+                    </Option>
+
+                    <Option value="asignados">
+                      Asignados
+                    </Option>
+
+                    <Option value="pendientes">
+                      Pendientes
+                    </Option>
+                  </Select>
+                </Col>
+              </Row>
 
               <Col xs={24}>
                 <TableContainer component={Paper} className="tabla">
@@ -1067,9 +1344,9 @@ export default function TarjetaDCAMR() {
                     </TableHead>
                     <TableBody>
                       {stableSort2(
-                        tablaDetalles,
-                        getComparator2(order2, orderBy2)
-                      )
+                          tablaDetallesFiltrada,
+                          getComparator2(order2, orderBy2)
+                        )
                         .slice(
                           page2 * rowsPerPage2,
                           page2 * rowsPerPage2 + rowsPerPage2
@@ -1090,7 +1367,26 @@ export default function TarjetaDCAMR() {
                             <TableCell>
                               ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
                             </TableCell>
-                            <TableCell>{dato.descripcion}</TableCell>
+                            <TableCell>
+                                <Select
+                                  value={formValues[`${dato.id}`]}
+                                  style={{ width: "100%", minWidth: 180 }}
+                                  disabled={disableSelect(dato.status)}
+                                  placeholder="Tipo de movimiento"
+                                  onChange={(value) =>
+                                    handleChangeDetalle(value, dato.id)
+                                  }
+                                >
+                                  {datos.map((option) => (
+                                    <Option
+                                      key={option.id}
+                                      value={option.id}
+                                    >
+                                      {option.descripcion}
+                                    </Option>
+                                  ))}
+                                </Select>
+                              </TableCell>
                           </TableRow>
                         ))}
                     </TableBody>
@@ -1098,7 +1394,7 @@ export default function TarjetaDCAMR() {
                       <TableRow>
                         <TablePagination
                           rowsPerPageOptions={[5, 10, 25]}
-                          count={tablaDetalles.length}
+                          count={tablaDetallesFiltrada.length}
                           rowsPerPage={rowsPerPage2}
                           page={page2}
                           onPageChange={handleChangePage2}

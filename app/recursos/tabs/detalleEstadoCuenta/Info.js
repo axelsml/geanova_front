@@ -98,8 +98,280 @@ export default function DetalleEstadoCuenta() {
   const [formValues, setFormValues] = useState({});
   const [formValuesSucursal, setFormValuesSucursal] = useState({});
   const [cookiePermisos, setCookiePermisos] = useState([]);
+
+  const [filtroAsignacion, setFiltroAsignacion] =
+  useState("todos");
+
   const { Option } = Select;
 
+  const esMovimientoPendiente = (movimiento) => {
+  const tipoId =
+    parseInt(
+      movimiento.tipo_movimiento_id,
+      10
+    );
+
+  const status =
+    parseInt(
+      movimiento.status,
+      10
+    );
+
+  return (
+    status !== 1 &&
+    (
+      movimiento.tipo_movimiento_id === null ||
+      movimiento.tipo_movimiento_id === undefined ||
+      movimiento.tipo_movimiento_id === "" ||
+      isNaN(tipoId) ||
+      tipoId === 0
+    )
+  );
+};
+
+const handleChangeDetalle = (
+  value,
+  movimientoId,
+  cuenta
+) => {
+
+  const params = {
+    id: movimientoId,
+    tipo_movimiento_id: value,
+  };
+
+
+  const tipo =
+    datos.find(
+      (item) =>
+        parseInt(item.id, 10) ===
+        parseInt(value, 10)
+    );
+
+
+  // ==========================================================
+  // ALONSO
+  // ==========================================================
+
+  if (cuenta === "alonso") {
+
+    setFormValues((prev) => ({
+      ...prev,
+      [`${movimientoId}`]: value,
+    }));
+
+
+    setTablaAlonso((prev) =>
+      prev.map((movimiento) => {
+
+        if (
+          movimiento.id !== movimientoId
+        ) {
+          return movimiento;
+        }
+
+        return {
+          ...movimiento,
+
+          tipo_movimiento_id:
+            value,
+
+          tipo_id:
+            value,
+
+          tipo_movimiento:
+            tipo
+              ? tipo.descripcion
+              : movimiento.tipo_movimiento,
+
+          codigo_color:
+            tipo
+              ? tipo.codigo_color
+              : movimiento.codigo_color,
+        };
+      })
+    );
+
+
+    setTablaAlonsoFiltrada((prev) =>
+      prev.map((movimiento) => {
+
+        if (
+          movimiento.id !== movimientoId
+        ) {
+          return movimiento;
+        }
+
+        return {
+          ...movimiento,
+
+          tipo_movimiento_id:
+            value,
+
+          tipo_id:
+            value,
+
+          tipo_movimiento:
+            tipo
+              ? tipo.descripcion
+              : movimiento.tipo_movimiento,
+
+          codigo_color:
+            tipo
+              ? tipo.codigo_color
+              : movimiento.codigo_color,
+        };
+      })
+    );
+  }
+
+
+  // ==========================================================
+  // SUCURSAL
+  // ==========================================================
+
+  if (cuenta === "sucursal") {
+
+    setFormValuesSucursal((prev) => ({
+      ...prev,
+      [`${movimientoId}`]: value,
+    }));
+
+
+    setTablaSucursal((prev) =>
+      prev.map((movimiento) => {
+
+        if (
+          movimiento.id !== movimientoId
+        ) {
+          return movimiento;
+        }
+
+        return {
+          ...movimiento,
+
+          tipo_movimiento_id:
+            value,
+
+          tipo_id:
+            value,
+
+          tipo_movimiento:
+            tipo
+              ? tipo.descripcion
+              : movimiento.tipo_movimiento,
+
+          codigo_color:
+            tipo
+              ? tipo.codigo_color
+              : movimiento.codigo_color,
+        };
+      })
+    );
+
+
+    setTablaSucursalFiltrada((prev) =>
+      prev.map((movimiento) => {
+
+        if (
+          movimiento.id !== movimientoId
+        ) {
+          return movimiento;
+        }
+
+        return {
+          ...movimiento,
+
+          tipo_movimiento_id:
+            value,
+
+          tipo_id:
+            value,
+
+          tipo_movimiento:
+            tipo
+              ? tipo.descripcion
+              : movimiento.tipo_movimiento,
+
+          codigo_color:
+            tipo
+              ? tipo.codigo_color
+              : movimiento.codigo_color,
+        };
+      })
+    );
+  }
+
+
+  recursosService.updateTipoMovimiento(
+    () => {
+      onBuscar();
+    },
+    params,
+    onError
+  );
+};
+
+const filtrarPorAsignacion = (
+  movimientos,
+  filtro
+) => {
+
+  if (!Array.isArray(movimientos)) {
+    return [];
+  }
+
+  if (filtro === "pendientes") {
+    return movimientos.filter(
+      (movimiento) =>
+        esMovimientoPendiente(
+          movimiento
+        )
+    );
+  }
+
+
+  if (filtro === "asignados") {
+    return movimientos.filter(
+      (movimiento) =>
+        !esMovimientoPendiente(
+          movimiento
+        )
+    );
+  }
+
+
+  return movimientos;
+};
+const tablaAlonsoVisible =
+  filtrarPorAsignacion(
+    tablaAlonso,
+    filtroAsignacion
+  );
+
+const tablaSucursalVisible =
+  filtrarPorAsignacion(
+    tablaSucursal,
+    filtroAsignacion
+  );
+
+
+const todos =
+  tablaAlonso.length +
+  tablaSucursal.length;
+
+
+const pendientes =
+  tablaAlonso
+    .filter(esMovimientoPendiente)
+    .length +
+  tablaSucursal
+    .filter(esMovimientoPendiente)
+    .length;
+
+
+const asignados =
+  todos - pendientes;
   const opcionTipo = [
     { index: 0, id: 0, nombre: "Todos" },
     { index: 1, id: 1, nombre: "Conciliado" },
@@ -157,6 +429,82 @@ export default function DetalleEstadoCuenta() {
         : filtrarTablaSucursal
     );
   };
+
+  function automatizarMovimientosBanco() {
+  Swal.fire({
+    title: "Clasificación automática",
+    text:
+      "Se clasificarán los movimientos pendientes no conciliados usando su historial.",
+    icon: "question",
+
+    showCancelButton: true,
+
+    confirmButtonText: "Clasificar",
+    cancelButtonText: "Cancelar",
+
+    confirmButtonColor: "#4096ff",
+  }).then((result) => {
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    setLoading(true);
+
+    const params = {
+      fechaInicial: range[0],
+      fechaFinal: range[1],
+      cargarCuenta: cargarCuenta || 0,
+
+      simular: false,
+    };
+
+    recursosService.automatizarTiposMovimientoBanco(
+      onAutomatizacionBancoTerminada,
+      params,
+      onError
+    );
+  });
+}
+  function onAutomatizacionBancoTerminada(response) {
+  setLoading(false);
+
+  if (!response || !response.success) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text:
+        response && response.message
+          ? response.message
+          : "No se pudo realizar la clasificación.",
+    });
+
+    return;
+  }
+
+  Swal.fire({
+    icon: "success",
+
+    title: "Clasificación terminada",
+
+    html:
+      "Analizados: <b>" +
+      response.total_analizados +
+      "</b><br/>" +
+
+      "Clasificados: <b>" +
+      response.total_clasificados +
+      "</b><br/>" +
+
+      "Pendientes: <b>" +
+      response.total_sin_clasificar +
+      "</b>",
+
+    confirmButtonColor: "#4096ff",
+  }).then(() => {
+    onBuscar();
+  });
+}
 
   useEffect(() => {
     // Obtener la fecha actual
@@ -667,6 +1015,17 @@ export default function DetalleEstadoCuenta() {
               </Button>
             </div>
           </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+            <Button
+              className="boton"
+              type="primary"
+              block
+              disabled={cookiePermisos < 2}
+              onClick={automatizarMovimientosBanco}
+            >
+              Clasificar automáticamente
+            </Button>
+          </Col>
         </Row>
         {Object.keys(message).length > 0 && errorMessage.length == 0 && (
           <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
@@ -933,6 +1292,38 @@ export default function DetalleEstadoCuenta() {
             </p>
           </Col>
         </Row>
+        <Row
+          justify="end"
+          style={{
+            marginBottom: 15,
+            marginTop: 10,
+          }}
+        >
+          <Col>
+            <Select
+              value={filtroAsignacion}
+              style={{ width: 210 }}
+              onChange={(value) => {
+                setFiltroAsignacion(value);
+
+                setPage(0);
+                setPage2(0);
+              }}
+            >
+              <Option value="todos">
+                Todos ({todos})
+              </Option>
+
+              <Option value="asignados">
+                Asignados ({asignados})
+              </Option>
+
+              <Option value="pendientes">
+                Pendientes ({pendientes})
+              </Option>
+            </Select>
+          </Col>
+        </Row>
 
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">
@@ -960,7 +1351,7 @@ export default function DetalleEstadoCuenta() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stableSort(tablaAlonso, getComparator(order, orderBy))
+                {stableSort(tablaAlonsoVisible, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((dato, index) => (
                     <TableRow
@@ -1008,7 +1399,7 @@ export default function DetalleEstadoCuenta() {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={tablaAlonso.length}
+                    count={tablaAlonsoVisible.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -1033,7 +1424,38 @@ export default function DetalleEstadoCuenta() {
             </p>
           </Col>
         </Row>
+         <Row
+            justify="end"
+            style={{
+              marginBottom: 15,
+              marginTop: 10,
+            }}
+          >
+            <Col>
+              <Select
+                value={filtroAsignacion}
+                style={{ width: 210 }}
+                onChange={(value) => {
+                  setFiltroAsignacion(value);
 
+                  setPage(0);
+                  setPage2(0);
+                }}
+              >
+                <Option value="todos">
+                  Todos ({todos})
+                </Option>
+
+                <Option value="asignados">
+                  Asignados ({asignados})
+                </Option>
+
+                <Option value="pendientes">
+                  Pendientes ({pendientes})
+                </Option>
+              </Select>
+            </Col>
+          </Row>         
         <Col xs={24}>
           <TableContainer component={Paper} className="tabla">
             <Table>
@@ -1060,7 +1482,7 @@ export default function DetalleEstadoCuenta() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stableSort2(tablaSucursal, getComparator2(order2, orderBy2))
+                {stableSort2(tablaSucursalVisible, getComparator2(order2, orderBy2))
                   .slice(
                     page2 * rowsPerPage2,
                     page2 * rowsPerPage2 + rowsPerPage2
@@ -1111,7 +1533,7 @@ export default function DetalleEstadoCuenta() {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    count={tablaSucursal.length}
+                    count={tablaSucursalVisible.length}
                     rowsPerPage={rowsPerPage2}
                     page={page2}
                     onPageChange={handleChangePage2}
@@ -1232,9 +1654,41 @@ export default function DetalleEstadoCuenta() {
                             <TableCell sx={colorDinamicoText(dato.status)}>
                               ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
                             </TableCell>
-                            <TableCell sx={colorDinamicoText(dato.status)}>
-                              {dato.tipo_movimiento}
-                            </TableCell>
+                            <TableCell>
+                                <Select
+                                  value={
+                                    formValues[
+                                      `${dato.id}`
+                                    ]
+                                  }
+                                  style={{
+                                    width: "100%",
+                                    minWidth: 180,
+                                  }}
+                                  disabled={
+                                    disableSelect(
+                                      dato.status
+                                    )
+                                  }
+                                  placeholder="Tipo de movimiento"
+                                  onChange={(value) =>
+                                    handleChangeDetalle(
+                                      value,
+                                      dato.id,
+                                      "alonso"
+                                    )
+                                  }
+                                >
+                                  {datos.map((option) => (
+                                    <Option
+                                      key={option.id}
+                                      value={option.id}
+                                    >
+                                      {option.descripcion}
+                                    </Option>
+                                  ))}
+                                </Select>
+                              </TableCell>
                           </TableRow>
                         ))}
                     </TableBody>
@@ -1318,8 +1772,40 @@ export default function DetalleEstadoCuenta() {
                             <TableCell sx={colorDinamicoText(dato.status)}>
                               ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
                             </TableCell>
-                            <TableCell sx={colorDinamicoText(dato.status)}>
-                              {dato.tipo_movimiento}
+                           <TableCell>
+                                <Select
+                                  value={
+                                    formValuesSucursal[
+                                      `${dato.id}`
+                                    ]
+                                  }
+                                  style={{
+                                    width: "100%",
+                                    minWidth: 180,
+                                  }}
+                                  disabled={
+                                    disableSelect(
+                                      dato.status
+                                    )
+                                  }
+                                  placeholder="Tipo de movimiento"
+                                  onChange={(value) =>
+                                    handleChangeDetalle(
+                                      value,
+                                      dato.id,
+                                      "sucursal"
+                                    )
+                                  }
+                                >
+                                  {datos.map((option) => (
+                                    <Option
+                                      key={option.id}
+                                      value={option.id}
+                                    >
+                                      {option.descripcion}
+                                    </Option>
+                                  ))}
+                                </Select>
                             </TableCell>
                           </TableRow>
                         ))}

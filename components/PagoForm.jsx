@@ -105,7 +105,7 @@ export default function PagoForm({
   // ============================================================
 
   const SISTEMAS_CON_CUENTA_BANCARIA = [2, 5];
-
+  const SISTEMAS_CON_COMPROBANTE = [2, 5];
   // ============================================================
   // CARGAR CATÁLOGOS
   // ============================================================
@@ -189,48 +189,68 @@ export default function PagoForm({
   // ============================================================
 
   const handleSistemaPagoChange = (value) => {
-    setSistemaSelected(value);
+  setSistemaSelected(value);
 
-    // Si no es transferencia o depósito banco,
-    // limpiar la cuenta bancaria.
-    if (!SISTEMAS_CON_CUENTA_BANCARIA.includes(value)) {
-      form.setFieldsValue({
-        cuenta_bancaria_id: undefined,
-      });
-    }
+  // ==========================================================
+  // CUENTA BANCARIA
+  // ==========================================================
 
-    // Estos datos actualmente son exclusivos de Transferencia.
-    if (value !== 2) {
-      setComprobanteBanco(null);
+  if (!SISTEMAS_CON_CUENTA_BANCARIA.includes(value)) {
+    form.setFieldsValue({
+      cuenta_bancaria_id: undefined,
+    });
+  }
 
-      setMovimientoIdConciliar(0);
+  // ==========================================================
+  // COMPROBANTE
+  // ==========================================================
+  // Transferencia y Depósito Banco utilizan comprobante.
+  // Si cambia a cualquier otro sistema, lo eliminamos.
+  // ==========================================================
 
-      setPendientes([]);
+  if (!SISTEMAS_CON_COMPROBANTE.includes(value)) {
+    setComprobanteBanco(null);
+  }
 
-      setFechaMovimiento("");
+  // ==========================================================
+  // DATOS EXCLUSIVOS DE TRANSFERENCIA
+  // ==========================================================
 
-      form.setFieldsValue({
-        fechaTransferencia: undefined,
-        referenciaTransferencia: undefined,
-      });
-    }
+  if (value !== 2) {
+    setMovimientoIdConciliar(0);
 
-    // Si deja Pago en Oficina
-    if (value !== 1) {
-      setTipoPagoSelected(null);
+    setPendientes([]);
 
-      form.setFieldsValue({
-        usuario_recibio: undefined,
-      });
-    }
+    setFechaMovimiento("");
 
-    // Si deja "Otro"
-    if (value !== 8) {
-      form.setFieldsValue({
-        otro_pago: undefined,
-      });
-    }
-  };
+    form.setFieldsValue({
+      fechaTransferencia: undefined,
+      referenciaTransferencia: undefined,
+    });
+  }
+
+  // ==========================================================
+  // PAGO EN OFICINA
+  // ==========================================================
+
+  if (value !== 1) {
+    setTipoPagoSelected(null);
+
+    form.setFieldsValue({
+      usuario_recibio: undefined,
+    });
+  }
+
+  // ==========================================================
+  // OTRO
+  // ==========================================================
+
+  if (value !== 8) {
+    form.setFieldsValue({
+      otro_pago: undefined,
+    });
+  }
+};
 
   // ============================================================
   // PAGINACIÓN
@@ -252,24 +272,55 @@ export default function PagoForm({
   // GUARDAR PAGO
   // ============================================================
 
-  const onGuardarPago = (values) => {
-    // ----------------------------------------------------------
-    // VALIDAR COMPROBANTE PARA TRANSFERENCIA
-    // ----------------------------------------------------------
+ const onGuardarPago = (values) => {
 
-    if (
-      sistemaSelected === 2 &&
-      !comprobanteBanco
-    ) {
-      Swal.fire({
-        title: "Comprobante requerido",
-        icon: "warning",
-        text: "Debe adjuntar el comprobante del pago bancario.",
-        confirmButtonText: "Aceptar",
-      });
+  // ==========================================================
+  // VALIDAR COMPROBANTE
+  //
+  // 2 = Transferencia
+  // 5 = Deposito Banco
+  // ==========================================================
 
-      return;
-    }
+  if (
+    SISTEMAS_CON_COMPROBANTE.includes(
+      sistemaSelected
+    ) &&
+    !comprobanteBanco
+  ) {
+    Swal.fire({
+      title: "Comprobante requerido",
+      icon: "warning",
+
+      text:
+        sistemaSelected === 5
+          ? "Debe adjuntar el comprobante del depósito bancario."
+          : "Debe adjuntar el comprobante de la transferencia.",
+
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  // ==========================================================
+  // VALIDAR CUENTA BANCARIA
+  // ==========================================================
+
+  if (
+    SISTEMAS_CON_CUENTA_BANCARIA.includes(
+      sistemaSelected
+    ) &&
+    !values.cuenta_bancaria_id
+  ) {
+    Swal.fire({
+      title: "Cuenta bancaria requerida",
+      icon: "warning",
+      text: "Debe seleccionar la cuenta bancaria donde se recibió el pago.",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
 
     // ----------------------------------------------------------
     // VALIDAR CUENTA BANCARIA
@@ -982,7 +1033,7 @@ export default function PagoForm({
                 TRANSFERENCIA
                 ================================================= */}
 
-            {sistemaSelected === 2 && (
+            {(sistemaSelected === 2 || sistemaSelected === 5) && (
 
               <div>
 

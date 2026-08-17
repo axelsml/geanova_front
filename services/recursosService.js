@@ -940,6 +940,85 @@ class RecursosService {
         }
       });
   }
+   automatizarTiposMovimientoTarjeta(callback, params, error) {
+  let call;
+
+  if (call) {
+    call.cancel();
+  }
+
+  const CancelToken = axios.CancelToken;
+  call = CancelToken.source();
+
+  return http
+    .post(
+      "automatizar_tipos_movimientos_tarjeta",
+      params,
+      {
+        cancelToken: call.token,
+      }
+    )
+    .then((response) => {
+      console.log(
+        "automatizarTiposMovimientoTarjeta:",
+        response.data
+      );
+
+      return callback(response.data);
+    })
+    .catch((response) => {
+      try {
+        if (axios.isCancel(response)) {
+          console.log("Petición Cancelada");
+          return;
+        }
+
+        error(response);
+
+        return Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `Error Handled: ${response}`,
+        });
+
+      } catch (err) {
+        console.error(
+          "Error Handled",
+          err
+        );
+
+        return Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `Error Handled: ${err}`,
+        });
+      }
+    });
+}
+
+automatizarTiposMovimientoBanco(callback, params, error) {
+  return http
+    .post(
+      "automatizar_tipos_movimientos_banco",
+      params
+    )
+    .then((response) => {
+      console.log(
+        "automatizarTiposMovimientoBanco:",
+        response.data
+      );
+
+      return callback(response.data);
+    })
+    .catch((err) => {
+      console.error(
+        "automatizarTiposMovimientoBanco error:",
+        err
+      );
+
+      error(err);
+    });
+}
 
   updateTipoMovimientoTarjeta(callback, params, error) {
     let call;
@@ -976,6 +1055,7 @@ class RecursosService {
         }
       });
   }
+  
 }
 
 export default new RecursosService();

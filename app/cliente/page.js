@@ -2,6 +2,7 @@
 import { formatPrecio, formatDate } from "@/helpers/formatters";
 import VentaForm from "@/components/VentaForm";
 import PagoForm from "@/components/PagoForm";
+import ImagenesLoteModal from "@/components/ImagenesLoteModal";
 import ventasService from "@/services/ventasService";
 import {
   Button,
@@ -110,6 +111,9 @@ export default function ClientesInfo() {
   const [sistemas_pagoModal, setSistemasPagoModal] = useState(null);
   const [sistemaPagoSelectedModal, setSistemaPagoSelectedModal] =
     useState(null);
+
+    const [showImagenes, setShowImagenes] =
+  useState(false);
 
   const [calle, setCalle] = useState(null);
   const [colonia, setColonia] = useState(null);
@@ -1147,19 +1151,20 @@ export default function ClientesInfo() {
                 Hoja de Liquidación
               </Button>
             )}
-          <Button
-            className="boton"
-            disabled={cookiePermisos >= 1 ? false : true}
-            onClick={() => {
-              window.open(
-                // https://api.santamariadelaluz.com
-                `https://api.santamariadelaluz.com/mostrar_imagen/${info_cliente.id}.pdf`
-              );
-            }}
-            size="large"
-          >
-            Ver Imagenes
-          </Button>
+         <Button
+          className="boton"
+          disabled={
+            cookiePermisos >= 1
+              ? false
+              : true
+          }
+          onClick={() => {
+            setShowImagenes(true);
+          }}
+          size="large"
+        >
+          Ver Imagenes
+        </Button>
 
           <Button
             className="boton"
@@ -2013,7 +2018,22 @@ export default function ClientesInfo() {
           </div>
         </Form>
       </Modal>
-
+                  <ImagenesLoteModal
+  visible={showImagenes}
+  onClose={() => {
+    setShowImagenes(false);
+  }}
+  loteId={
+    info_lote
+      ? info_lote.lote_id
+      : null
+  }
+  terrenoId={
+    info_lote
+      ? info_lote.terreno_id
+      : null
+  }
+/>
       {/* {!nuevoPago && ventas?.length > 0 && (
         <div className="p-8 grid gap-8">
           <Row justify={"start"}>
