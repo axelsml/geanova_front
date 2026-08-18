@@ -152,7 +152,9 @@
   padding: 10px;
 
 }
-
+.swal2-container {
+  z-index: 99999 !important;
+}
 .boton {
   background-color: rgb(67, 141, 204);
   color: white;

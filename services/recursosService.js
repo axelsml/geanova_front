@@ -1055,6 +1055,35 @@ automatizarTiposMovimientoBanco(callback, params, error) {
         }
       });
   }
+
+previsualizarPalabraClaveBanco(callback, params, error) {
+  return http
+    .post(
+      "previsualizar_palabra_clave_banco",
+      params
+    )
+    .then((response) => {
+      return callback(response.data);
+    })
+    .catch((err) => {
+      error(err);
+    });
+}
+
+guardarAplicarPalabraClaveBanco(callback, params, error) {
+  return http
+    .post(
+      "guardar_aplicar_palabra_clave_banco",
+      params
+    )
+    .then((response) => {
+      return callback(response.data);
+    })
+    .catch((err) => {
+      error(err);
+    });
+}
+
   
 }
 

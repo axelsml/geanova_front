@@ -13,6 +13,7 @@ import {
   ColorPicker,
   theme,
   Divider,
+  Alert
 } from "antd";
 import {
   Paper,
@@ -24,12 +25,13 @@ import {
   TableRow,
   TablePagination,
   TableFooter,
+
 } from "@mui/material";
 import { FaRegTrashAlt, FaUserTag } from "react-icons/fa";
 import { LoadingContext } from "@/contexts/loading";
 import Swal from "sweetalert2";
 import recursosService from "@/services/recursosService";
-import { toTitleCase } from "@/helpers/formatters";
+import { formatPrecio, toTitleCase } from "@/helpers/formatters";
 import {
   yellow,
   generate,
@@ -50,6 +52,23 @@ export default function AdministrarTipoMovimiento() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [form] = Form.useForm();
+  const [showPalabraClave, setShowPalabraClave] =
+  useState(false);
+
+const [tipoPalabraClave, setTipoPalabraClave] =
+  useState(null);
+
+const [palabraClave, setPalabraClave] =
+  useState("");
+
+const [cuentaPalabraClave, setCuentaPalabraClave] =
+  useState(0);
+
+const [direccionPalabraClave, setDireccionPalabraClave] =
+  useState("AMBOS");
+
+const [previewPalabraClave, setPreviewPalabraClave] =
+  useState(null);
 
   //Variables del modal
   const [showModal, setShowModal] = useState(false);
@@ -72,6 +91,173 @@ export default function AdministrarTipoMovimiento() {
     Amarillo: yellow,
   });
 
+  function buscarCoincidenciasPalabraClave() {
+
+  if (!tipoPalabraClave) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Tipo requerido",
+      text:
+        "Selecciona un tipo de movimiento.",
+    });
+  }
+
+
+  if (!palabraClave.trim()) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Palabra requerida",
+      text:
+        "Escribe una palabra clave.",
+    });
+  }
+
+
+  const params = {
+    tipo_movimiento_id:
+      tipoPalabraClave,
+
+    palabra_clave:
+      palabraClave,
+
+    cuenta_id:
+      cuentaPalabraClave,
+
+    direccion:
+      direccionPalabraClave,
+  };
+
+
+  recursosService.previsualizarPalabraClaveBanco(
+    (response) => {
+
+      if (!response.success) {
+
+        return Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.message,
+        });
+
+      }
+
+
+      setPreviewPalabraClave(
+        response
+      );
+
+    },
+
+    params,
+
+    onError
+  );
+}
+function guardarAplicarPalabraClave() {
+
+  if (!previewPalabraClave) {
+    return;
+  }
+
+
+  Swal.fire({
+    icon: "question",
+
+    title: "¿Aplicar palabra clave?",
+
+    html:
+      "Se asignarán <b>" +
+      previewPalabraClave.total_encontrados +
+      "</b> movimientos pendientes a:<br/><br/>" +
+      "<b>" +
+      previewPalabraClave.tipo_movimiento +
+      "</b>",
+
+    showCancelButton: true,
+
+    confirmButtonText:
+      "Guardar y aplicar",
+
+    cancelButtonText:
+      "Cancelar",
+
+    confirmButtonColor:
+      "#4096ff",
+
+  }).then((result) => {
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+
+    const params = {
+      tipo_movimiento_id:
+        tipoPalabraClave,
+
+      palabra_clave:
+        palabraClave,
+
+      cuenta_id:
+        cuentaPalabraClave,
+
+      direccion:
+        direccionPalabraClave,
+
+      prioridad:
+        100,
+    };
+
+
+    recursosService.guardarAplicarPalabraClaveBanco(
+      (response) => {
+
+        if (!response.success) {
+
+          return Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: response.message,
+          });
+
+        }
+
+
+        Swal.fire({
+          icon: "success",
+
+          title:
+            "Palabra clave guardada",
+
+          html:
+            "Se actualizaron <b>" +
+            response.total_actualizados +
+            "</b> movimientos.",
+
+          confirmButtonColor:
+            "#4096ff",
+
+        }).then(() => {
+
+          setShowPalabraClave(false);
+
+          setPreviewPalabraClave(null);
+
+          setPalabraClave("");
+
+          setTipoPalabraClave(null);
+
+        });
+
+      },
+
+      params,
+
+      onError
+    );
+
+  });
+}
   const customPanelRender = (_, { components: { Picker, Presets } }) => (
     <Row justify="space-between" wrap={false}>
       <Col span={12}>
@@ -293,6 +479,12 @@ export default function AdministrarTipoMovimiento() {
             <FaUserTag className="m-auto" size={"20px"} />
           </Button>
         </Tooltip>
+         <Button
+          type="primary"
+          onClick={() => setShowPalabraClave(true)}
+        >
+          palabra clave
+        </Button>
         <Input.Search
           placeholder="Buscar Movimiento"
           style={{
@@ -304,6 +496,7 @@ export default function AdministrarTipoMovimiento() {
           onSearch={onSearch}
         />
       </Row>
+      
       <Row justify={"center"}>
         <Col xs={24} sm={20} md={16} lg={24} xl={24} xxl={24}>
           <TableContainer component={Paper} className="tabla">
@@ -339,6 +532,8 @@ export default function AdministrarTipoMovimiento() {
                           disabled
                         />
                       </TableCell>
+                      
+
                       <TableCell>
                         <Tooltip title="Haz clic aquí para eliminar un tipo de movimiento">
                           <Button
@@ -472,6 +667,149 @@ export default function AdministrarTipoMovimiento() {
           </Row>
         </div>
       </Modal>
+      <Modal
+  title="Nueva palabra clave"
+  open={showPalabraClave}
+  footer={null}
+  onCancel={() => {
+    setShowPalabraClave(false);
+    setPreviewPalabraClave(null);
+  }}
+>
+  <Form layout="vertical">
+
+    <Form.Item label="Tipo de movimiento">
+      <Select
+        value={tipoPalabraClave}
+        onChange={setTipoPalabraClave}
+        placeholder="Selecciona el tipo"
+      >
+        {datos.map((tipo) => (
+          <Option
+            key={tipo.id}
+            value={tipo.id}
+          >
+            {tipo.descripcion}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+
+    <Form.Item label="Palabra clave">
+      <Input
+        value={palabraClave}
+        onChange={(e) =>
+          setPalabraClave(
+            e.target.value
+          )
+        }
+        placeholder="Ej. EL DIEZ"
+      />
+    </Form.Item>
+
+
+    <Form.Item label="Cuenta">
+      <Select
+        value={cuentaPalabraClave}
+        onChange={setCuentaPalabraClave}
+      >
+        <Option value={0}>
+          Todas
+        </Option>
+
+        <Option value={1}>
+          Alonso Morales
+        </Option>
+
+        <Option value={2}>
+          Sucursal Uno
+        </Option>
+      </Select>
+    </Form.Item>
+
+
+    <Form.Item label="Movimiento">
+      <Select
+        value={direccionPalabraClave}
+        onChange={setDireccionPalabraClave}
+      >
+        <Option value="AMBOS">
+          Cargo y abono
+        </Option>
+
+        <Option value="CARGO">
+          Solo cargos
+        </Option>
+
+        <Option value="ABONO">
+          Solo abonos
+        </Option>
+      </Select>
+    </Form.Item>
+
+
+    <Button
+      type="primary"
+      block
+      onClick={buscarCoincidenciasPalabraClave}
+    >
+      Buscar coincidencias
+    </Button>
+
+  </Form>
+
+
+  {previewPalabraClave && (
+    <div
+      style={{
+        marginTop: 20,
+      }}
+    >
+      <Alert
+        type={
+          previewPalabraClave.total_encontrados > 0
+            ? "info"
+            : "warning"
+        }
+        showIcon
+        message={
+          `${previewPalabraClave.total_encontrados} movimientos encontrados`
+        }
+        description={
+          <>
+            <div>
+              Cargos: $
+              {formatPrecio(
+                previewPalabraClave.total_cargo
+              )}
+            </div>
+
+            <div>
+              Abonos: $
+              {formatPrecio(
+                previewPalabraClave.total_abono
+              )}
+            </div>
+          </>
+        }
+      />
+
+
+      <Button
+        type="primary"
+        block
+        style={{
+          marginTop: 15,
+        }}
+        onClick={guardarAplicarPalabraClave}
+      >
+        Guardar regla y aplicar
+      </Button>
+    </div>
+  )}
+
+</Modal>
     </div>
   );
 }
