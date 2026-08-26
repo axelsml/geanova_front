@@ -287,115 +287,121 @@ export default function ImagenesLoteModal({
   // GUARDAR
   // ============================================================
 
-  async function guardar() {
+async function guardar() {
 
-    try {
+  try {
 
-      const values =
-        await form.validateFields();
+    const values =
+      await form.validateFields();
 
-      // Para creación pedimos al menos una imagen.
-      if (
-        !editando &&
-        !archivoImagen
-      ) {
+    // ========================================================
+    // VALIDAR ARCHIVOS
+    // Se permite:
+    // - Solo imagen
+    // - Solo PDF
+    // - Imagen + PDF
+    // ========================================================
 
-        Swal.fire({
-          title: "Imagen requerida",
-          icon: "warning",
-          text:
-            "Seleccione una imagen para guardar.",
-        });
+    if (
+      !editando &&
+      !archivoImagen &&
+      !archivoPdf
+    ) {
 
-        return;
+      Swal.fire({
+        title: "Archivo requerido",
+        icon: "warning",
+        text:
+          "Seleccione una imagen o un PDF para guardar.",
+      });
 
-      }
+      return;
 
-      const formData =
-        new FormData();
+    }
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "imagen[lote_id]",
+      loteId
+    );
+
+    formData.append(
+      "imagen[terreno_id]",
+      terrenoId
+    );
+
+    if (
+      values.tipo_id !== undefined &&
+      values.tipo_id !== null
+    ) {
 
       formData.append(
-        "imagen[lote_id]",
-        loteId
+        "imagen[tipo_id]",
+        values.tipo_id
       );
+
+    }
+
+    // Imagen solamente si fue seleccionada
+    if (archivoImagen) {
 
       formData.append(
-        "imagen[terreno_id]",
-        terrenoId
+        "imagen[img]",
+        archivoImagen
       );
 
-      if (
-        values.tipo_id !== undefined &&
-        values.tipo_id !== null
-      ) {
+    }
 
-        formData.append(
-          "imagen[tipo_id]",
-          values.tipo_id
-        );
+    // PDF solamente si fue seleccionado
+    if (archivoPdf) {
 
-      }
+      formData.append(
+        "imagen[pdf]",
+        archivoPdf
+      );
 
-      if (archivoImagen) {
+    }
 
-        formData.append(
-          "imagen[img]",
-          archivoImagen
-        );
-
-      }
-
-      if (archivoPdf) {
-
-        formData.append(
-          "imagen[pdf]",
-          archivoPdf
-        );
-
-      }
-
-      setGuardando(true);
+    setGuardando(true);
 
 
-      // ========================================================
-      // UPDATE
-      // ========================================================
+    // ========================================================
+    // UPDATE
+    // ========================================================
 
-      if (editando) {
+    if (editando) {
 
-        imagenesService.updateImagen(
-          editando.id,
-
-          formData,
-
-          onGuardado,
-
-          onErrorGuardar
-        );
-
-        return;
-
-      }
-
-
-      // ========================================================
-      // CREATE
-      // ========================================================
-
-      imagenesService.createImagen(
+      imagenesService.updateImagen(
+        editando.id,
         formData,
         onGuardado,
         onErrorGuardar
       );
 
-    } catch (error) {
-
-      console.log(error);
+      return;
 
     }
 
+
+    // ========================================================
+    // CREATE
+    // ========================================================
+
+    imagenesService.createImagen(
+      formData,
+      onGuardado,
+      onErrorGuardar
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
   }
 
+}
 
   // ============================================================
   // GUARDADO
@@ -684,8 +690,8 @@ export default function ImagenesLoteModal({
             >
 
               <Form.Item
-                label="PDF opcional"
-              >
+                  label="PDF"
+                >
 
                 <Upload
                   beforeUpload={
@@ -834,6 +840,7 @@ export default function ImagenesLoteModal({
                         type="secondary"
                       >
                         {imagen.img_file_name ||
+                          imagen.pdf_file_name ||
                           "Sin nombre"}
                       </Text>
 
