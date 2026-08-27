@@ -1,249 +1,373 @@
 "use client";
 
-import AsignarM2 from "@/app/lotes/asignar/page";
-import PlazosCrear from "@/app/plazos/crear/page";
-import TerrenoForm from "@/components/TerrenoForm";
-import { formatPrecio } from "@/helpers/formatters";
-import terrenosService from "@/services/terrenosService";
-import { FaArrowUpRightFromSquare } from "react-icons/fa6";
-import { Button, Col, Collapse, Row, Typography, Radio, Tooltip } from "antd";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Tooltip } from "antd";
+
 import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TableFooter,
-} from "@mui/material";
+  FaArrowUpRightFromSquare,
+  FaPlus,
+} from "react-icons/fa6";
+
+import { TbReportAnalytics } from "react-icons/tb";
+import { BiBuildings } from "react-icons/bi";
+
+import TerrenoForm from "@/components/TerrenoForm";
 import TerrenoInfoForm from "@/components/TerrenoInfoForm";
 import ReporteProyectoForm from "@/components/ReporteProyectoForm";
+
+import terrenosService from "@/services/terrenosService";
+import { formatPrecio } from "@/helpers/formatters";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
+
 export default function TerrenosCrear() {
-  const [nuevoTerreno, setNuevoTerreno] = useState(false);
-  const [infoTerreno, setInfoTerreno] = useState(false);
+  const [vista, setVista] = useState("lista");
 
-  const [reporteProyecto, setReporteProyecto] = useState(false);
+  const [terrenos, setTerrenos] = useState([]);
+  const [terrenoSeleccionado, setTerrenoSeleccionado] = useState(null);
 
-  const [terrenos, setTerrenos] = useState(null);
-  const [terreno, setTerreno] = useState(null);
+  const [actualizar, setActualizar] = useState(0);
 
-  const [changeState, setChangeState] = useState(false);
-  const [value, setValue] = useState(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [cookiePermisos, setCookiePermisos] = useState([]);
-  const empresas = [
-    {
-      id: 1,
-      nombre: "Sucursal 1",
-    },
-  ];
-
-  const onChange = (e) => {
-    setValue(e.target.value);
-  };
+  const [cookiePermisos, setCookiePermisos] = useState(0);
 
   useEffect(() => {
-    terrenosService.getTerrenos(setTerrenos, Error);
-    getCookiePermisos("lista de terrenos", setCookiePermisos);
-  }, [changeState]);
+    cargarTerrenos();
 
-  async function onTerreno(terrenos) {
-    setProyectos(terrenos);
+    getCookiePermisos(
+      "lista de terrenos",
+      setCookiePermisos
+    );
+  }, [actualizar]);
+
+  const cargarTerrenos = () => {
+    terrenosService.getTerrenos(
+      (data) => {
+        setTerrenos(
+          Array.isArray(data)
+            ? data
+            : []
+        );
+      },
+      (error) => {
+        console.error(
+          "Error al cargar terrenos:",
+          error
+        );
+
+        setTerrenos([]);
+      }
+    );
+  };
+
+  const abrirTerreno = (terreno) => {
+    setTerrenoSeleccionado(terreno);
+    setVista("detalle");
+  };
+
+  const regresarLista = () => {
+    setVista("lista");
+  };
+
+  const refrescarLista = () => {
+    setActualizar((valor) => valor + 1);
+  };
+
+  if (vista === "nuevo") {
+    return (
+      <div className="page-container">
+        <TerrenoForm
+          setTerrenoNuevo={() => regresarLista()}
+          setWatch={refrescarLista}
+          watch={actualizar}
+        />
+      </div>
+    );
   }
 
-  const CreateNuevoTerreno = () => {
-    setNuevoTerreno(!nuevoTerreno);
-  };
-  const CreateReporteProyecto = () => {
-    setReporteProyecto(!reporteProyecto);
-  };
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+  if (
+    vista === "detalle" &&
+    terrenoSeleccionado
+  ) {
+    return (
+      <div className="page-container">
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+        <button
+          type="button"
+          className="btn btn-secondary terrain-back-button"
+          onClick={regresarLista}
+        >
+          ← Volver a terrenos
+        </button>
+
+        <TerrenoInfoForm
+          terrenoSeleccionado={
+            terrenoSeleccionado
+          }
+          setTerrenoNuevo={regresarLista}
+          setWatch={refrescarLista}
+          watch={actualizar}
+        />
+
+      </div>
+    );
+  }
+
+  if (vista === "reporte") {
+    return (
+      <div className="page-container">
+
+        <button
+          type="button"
+          className="btn btn-secondary terrain-back-button"
+          onClick={regresarLista}
+        >
+          ← Volver a terrenos
+        </button>
+
+        <ReporteProyectoForm
+          setReporteNuevo={regresarLista}
+          setWatch={refrescarLista}
+          watch={actualizar}
+        />
+
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8 grid gap-4">
-      {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
-        <>
-          <Row justify={"center"}>
-            <Col
-              xs={24}
-              sm={20}
-              md={16}
-              lg={12}
-              xl={8}
-              xxl={4}
-              className="titulo_pantallas"
+    <main className="page">
+      <div className="page-container">
+
+        <div className="page-header">
+
+          <div className="page-header__content">
+
+            <div className="page-header__eyebrow">
+              <BiBuildings />
+
+              INVENTARIO INMOBILIARIO
+            </div>
+
+            <h1 className="page-title">
+              Terrenos
+            </h1>
+
+            <p className="page-description">
+              Administra proyectos, superficies,
+              lotes y configuración comercial.
+            </p>
+
+          </div>
+
+          <div className="page-header__actions">
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={cookiePermisos < 1}
+              onClick={() => setVista("reporte")}
             >
-              <b>LISTA DE TERRENOS</b>
-            </Col>
-          </Row>
-        </>
-      )}
-      {!nuevoTerreno && !infoTerreno && !reporteProyecto && (
-        <>
-          <Row
-            style={{ marginTop: "100px", marginRight: "12%" }}
-            justify={"end"}
-          >
-            <Col>
-              <Button
-                className="boton"
-                size={"large"}
-                disabled={cookiePermisos >= 2 ? false : true}
-                onClick={CreateNuevoTerreno}
-              >
-                Crear Nuevo Terreno
-              </Button>
-            </Col>
-            <Col>
-              <Button
-                className="boton"
-                disabled={cookiePermisos >= 1 ? false : true}
-                size={"large"}
-                onClick={CreateReporteProyecto}
-              >
-                Reporte general proyecto
-              </Button>
-            </Col>
-          </Row>
-        </>
-      )}
-      <Row justify={"center"}>
-        <Col span={24}>
-          {nuevoTerreno && (
-            <TerrenoForm
-              setTerrenoNuevo={setNuevoTerreno}
-              setWatch={setChangeState}
-              watch={changeState}
-            />
-          )}
-        </Col>
-      </Row>
+              <TbReportAnalytics />
 
-      <Row justify={"center"}>
-        <Col span={24}>
-          {infoTerreno && (
-            <TerrenoInfoForm
-              setTerrenoNuevo={setNuevoTerreno}
-              terrenoSeleccionado={terreno}
-              setWatch={setChangeState}
-              watch={changeState}
-            />
-          )}
-        </Col>
-      </Row>
+              Reporte general
+            </button>
 
-      <Row justify={"center"}>
-        <Col span={24}>
-          {reporteProyecto && (
-            <ReporteProyectoForm
-              setReporteNuevo={setReporteProyecto}
-              setWatch={setChangeState}
-              watch={changeState}
-            />
-          )}
-        </Col>
-      </Row>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={cookiePermisos < 2}
+              onClick={() => setVista("nuevo")}
+            >
+              <FaPlus />
 
-      {!nuevoTerreno &&
-        !infoTerreno &&
-        terrenos?.length > 0 &&
-        !reporteProyecto && (
-          <Row justify={"center"}>
-            {/* <Col span={21}>
-              <Typography>Lista de Terrenos</Typography>
-              <br />
-            </Col> */}
-            <Row justify={"center"} className="w-3/4 m-auto">
-              <TableContainer component={Paper} className="tabla">
-                <Table>
-                  <TableHead>
-                    <TableRow className="tabla_encabezado">
-                      <TableCell>
-                        <p>Proyecto</p>
-                      </TableCell>
-                      <TableCell>
-                        <p>Propietario</p>
-                      </TableCell>
-                      <TableCell>
-                        <p>Domicilio</p>
-                      </TableCell>
-                      <TableCell>
-                        <p>Colonia/Localidad</p>
-                      </TableCell>
-                      <TableCell>
-                        <p>Ciudad</p>
-                      </TableCell>
-                      <TableCell>
-                        <p>Superficie</p>
-                      </TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {terrenos?.map((terreno, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{terreno.nombre}</TableCell>
-                        <TableCell>{terreno.propietario}</TableCell>
-                        <TableCell>{terreno.domicilio}</TableCell>
-                        <TableCell>{terreno.colonia}</TableCell>
-                        <TableCell>{terreno.ciudad}</TableCell>
-                        <TableCell>
-                          {formatPrecio(terreno.superficie_total)}
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip
-                            title={
-                              "Datos del terreno seleccionado " + terreno.nombre
+              Nuevo terreno
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div className="terrain-summary">
+
+          <div className="kpi-card">
+
+            <div className="kpi-card__label">
+              Proyectos registrados
+            </div>
+
+            <div className="kpi-card__value">
+              {terrenos.length}
+            </div>
+
+            <div className="kpi-card__description">
+              Total de terrenos disponibles
+              en el sistema.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <section className="card terrain-list-card">
+
+          <div className="card__header">
+
+            <div>
+
+              <h2 className="card__title">
+                Lista de terrenos
+              </h2>
+
+              <p className="terrain-list-card__description">
+                Consulta la información general
+                de cada proyecto.
+              </p>
+
+            </div>
+
+            <span className="badge badge-primary">
+              {terrenos.length} proyectos
+            </span>
+
+          </div>
+
+
+          <div className="terrain-table-wrapper">
+
+            {terrenos.length > 0 ? (
+
+              <table className="table terrain-table">
+
+                <thead>
+                  <tr>
+                    <th>Proyecto</th>
+                    <th>Propietario</th>
+                    <th>Ubicación</th>
+                    <th>Superficie</th>
+                    <th></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  {terrenos.map((terreno) => (
+
+                    <tr key={terreno.id}>
+
+                      <td>
+
+                        <div className="terrain-project">
+
+                          <div className="terrain-project__icon">
+                            <BiBuildings />
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              {terreno.nombre || "Sin nombre"}
+                            </strong>
+
+                            <span>
+                              Proyecto inmobiliario
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                      </td>
+
+                      <td>
+                        {terreno.propietario || "—"}
+                      </td>
+
+                      <td>
+
+                        <div className="terrain-location">
+
+                          <strong>
+                            {terreno.ciudad || "—"}
+                          </strong>
+
+                          <span>
+                            {[
+                              terreno.colonia,
+                              terreno.domicilio,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ") || "Sin dirección"}
+                          </span>
+
+                        </div>
+
+                      </td>
+
+                      <td>
+
+                        <strong className="terrain-area">
+                          {formatPrecio(
+                            terreno.superficie_total
+                          )}
+                        </strong>
+
+                        <span className="terrain-area__unit">
+                          m²
+                        </span>
+
+                      </td>
+
+                      <td className="terrain-actions">
+
+                        <Tooltip title="Ver detalles">
+
+                          <button
+                            type="button"
+                            className="btn btn-icon btn-secondary"
+                            onClick={() =>
+                              abrirTerreno(terreno)
                             }
                           >
-                            <Button
-                              className="boton"
-                              onClick={() => {
-                                setTerreno(terreno);
-                                setInfoTerreno(true);
-                              }}
-                              size="large"
-                            >
-                              <FaArrowUpRightFromSquare
-                                className="m-auto"
-                                size={"20px"}
-                              />
-                            </Button>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Row>
-          </Row>
-        )}
-      <div>
-        {terreno != null && (
-          <>
-            <div>
-              <Row>
-                <h1>{terreno.proyecto}</h1>
-              </Row>
-              <Row>
-                <Col></Col>
-              </Row>
-            </div>
-          </>
-        )}
+                            <FaArrowUpRightFromSquare />
+                          </button>
+
+                        </Tooltip>
+
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            ) : (
+
+              <div className="empty-state">
+
+                <BiBuildings size={34} />
+
+                <strong>
+                  Aún no hay terrenos registrados
+                </strong>
+
+                <span>
+                  Crea un terreno para comenzar
+                  a administrar tus proyectos.
+                </span>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </section>
+
       </div>
-    </div>
+    </main>
   );
 }

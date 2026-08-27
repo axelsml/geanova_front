@@ -1,111 +1,191 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
+
 import {
-  Row,
-  Col,
-  Typography,
-  Input,
-  Button,
-  Form,
-  Select,
-  DatePicker,
   Alert,
-  Space,
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Select,
 } from "antd";
-import Loader80 from "@/components/Loader80";
+
 import Swal from "sweetalert2";
+
+import Loader80 from "@/components/Loader80";
 import recursosService from "@/services/recursosService";
-import { formatDate } from "@/helpers/formatters";
-import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
+import { formatDate, formatPrecio } from "@/helpers/formatters";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
+
+import locale from "antd/lib/date-picker/locale/es_ES";
 
 export default function AgregarCargo() {
   const [loading, setLoading] = useState(false);
-
   const [datos, setDatos] = useState([]);
-  const [message, setMessage] = useState("");
-  const [form] = Form.useForm();
+  const [message, setMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const storedUsuario = window.localStorage.getItem("usuario");
-  const [cookiePermisos, setCookiePermisos] = useState([]);
-  const onError = (e) => {
+  const [cookiePermisos, setCookiePermisos] = useState(0);
+
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    recursosService
+      .showTipoMovimientoManejo(setDatos, onError)
+      .then(() => {
+        setLoading(false);
+      });
+
+    getCookiePermisos(
+      "agregar cargo",
+      setCookiePermisos
+    );
+  }, []);
+
+  const onError = (error) => {
     setLoading(false);
-    console.log(e);
-    if (e.message) {
-      setErrorMessage(
-        `Error al realizar la consulta, favor de revisar: ${e.message}`
+
+    console.error(
+      "AgregarCargo:",
+      error
+    );
+
+    const detalle =
+      error && error.message
+        ? error.message
+        : String(error || "");
+
+    setErrorMessage(
+      "Error al realizar la operación" +
+        (detalle ? ": " + detalle : ".")
+    );
+  };
+
+  const obtenerUsuarioId = () => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    try {
+      const storedUsuario =
+        window.localStorage.getItem("usuario");
+
+      if (!storedUsuario) {
+        return null;
+      }
+
+      const usuario =
+        JSON.parse(storedUsuario);
+
+      return usuario && usuario.id
+        ? usuario.id
+        : null;
+    } catch (error) {
+      console.error(
+        "No fue posible leer el usuario:",
+        error
       );
-    } else {
-      setErrorMessage(`Error al realizar la consulta, favor de revisar ${e}`);
+
+      return null;
     }
   };
 
-  useEffect(() => {
-    recursosService.showTipoMovimientoManejo(setDatos, onError).then(() => {
-      setLoading(false);
-    });
-
-    getCookiePermisos("agregar cargo", setCookiePermisos);
-  }, []);
-
-  const layout = {
-    labelCol: { span: 24 },
-    wrapperCol: { span: 24 },
-  };
-  const dateFormat = "DD/MM/YYYY";
-
   async function onFinish(data) {
-    const usuarioId = JSON.parse(storedUsuario).id;
-    let forms = {
+    const usuarioId =
+      obtenerUsuarioId();
+
+    if (!usuarioId) {
+      Swal.fire({
+        title: "Sesión no disponible",
+        icon: "warning",
+        text: "No fue posible identificar al usuario que está registrando el cargo.",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    const folio =
+      String(data.folio || "").trim();
+
+    const forms = {
       fecha: formatDate(data.fecha),
-      monto: data.monto,
-      comentario: data.comentario,
+      monto: Number(data.monto || 0),
+      comentario:
+        "Pago de cliente con folio: " +
+        folio,
       tipoCargo: data.tipoCargo,
       usuarioCreacion: usuarioId,
     };
 
-    await Swal.fire({
-      title: "Guardar nuevo cargo?",
-      icon: "question",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      confirmButtonText: "Aceptar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setLoading(true);
-        recursosService.agregarCargo(onCargoGuardado, forms, onError);
-      }
-    });
+    const result =
+      await Swal.fire({
+        title: "¿Guardar nuevo cargo?",
+        icon: "question",
+        html:
+          '<div style="text-align:left">' +
+          "<b>Monto:</b> $" +
+          formatPrecio(forms.monto) +
+          "<br/><br/>" +
+          "<b>Concepto:</b> " +
+          forms.comentario +
+          "</div>",
+        confirmButtonColor: "#438dcc",
+        cancelButtonColor: "#64748b",
+        showCancelButton: true,
+        confirmButtonText: "Guardar",
+        cancelButtonText: "Cancelar",
+      });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+    setMessage(null);
+
+    recursosService.agregarCargo(
+      onCargoGuardado,
+      forms,
+      onError
+    );
   }
 
   const onCargoGuardado = (data) => {
     setLoading(false);
-    if (data.type == "success") {
+
+    if (data.type === "success") {
       form.resetFields();
+
       setMessage({
         type: data.type,
         message: data.message,
       });
+
       Swal.fire({
-        title: "Cargo guardado con éxito",
+        title: "Cargo guardado",
         icon: "success",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
+        text:
+          data.message ||
+          "El cargo se registró correctamente.",
+        confirmButtonColor: "#438dcc",
         confirmButtonText: "Aceptar",
       });
-    } else {
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: data.message,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
+
+      return;
     }
+
+    Swal.fire({
+      title: "Error",
+      icon: "error",
+      text:
+        data.message ||
+        "No fue posible guardar el cargo.",
+      confirmButtonColor: "#438dcc",
+      confirmButtonText: "Aceptar",
+    });
   };
 
   const handleKeyPress = (event) => {
@@ -113,151 +193,193 @@ export default function AgregarCargo() {
       event.preventDefault();
     }
   };
+
   return (
-    <div>
-      {loading && (
-        <>
-          <Loader80 />
-        </>
-      )}
-      <Row>
-        <Col style={{ margin: "auto" }}>
-          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
-            Agregar Cargo
+    <div className="resource-form-page">
+      {loading && <Loader80 />}
+
+      <div className="resource-section-header">
+        <div>
+          <span className="resource-section-header__eyebrow">
+            MOVIMIENTO MANUAL
+          </span>
+
+          <h2 className="resource-section-header__title">
+            Agregar cargo
+          </h2>
+
+          <p className="resource-section-header__description">
+            Registra un cargo asociado a un cliente y clasifícalo
+            dentro de los movimientos de recursos.
           </p>
-        </Col>
-      </Row>
-      <Row justify={"center"}>
+        </div>
+      </div>
+
+      <div className="resource-form-card">
+        {message && !errorMessage && (
+          <Alert
+            className="resource-alert"
+            message="Cargo registrado"
+            description={message.message}
+            type="success"
+            showIcon
+            closable
+            onClose={() => setMessage(null)}
+          />
+        )}
+
+        {errorMessage && (
+          <Alert
+            className="resource-alert"
+            message="Error"
+            description={errorMessage}
+            type="error"
+            showIcon
+            closable
+            onClose={() => setErrorMessage("")}
+          />
+        )}
+
         <Form
-          {...layout}
-          style={{
-            maxWidth: 600,
-          }}
           form={form}
           onFinish={onFinish}
+          layout="vertical"
+          requiredMark={false}
+          className="resource-form"
         >
-          {Object.keys(message).length > 0 && errorMessage.length == 0 && (
-            <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
-              <Alert
+          <div className="resource-form-grid">
+            <Form.Item
+              label="Fecha"
+              name="fecha"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "Debe ingresar una fecha del cargo.",
+                },
+              ]}
+            >
+              <DatePicker
+                format="DD/MM/YYYY"
+                locale={locale}
                 style={{ width: "100%" }}
-                message={message.type}
-                description={message.message}
-                type="success"
-                showIcon
-                closable
+                size="large"
+                placeholder="Seleccione la fecha"
               />
-            </Row>
-          )}
-          {errorMessage.length > 0 && (
-            <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
-              <Alert
+            </Form.Item>
+
+            <Form.Item
+              label="Monto del cargo"
+              name="monto"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "Debe ingresar un monto del cargo.",
+                },
+                {
+                  type: "number",
+                  min: 0.01,
+                  message:
+                    "El monto debe ser mayor a cero.",
+                },
+              ]}
+            >
+              <InputNumber
+                size="large"
+                min={0.01}
+                precision={2}
                 style={{ width: "100%" }}
-                message={"Error"}
-                description={errorMessage}
-                showIcon
-                type="error"
-                closable
+                prefix="$"
+                suffix="MXN"
+                placeholder="0.00"
+                formatter={(value) =>
+                  value === undefined ||
+                  value === null
+                    ? ""
+                    : formatPrecio(value)
+                }
+                parser={(value) =>
+                  String(value || "").replace(
+                    /\$\s?|(,*)/g,
+                    ""
+                  )
+                }
               />
-            </Row>
-          )}
-          <Row justify={"center"} gutter={16}>
-            <Col xs={24} sm={18}>
-              <Form.Item
-                label="Fecha"
-                name="fecha"
-                rules={[
-                  {
-                    required: true,
-                    message: "Debe ingresar una fecha del cargo.",
-                  },
-                ]}
+            </Form.Item>
+
+            <Form.Item
+              label="Folio del cliente"
+              name="folio"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "Debe ingresar el folio del cliente.",
+                },
+              ]}
+            >
+              <Input
+                size="large"
+                addonBefore="Pago de cliente con folio:"
+                placeholder="Folio"
+                onKeyDown={handleKeyPress}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Tipo de cargo"
+              name="tipoCargo"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "Debe seleccionar un tipo de cargo.",
+                },
+              ]}
+            >
+              <Select
+                size="large"
+                showSearch
+                optionFilterProp="children"
+                placeholder="Seleccione un tipo de cargo"
               >
-                <DatePicker
-                  format={dateFormat}
-                  locale={locale}
-                  style={{
-                    width: "100%",
-                  }}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={18}>
-              <Form.Item
-                label="Monto del Cargo"
-                name="monto"
-                rules={[
-                  {
-                    required: true,
-                    message: "Debe ingresar un monto del cargo.",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={18}>
-              <Form.Item
-                label="Concepto del Cargo"
-                name="comentario"
-                rules={[
-                  {
-                    required: true,
-                    message: "Debe ingresar un concepto del cargo.",
-                  },
-                ]}
-              >
-                <Space.Compact style={{ width: "100%" }}>
-                  <Input
-                    value={"Pago de cliente con folio: "}
-                    defaultValue={"Pago de cliente con folio: "}
-                    disabled
-                  />
-                  <Input placeholder="folio" onKeyDown={handleKeyPress} />
-                </Space.Compact>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={18}>
-              <Form.Item
-                label="Tipo de Cargo"
-                name="tipoCargo"
-                rules={[
-                  {
-                    required: true,
-                    message: "Debe seleccionar un tipo del cargo.",
-                  },
-                ]}
-              >
-                <Select style={{ width: "100%" }}>
-                  {datos.map(
+                {datos
+                  .filter(
                     (option) =>
-                      option.tipo_ingreso != 1 && (
-                        <Select.Option key={option.id} value={option.id}>
-                          {option.descripcion}
-                        </Select.Option>
-                      )
-                  )}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={18}>
-              <div
-                className="terreno-edit__botones-footer"
-                style={{ paddingBottom: 15 }}
-              >
-                <span className="flex gap-2 justify-end">
-                  <Button
-                    className="boton"
-                    disabled={cookiePermisos >= 2 ? false : true}
-                    htmlType="submit"
-                  >
-                    Guardar
-                  </Button>
-                </span>
-              </div>
-            </Col>
-          </Row>
+                      option.tipo_ingreso != 1
+                  )
+                  .map((option) => (
+                    <Select.Option
+                      key={option.id}
+                      value={option.id}
+                    >
+                      {option.descripcion}
+                    </Select.Option>
+                  ))}
+              </Select>
+            </Form.Item>
+          </div>
+
+          <div className="resource-form-footer">
+            <span className="resource-form-footer__hint">
+              Los campos son obligatorios.
+            </span>
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              className="resource-primary-button"
+              disabled={
+                Number(cookiePermisos || 0) < 2
+              }
+            >
+              Guardar cargo
+            </Button>
+          </div>
         </Form>
-      </Row>
+      </div>
     </div>
   );
 }

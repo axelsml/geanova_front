@@ -272,7 +272,7 @@ export default function Anticipos() {
   }
 
   return (
-    <div>
+    <div className="resources-legacy-panel">
       {loading && (
         <>
           <Loader80 />

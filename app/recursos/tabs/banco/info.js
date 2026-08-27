@@ -131,14 +131,6 @@ const obtenerCuentaBancaria = (cuentaId) => {
         setInfoCliente(data.info_cliente);
         setInfoLote(data.info_lote);
         setProximoPago(data.fecha_proximo_pago);
-        setTieneLuzPantalla(data.tiene_luz);
-        plazosService.getPlazos(
-          { terreno_id: data.info_lote.terreno_id },
-          setPlazos,
-          onError
-        );
-        setPlazoId(data.info_lote.plazo_id);
-        setPlazoNombre(data.info_lote.plazo);
         setFinanciamientoId(data.info_lote.financiamiento_id);
         setFinanciamientoNombre(data.info_lote.financiamiento_nombre);
       } else {
@@ -623,9 +615,7 @@ const obtenerCuentaBancaria = (cuentaId) => {
                   showSearch
                   placeholder="Seleccione un Proyecto"
                   optionLabelProp="label"
-                  onChange={() => {
-                    handleSelectChange();
-                  }}
+                  onChange={handleSelectChange}
                 >
                   {terrenos?.map((item, index) => (
                     <Option key={index} value={item.id} label={item.nombre}>

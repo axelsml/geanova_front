@@ -1,202 +1,250 @@
 "use client";
 
-import { Card, Row, Col, Button } from "antd";
-import { BiBuildings, BiCart, BiMoneyWithdraw, BiUser } from "react-icons/bi";
-import { TbReport } from "react-icons/tb";
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { usuario_id } from "@/helpers/user";
-import { useEffect, useState } from "react";
-import { getCookie, expiredCookie, removeCookies } from "@/helpers/Cookies";
+import Image from "next/image";
+
+import {
+  BiBuildings,
+  BiCart,
+  BiMoneyWithdraw,
+  BiUser,
+  BiCog,
+  BiMapAlt,
+} from "react-icons/bi";
+
+import { TbReport } from "react-icons/tb";
+
+import { getCookie } from "@/helpers/Cookies";
+
+const MODULOS = [
+  {
+    descripcion: "Terreno",
+    titulo: "Terrenos",
+    descripcionCorta: "Administración de proyectos, etapas y lotes.",
+    href: "/terrenos/crear",
+    icono: BiBuildings,
+  },
+  {
+    descripcion: "Ventas",
+    titulo: "Ventas",
+    descripcionCorta: "Solicitudes, contratos y seguimiento comercial.",
+    href: "/ventas",
+    icono: BiCart,
+  },
+  {
+    descripcion: "Clientes",
+    titulo: "Clientes",
+    descripcionCorta: "Consulta y administración de clientes.",
+    href: "/cliente",
+    icono: BiUser,
+  },
+  {
+    descripcion: "Recursos",
+    titulo: "Recursos",
+    descripcionCorta: "Control financiero y recursos de la inmobiliaria.",
+    href: "/recursos",
+    icono: BiMoneyWithdraw,
+  },
+  {
+    descripcion: "Reportes",
+    titulo: "Reportes",
+    descripcionCorta: "Indicadores, estadísticas y reportes operativos.",
+    href: "/reportes",
+    icono: TbReport,
+  },
+  {
+    descripcion: "Configuracion",
+    titulo: "Configuración",
+    descripcionCorta: "Configuración general y catálogos del sistema.",
+    href: "/configuracion",
+    icono: BiCog,
+  },
+];
+
 export default function Home() {
   const [cookieMenu, setCookieMenu] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
   useEffect(() => {
-    const cookieMenu = getCookie("menu");
-    cookieMenu
-      .then((cookie) => {
-        setCookieMenu(JSON.parse(cookie.value));
-      })
-      .catch((error) => {
-        console.error("Error al obtener la cookie1:", error); // Manejar cualquier error
-      });
+    cargarMenu();
   }, []);
 
-  const terreno = cookieMenu.filter((item) => item.descripcion === "Terreno");
-  const ventas = cookieMenu.filter((item) => item.descripcion === "Ventas");
-  const clientes = cookieMenu.filter((item) => item.descripcion === "Clientes");
-  const recursos = cookieMenu.filter((item) => item.descripcion === "Recursos");
-  const reportes = cookieMenu.filter((item) => item.descripcion === "Reportes");
-  const configuracion = cookieMenu.filter(
-    (item) => item.descripcion === "Configuracion"
-  );
-  const mapas = cookieMenu.filter((item) => item.descripcion === "Mapas");
+  const cargarMenu = async () => {
+    try {
+      const cookie = await getCookie("menu");
+
+      if (!cookie || !cookie.value) {
+        setCookieMenu([]);
+        return;
+      }
+
+      const menu = JSON.parse(cookie.value);
+
+      setCookieMenu(
+        Array.isArray(menu)
+          ? menu
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "Error al obtener el menú:",
+        error
+      );
+
+      setCookieMenu([]);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const permisos = useMemo(() => {
+    return cookieMenu.reduce(
+      (resultado, item) => {
+        if (item && item.descripcion) {
+          resultado[item.descripcion] = true;
+        }
+
+        return resultado;
+      },
+      {}
+    );
+  }, [cookieMenu]);
+
+  const modulosDisponibles = useMemo(() => {
+    return MODULOS.filter(
+      (modulo) =>
+        permisos[modulo.descripcion]
+    );
+  }, [permisos]);
 
   return (
-    <div className="menu">
-      <Row justify={"center"}>
-        <Image
-          src={"/geanova.svg"}
-          width={500}
-          height={100}
-          priority
-          alt="Logo Geanova"
-        />
-      </Row>
-      <Row gutter={[16, 16]} wrap>
-        {terreno[0]?.descripcion === "Terreno" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"TerrenosCrear"} href={"/terrenos/crear"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono terreno.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Terreno"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Terreno</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
-        {ventas[0]?.descripcion === "Ventas" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"Ventas"} href={"/ventas"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono ventas.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Ventas"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Ventas</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
-        {clientes[0]?.descripcion === "Clientes" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"clientes"} href={"/cliente"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono usuario.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Usuario"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Clientes</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
-        {recursos[0]?.descripcion === "Recursos" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"recursos"} href={"/recursos"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono recursos.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Recursos"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Recursos</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
-        {reportes[0]?.descripcion === "Reportes" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"Reportes"} href={"/reportes"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono reporte.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Reportes"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Reportes</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
-        {configuracion[0]?.descripcion === "Configuracion" && (
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Link key={"Configuracion"} href={"/configuracion"}>
-              <Card hoverable>
-                <div>
-                  <Row justify={"center"}>
-                    <Image
-                      src={"/icono configuracion.svg"}
-                      width={200}
-                      height={200}
-                      priority
-                      alt="Logo Configuracion"
-                    />
-                  </Row>
-                  <Row justify={"center"}>
-                    <p className="text-lg text-center">Configuración</p>
-                  </Row>
-                </div>
-              </Card>
-            </Link>
-          </Col>
-        )}
+    <main className="geanova-home">
+      <div className="geanova-home__container">
 
-        {/* <Col xs={24} sm={12} md={8} lg={6}>
-          <Link key={"Mapas"} href={"/mapas"}>
-            <Card hoverable>
-              <div>
-                <Row justify={"center"}>
-                  <Image
-                    src={"/icono terreno.svg"}
-                    width={200}
-                    height={200}
-                    priority
-                    alt="Logo Mapas"
-                  />
-                </Row>
-                <Row justify={"center"}>
-                  <p className="text-lg text-center">Mapas</p>
-                </Row>
-              </div>
-            </Card>
-          </Link>
-        </Col> */}
-      </Row>
-    </div>
+      <header className="geanova-home__header">
+
+        <div className="geanova-home__hero">
+
+          <div className="geanova-home__brand">
+
+            <Image
+              src="/geanova.svg"
+              width={230}
+              height={140}
+              priority
+              alt="Geanova Inmobiliaria"
+            />
+
+          </div>
+
+
+          <div className="geanova-home__welcome">
+
+            <span className="geanova-home__eyebrow">
+              SISTEMA ADMINISTRATIVO
+            </span>
+
+            <h1 className="geanova-home__title">
+              Bienvenido
+            </h1>
+           
+          </div>
+
+        </div>
+
+      </header>
+
+        <section className="geanova-home__section">
+
+          <div className="geanova-home__section-header">
+
+            <div>
+              <h2 className="geanova-home__section-title">
+                Módulos
+              </h2>
+
+              <p className="geanova-home__section-description">
+                Accede a las herramientas disponibles
+                de acuerdo con tu perfil.
+              </p>
+            </div>
+
+          </div>
+
+          {cargando ? (
+
+            <div className="geanova-modules-loading">
+              <div className="geanova-module-skeleton" />
+              <div className="geanova-module-skeleton" />
+              <div className="geanova-module-skeleton" />
+              <div className="geanova-module-skeleton" />
+              <div className="geanova-module-skeleton" />
+              <div className="geanova-module-skeleton" />
+            </div>
+
+          ) : modulosDisponibles.length > 0 ? (
+
+            <div className="geanova-modules-grid">
+
+              {modulosDisponibles.map((modulo) => {
+                const Icono = modulo.icono;
+
+                return (
+                  <Link
+                    key={modulo.descripcion}
+                    href={modulo.href}
+                    className="geanova-module-card"
+                  >
+
+                    <div className="geanova-module-card__icon">
+                      <Icono />
+                    </div>
+
+                    <div className="geanova-module-card__content">
+
+                      <h3 className="geanova-module-card__title">
+                        {modulo.titulo}
+                      </h3>
+
+                      <p className="geanova-module-card__description">
+                        {modulo.descripcionCorta}
+                      </p>
+
+                    </div>
+
+                    <div className="geanova-module-card__arrow">
+                      →
+                    </div>
+
+                  </Link>
+                );
+              })}
+
+            </div>
+
+          ) : (
+
+            <div className="empty-state">
+
+              <BiMapAlt size={36} />
+
+              <strong>
+                No hay módulos disponibles
+              </strong>
+
+              <span>
+                Tu usuario no tiene módulos
+                asignados actualmente.
+              </span>
+
+            </div>
+
+          )}
+
+        </section>
+
+      </div>
+    </main>
   );
 }

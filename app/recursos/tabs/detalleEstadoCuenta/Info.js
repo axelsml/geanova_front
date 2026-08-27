@@ -873,7 +873,7 @@ const asignados =
   }
 
   return (
-    <div style={{ paddingBottom: 30 }}>
+    <div className="resources-legacy-panel" style={{ paddingBottom: 30 }}>
       {loading && (
         <>
           <Loader80 />

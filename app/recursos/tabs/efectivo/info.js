@@ -115,15 +115,20 @@ export default function Efectivo() {
     getCookiePermisos("efectivo", setCookiePermisos);
   }, []);
 
-  const onError = () => {
+  const onError = (error) => {
     setLoading(false);
+
+    console.error("Efectivo:", error);
+
     Swal.fire({
       title: "Error",
       icon: "error",
-      text: data.message,
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
+      text:
+        error && error.message
+          ? error.message
+          : "No fue posible realizar la operación.",
+      confirmButtonColor: "#438dcc",
+      showDenyButton: false,
       confirmButtonText: "Aceptar",
     });
   };

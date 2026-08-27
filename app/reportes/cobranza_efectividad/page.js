@@ -1,1329 +1,3059 @@
 "use client";
 
-import Loader80 from "@/components/Loader80";
-import { formatPrecio } from "@/helpers/formatters";
-import cobranzaService from "@/services/cobranzaService";
-import terrenosService from "@/services/terrenosService";
 import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TableFooter,
-} from "@mui/material";
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import {
-  Anchor,
   Button,
-  Col,
-  DatePicker,
   Form,
   Modal,
-  Row,
+  Progress,
   Select,
-  Space,
-  Typography,
+  Table,
 } from "antd";
-import { useEffect, useState } from "react";
+
 import Swal from "sweetalert2";
 
+import {
+  formatPrecio,
+} from "@/helpers/formatters";
+
+import cobranzaService from "@/services/cobranzaService";
+import terrenosService from "@/services/terrenosService";
+
+import {
+  LoadingContext,
+} from "@/contexts/loading";
+
+
+const {
+  Option,
+} = Select;
+
+
+/* ============================================================
+   MESES
+   ============================================================ */
+
+const MESES = [
+  { value: 1, label: "Enero" },
+  { value: 2, label: "Febrero" },
+  { value: 3, label: "Marzo" },
+  { value: 4, label: "Abril" },
+  { value: 5, label: "Mayo" },
+  { value: 6, label: "Junio" },
+  { value: 7, label: "Julio" },
+  { value: 8, label: "Agosto" },
+  { value: 9, label: "Septiembre" },
+  { value: 10, label: "Octubre" },
+  { value: 11, label: "Noviembre" },
+  { value: 12, label: "Diciembre" },
+];
+
+
+/* ============================================================
+   AÑOS
+   ============================================================ */
+
+const ANIOS = [];
+
+for (
+  let anio = 2017;
+  anio <= 2030;
+  anio++
+) {
+
+  ANIOS.push({
+    value: anio,
+    label: String(anio),
+  });
+
+}
+
+
+/* ============================================================
+   COMPONENTE
+   ============================================================ */
+
 export default function EfectividadCobranza() {
-  const { RangePicker } = DatePicker;
-  const [totalClientes, setTotalClientes] = useState();
-  const [totalMontoEsperado, setTotalMontoEsperado] = useState();
-  const [totalMontoAnticipo, setTotalMontoAnticipo] = useState();
-  const [totalMontoCobrado, setTotalMontoCobrado] = useState();
-  const [totalPendienteCobrar, setTotalPendienteCobrar] = useState();
-  const [totalPorcentajeImporte, setTotalPorcentajeImporte] = useState();
-  const [totalPorcentajeClientes, setTotalPorcentajeClientes] = useState();
-  const [range, setRange] = useState([]);
-  const [mesSelected, setMesSelected] = useState(null);
-  const [añoSelected, setAñoSelected] = useState(null);
 
-  const [loading, setLoading] = useState(false);
+  const loadingContext =
+    useContext(
+      LoadingContext
+    );
 
-  const [orderBy2] = useState("fechaOperacion");
-  const [order2] = useState("desc");
-  const [rowsPerPage2, setRowsPerPage2] = useState(5);
-  const [page2, setPage2] = useState(0);
 
-  const [orderBy3] = useState("fechaOperacion");
-  const [order3] = useState("desc");
-  const [rowsPerPage3, setRowsPerPage3] = useState(5);
-  const [page3, setPage3] = useState(0);
+  if (!loadingContext) {
 
-  const [orderBy4] = useState("fechaOperacion");
-  const [order4] = useState("desc");
-  const [rowsPerPage4, setRowsPerPage4] = useState(5);
-  const [page4, setPage4] = useState(0);
+    throw new Error(
+      "EfectividadCobranza debe estar dentro de LoadingProvider"
+    );
 
-  const [showModal, setShowModal] = useState(false);
-  const [showModalClientesCobrados, setShowModalClientesCobrados] =
+  }
+
+
+  const {
+    setIsLoading,
+  } =
+    loadingContext;
+
+
+  const [
+    form,
+  ] =
+    Form.useForm();
+
+
+  /* ==========================================================
+     FILTROS
+     ========================================================== */
+
+  const [
+    terrenos,
+    setTerrenos,
+  ] =
+    useState([]);
+
+
+  const [
+    terrenoSelected,
+    setTerrenoSelected,
+  ] =
+    useState(0);
+
+
+  const [
+    mesSelected,
+    setMesSelected,
+  ] =
+    useState(null);
+
+
+  const [
+    anioSelected,
+    setAnioSelected,
+  ] =
+    useState(null);
+
+
+  /* ==========================================================
+     DATOS
+     ========================================================== */
+
+  const [
+    datos,
+    setDatos,
+  ] =
+    useState([]);
+
+
+  const [
+    datosClientesCongelados,
+    setDatosClientesCongelados,
+  ] =
+    useState([]);
+
+
+  const [
+    datosClientesAnualidad,
+    setDatosClientesAnualidad,
+  ] =
+    useState([]);
+
+
+  const [
+    busquedaRealizada,
+    setBusquedaRealizada,
+  ] =
     useState(false);
-  const [showModalClientesPorCobrar, setShowModalClientesPorCobrar] =
-    useState(false);
-  const [showModalEfectivo, setShowModalEfectivo] = useState(false);
 
-  const [datos, setDatos] = useState([]);
-  const [datosClientesCongelados, setDatosClientesCongelados] = useState([]);
-  const [datosClientesAnualidad, setDatosClientesAnualidad] = useState([]);
-  const [datosModal, setDatosModal] = useState([]);
-  const [datosModalClientesPagados, setDatosModalClientesPagados] = useState(
+
+  /* ==========================================================
+     TOTALES
+     ========================================================== */
+
+  const [
+    totalClientes,
+    setTotalClientes,
+  ] =
+    useState(0);
+
+
+  const [
+    totalMontoEsperado,
+    setTotalMontoEsperado,
+  ] =
+    useState(0);
+
+
+  const [
+    totalMontoAnticipo,
+    setTotalMontoAnticipo,
+  ] =
+    useState(0);
+
+
+  const [
+    totalMontoCobrado,
+    setTotalMontoCobrado,
+  ] =
+    useState(0);
+
+
+  const [
+    totalPendienteCobrar,
+    setTotalPendienteCobrar,
+  ] =
+    useState(0);
+
+
+  const [
+    totalPorcentajeImporte,
+    setTotalPorcentajeImporte,
+  ] =
+    useState(0);
+
+
+  const [
+    totalPorcentajeClientes,
+    setTotalPorcentajeClientes,
+  ] =
+    useState(0);
+
+
+  /* ==========================================================
+     MODAL
+     ========================================================== */
+
+  const [
+    detalleModal,
+    setDetalleModal,
+  ] =
+    useState({
+      open: false,
+      tipo: null,
+      title: "",
+      data: [],
+    });
+
+
+  /* ==========================================================
+     CARGA INICIAL
+     ========================================================== */
+
+  useEffect(
+    function () {
+
+      const hoy =
+        new Date();
+
+
+      const mesActual =
+        hoy.getMonth() +
+        1;
+
+
+      const anioActual =
+        hoy.getFullYear();
+
+
+      setMesSelected(
+        mesActual
+      );
+
+
+      setAnioSelected(
+        anioActual
+      );
+
+
+      setTerrenoSelected(
+        0
+      );
+
+
+      form.setFieldsValue({
+        mes:
+          mesActual,
+
+        anio:
+          anioActual,
+
+        proyecto:
+          0,
+      });
+
+
+      terrenosService.getTerrenos(
+
+        function (response) {
+
+          setTerrenos(
+            Array.isArray(response)
+              ? response
+              : []
+          );
+
+        },
+
+        onError
+
+      );
+
+    },
     []
   );
-  const [datosModalClientesPorPagar, setDatosModalClientesPorPagar] = useState(
-    []
-  );
-  const [datosModalEfectivo, setDatosModalEfectivo] = useState([]);
-  const [terrenos, setTerrenos] = useState(null);
-  const [terrenoSelected, setTerrenoSelected] = useState(null);
 
-  const layout = {
-    labelCol: { span: 24 },
-    wrapperCol: { span: 24 },
-  };
 
-  const [form] = Form.useForm();
-  const { Option } = Select;
-  const opcion = [{ index: 0, id: 0, nombre: "Todos" }];
+  /* ==========================================================
+     ERROR
+     ========================================================== */
 
-  const years = [];
-  for (let i = 2017; i <= 2030; i++) {
-    years.push({ value: i, label: `${i}` });
-  }
+  function onError(
+    error
+  ) {
 
-  const months = [
-    { value: 1, label: "Enero" },
-    { value: 2, label: "Febrero" },
-    { value: 3, label: "Marzo" },
-    { value: 4, label: "Abril" },
-    { value: 5, label: "Mayo" },
-    { value: 6, label: "Junio" },
-    { value: 7, label: "Julio" },
-    { value: 8, label: "Agosto" },
-    { value: 9, label: "Septiembre" },
-    { value: 10, label: "Octubre" },
-    { value: 11, label: "Noviembre" },
-    { value: 12, label: "Diciembre" },
-  ];
+    setIsLoading(
+      false
+    );
 
-  useEffect(() => {
-    const fechaActual = new Date();
-    const mesActual = fechaActual.getMonth() + 1;
-    const añoActual = fechaActual.getFullYear();
-    console.log("opciones: ", opcion[0]);
-    console.log("mesActual: ", mesActual);
-    console.log("añoActual: ", añoActual);
 
-    terrenosService.getTerrenos(setTerrenos, Error);
-    form.setFieldValue("mes", mesActual);
-    form.setFieldValue("año", añoActual);
-    form.setFieldValue("proyecto", 0);
+    console.error(
+      "EfectividadCobranza:",
+      error
+    );
 
-    setMesSelected(mesActual);
-    setAñoSelected(añoActual);
-  }, []);
 
-  function handleCloseModal(params) {
-    setShowModal(false);
-    setPage2(0);
-  }
+    Swal.fire({
+      title:
+        "Error",
 
-  function handleCloseModalClientesCobrados(params) {
-    setShowModalClientesCobrados(false);
-    setPage3(0);
-  }
+      icon:
+        "error",
 
-  function handleCloseModalClientesPorCobrar(params) {
-    setShowModalClientesPorCobrar(false);
-    setPage4(0);
-  }
+      text:
+        error &&
+        error.message
+          ? error.message
+          : "No fue posible consultar la efectividad de cobranza.",
 
-  function handleCloseModalEfectivo(params) {
-    setShowModalEfectivo(false);
-    setPage2(0);
-  }
-
-  const onError = (e) => {
-    setLoading(false);
-    console.log(e);
-  };
-
-  const customTitle = (title, level) => (
-    <Row justify={"center"}>
-      <Typography.Title level={level}>{title}</Typography.Title>
-    </Row>
-  );
-
-  const handleChangePage2 = (event, newPage) => {
-    setPage2(newPage);
-  };
-
-  const handleChangeRowsPerPage2 = (event) => {
-    setRowsPerPage2(parseInt(event.target.value, 10));
-    setPage2(0);
-  };
-
-  const stableSort2 = (array, comparator) => {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order2 = comparator(a[0], b[0]);
-      if (order2 !== 0) return order2;
-      return a[1] - b[1];
+      confirmButtonText:
+        "Aceptar",
     });
-    return stabilizedThis.map((el) => el[0]);
-  };
 
-  const descendingComparator2 = (a2, b2, orderBy2) => {
-    if (b2[orderBy2] < a2[orderBy2]) {
-      return -1;
-    }
-    if (b2[orderBy2] > a2[orderBy2]) {
-      return 1;
-    }
-    return 0;
-  };
+  }
 
-  const getComparator2 = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator2(a, b, orderBy)
-      : (a, b) => -descendingComparator2(a, b, orderBy);
-  };
 
-  const handleChangePage3 = (event, newPage) => {
-    setPage3(newPage);
-  };
-
-  const handleChangeRowsPerPage3 = (event) => {
-    setRowsPerPage3(parseInt(event.target.value, 10));
-    setPage3(0);
-  };
-
-  const stableSort3 = (array, comparator) => {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order2 = comparator(a[0], b[0]);
-      if (order2 !== 0) return order2;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  };
-
-  const descendingComparator3 = (a2, b2, orderBy2) => {
-    if (b2[orderBy2] < a2[orderBy2]) {
-      return -1;
-    }
-    if (b2[orderBy2] > a2[orderBy2]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  const getComparator3 = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator3(a, b, orderBy)
-      : (a, b) => -descendingComparator3(a, b, orderBy);
-  };
-
-  const handleChangePage4 = (event, newPage) => {
-    setPage4(newPage);
-  };
-
-  const handleChangeRowsPerPage4 = (event) => {
-    setRowsPerPage4(parseInt(event.target.value, 10));
-    setPage4(0);
-  };
-
-  const stableSort4 = (array, comparator) => {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order2 = comparator(a[0], b[0]);
-      if (order2 !== 0) return order2;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  };
-
-  const descendingComparator4 = (a2, b2, orderBy2) => {
-    if (b2[orderBy2] < a2[orderBy2]) {
-      return -1;
-    }
-    if (b2[orderBy2] > a2[orderBy2]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  const getComparator4 = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator4(a, b, orderBy)
-      : (a, b) => -descendingComparator4(a, b, orderBy);
-  };
+  /* ==========================================================
+     CONSULTAR
+     ========================================================== */
 
   function cargarEfectividadCobranza() {
-    let forms = {
-      mes: mesSelected,
-      año: añoSelected,
-      proyecto: terrenoSelected,
+
+    if (
+      !mesSelected ||
+      !anioSelected
+    ) {
+
+      Swal.fire({
+        title:
+          "Periodo requerido",
+
+        icon:
+          "warning",
+
+        text:
+          "Seleccione un mes y un año.",
+
+        confirmButtonText:
+          "Aceptar",
+      });
+
+
+      return;
+
+    }
+
+
+    setIsLoading(
+      true
+    );
+
+
+    const params = {
+
+      mes:
+        Number(
+          mesSelected
+        ),
+
+      año:
+        Number(
+          anioSelected
+        ),
+
+      proyecto:
+        Number(
+          terrenoSelected ||
+          0
+        ),
+
     };
-    setLoading(true);
-    console.log("forms:", forms);
+
 
     cobranzaService.getIEfectividadCobranza(
-      forms,
+      params,
       onEfectividadCargada,
       onError
     );
+
   }
 
-  function onEfectividadCargada(params) {
-    console.log("params: ", params);
-    console.log("filas: ", params.datos);
 
-    setDatos(params.datos);
-    setDatosClientesCongelados(params.clientesCongelados);
-    setDatosClientesAnualidad(params.anualidad_clientes);
-    setTotalClientes(params.totalClientes);
-    setTotalMontoAnticipo(params.totalMontoAnticipo);
-    setTotalMontoCobrado(params.totalMontoCobrado);
-    setTotalMontoEsperado(params.totalMontoEsperado);
-    setTotalPendienteCobrar(params.totalPendienteCobrar);
-    setTotalPorcentajeImporte(params.totalPorcentajeImporte);
-    setTotalPorcentajeClientes(params.totalPorcentajeClientes);
+  /* ==========================================================
+     RESPUESTA
+     ========================================================== */
 
-    setLoading(false);
+  function onEfectividadCargada(
+    response
+  ) {
+
+    setIsLoading(
+      false
+    );
+
+
+    setBusquedaRealizada(
+      true
+    );
+
+
+    setDatos(
+      Array.isArray(
+        response &&
+        response.datos
+      )
+        ? response.datos
+        : []
+    );
+
+
+    setDatosClientesCongelados(
+      Array.isArray(
+        response &&
+        response.clientesCongelados
+      )
+        ? response.clientesCongelados
+        : []
+    );
+
+
+    setDatosClientesAnualidad(
+      Array.isArray(
+        response &&
+        response.anualidad_clientes
+      )
+        ? response.anualidad_clientes
+        : []
+    );
+
+
+    setTotalClientes(
+      numeroSeguro(
+        response &&
+        response.totalClientes
+      )
+    );
+
+
+    setTotalMontoAnticipo(
+      numeroSeguro(
+        response &&
+        response.totalMontoAnticipo
+      )
+    );
+
+
+    setTotalMontoCobrado(
+      numeroSeguro(
+        response &&
+        response.totalMontoCobrado
+      )
+    );
+
+
+    setTotalMontoEsperado(
+      numeroSeguro(
+        response &&
+        response.totalMontoEsperado
+      )
+    );
+
+
+    setTotalPendienteCobrar(
+      numeroSeguro(
+        response &&
+        response.totalPendienteCobrar
+      )
+    );
+
+
+    setTotalPorcentajeImporte(
+      numeroSeguro(
+        response &&
+        response.totalPorcentajeImporte
+      )
+    );
+
+
+    setTotalPorcentajeClientes(
+      numeroSeguro(
+        response &&
+        response.totalPorcentajeClientes
+      )
+    );
+
   }
 
-  const handleRowClick = (dato) => {
-    console.log("Fila clickeada:", dato);
-    if (dato.lapso == "Otros") {
-      console.log("Fila clickeada Otros:", dato);
-      setDatosModalEfectivo(dato.registros);
-      setShowModalEfectivo(true);
-    } else {
-      setDatosModal(dato.registros);
-      setShowModal(true);
-    }
-  };
 
-  function cambiarColor(lapso) {
-    if (lapso === "Mes") {
-      return {
-        backgroundColor: lapso === "Mes" ? "#15297c" : "default",
-        color: lapso === "Mes" ? "white" : "black",
-        cursor: "pointer",
-        "& .MuiTableCell-root": {
-          color: lapso === "Mes" ? "white" : "black",
-        },
-      };
+  /* ==========================================================
+     KPIS
+     ========================================================== */
+
+  const kpis =
+    useMemo(
+      function () {
+
+        return [
+
+          {
+            label:
+              "Clientes",
+
+            value:
+              entero(
+                totalClientes
+              ),
+          },
+
+
+          {
+            label:
+              "Monto esperado",
+
+            value:
+              moneda(
+                totalMontoEsperado
+              ),
+          },
+
+
+          {
+            label:
+              "Anticipos",
+
+            value:
+              moneda(
+                totalMontoAnticipo
+              ),
+          },
+
+
+          {
+            label:
+              "Total percibido",
+
+            value:
+              moneda(
+                totalMontoCobrado
+              ),
+
+            featured:
+              true,
+          },
+
+
+          {
+            label:
+              "Pendiente por cobrar",
+
+            value:
+              moneda(
+                totalPendienteCobrar
+              ),
+
+            danger:
+              totalPendienteCobrar >
+              0,
+          },
+
+
+          {
+            label:
+              "Efectividad importe",
+
+            value:
+              porcentajeTexto(
+                totalPorcentajeImporte
+              ),
+
+            featured:
+              true,
+          },
+
+
+          {
+            label:
+              "Efectividad clientes",
+
+            value:
+              porcentajeTexto(
+                totalPorcentajeClientes
+              ),
+          },
+
+        ];
+
+      },
+      [
+        totalClientes,
+        totalMontoEsperado,
+        totalMontoAnticipo,
+        totalMontoCobrado,
+        totalPendienteCobrar,
+        totalPorcentajeImporte,
+        totalPorcentajeClientes,
+      ]
+    );
+
+
+  /* ==========================================================
+     ABRIR DETALLE
+     ========================================================== */
+
+  function abrirDetalleLapso(
+    dato
+  ) {
+
+    if (
+      dato.lapso ===
+      "Otros"
+    ) {
+
+      abrirModal(
+        "efectivo",
+        "Clientes en efectivo",
+        dato.registros
+      );
+
+
+      return;
+
     }
-    if (lapso === "Quincena - 1") {
-      return {
-        backgroundColor: "#107acc",
-        cursor: "pointer",
-        "& .MuiTableCell-root": {
-          color: lapso === "Quincena - 1" ? "white" : "black",
-        },
-      };
-    }
-    if (lapso === "Quincena - 2") {
-      return {
-        backgroundColor: "#2898ee",
-        cursor: "pointer",
-        "& .MuiTableCell-root": {
-          color: lapso === "Quincena - 2" ? "white" : "black",
-        },
-      };
-    } else {
-      return {
-        cursor: "pointer",
-      };
-    }
+
+
+    abrirModal(
+      "registro",
+      "Registro de clientes",
+      dato.registros
+    );
+
   }
 
-  const handleClientesPagadosClick = (dato) => {
-    setDatosModalClientesPagados(dato);
-    setShowModalClientesCobrados(true);
-  };
 
-  const handleClientesPorPagarClick = (dato) => {
-    setDatosModalClientesPorPagar(dato);
-    setShowModalClientesPorCobrar(true);
-  };
+  function abrirClientesCobrados(
+    event,
+    dato
+  ) {
 
-  async function borrarAmortizacion() {
-    await Swal.fire({
-      title: "Eliminar todas las amortizaciones?",
-      text: `¿Estás seguro de eliminarlas? `,
-      icon: "question",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      confirmButtonText: "Aceptar",
-    }).then((result) => {
-      console.log("result: ", result);
+    event.stopPropagation();
 
-      if (result.isConfirmed) {
-        cobranzaService.borrarAmortizaciones(onAmortizacionBorrada, onError);
-      }
+
+    if (
+      dato.lapso ===
+      "Otros"
+    ) {
+
+      return;
+
+    }
+
+
+    abrirModal(
+      "cobrados",
+      "Clientes cobrados",
+      dato.registros_clientes_cobrados
+    );
+
+  }
+
+
+  function abrirClientesPorCobrar(
+    event,
+    dato
+  ) {
+
+    event.stopPropagation();
+
+
+    if (
+      dato.lapso ===
+      "Otros"
+    ) {
+
+      return;
+
+    }
+
+
+    abrirModal(
+      "por_cobrar",
+      "Clientes por cobrar",
+      dato.registros_clientes_por_cobrar
+    );
+
+  }
+
+
+  function abrirModal(
+    tipo,
+    title,
+    data
+  ) {
+
+    setDetalleModal({
+      open:
+        true,
+
+      tipo:
+        tipo,
+
+      title:
+        title,
+
+      data:
+        Array.isArray(data)
+          ? data
+          : [],
     });
-  }
-  async function onAmortizacionBorrada(data) {
-    if (data.success) {
-      Swal.fire({
-        title: "Amortizaciones eliminadas con éxito",
-        icon: "success",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    } else {
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: "No Se Pudieron Borrar las Amortizaciones",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    }
+
   }
 
-  function handleTerrenos(params) {
-    console.log("params: ", params);
-    setTerrenoSelected(params);
+
+  function cerrarModal() {
+
+    setDetalleModal({
+      open:
+        false,
+
+      tipo:
+        null,
+
+      title:
+        "",
+
+      data:
+        [],
+    });
+
   }
+
+
+  /* ==========================================================
+     COLUMNAS EFECTIVIDAD
+     ========================================================== */
+
+  const columnasEfectividad = [
+
+    {
+      title:
+        "Lapso",
+
+      dataIndex:
+        "lapso",
+
+      key:
+        "lapso",
+
+      width:
+        125,
+
+      render:
+        function (
+          value
+        ) {
+
+          return (
+
+            <span
+              className={
+                obtenerClaseLapso(
+                  value
+                )
+              }
+            >
+
+              {
+                value
+              }
+
+            </span>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Fecha considerada",
+
+      dataIndex:
+        "fecha_considerada",
+
+      key:
+        "fecha_considerada",
+
+      width:
+        135,
+    },
+
+
+    {
+      title:
+        "Clientes",
+
+      dataIndex:
+        "total_clientes",
+
+      key:
+        "total_clientes",
+
+      align:
+        "center",
+
+      width:
+        85,
+    },
+
+
+    {
+      title:
+        "Monto esperado",
+
+      dataIndex:
+        "monto_esperado",
+
+      key:
+        "monto_esperado",
+
+      align:
+        "right",
+
+      width:
+        130,
+
+      render:
+        function (
+          value
+        ) {
+
+          return moneda(
+            value
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Anticipo",
+
+      dataIndex:
+        "monto_anticipo",
+
+      key:
+        "monto_anticipo",
+
+      align:
+        "right",
+
+      width:
+        120,
+
+      render:
+        function (
+          value
+        ) {
+
+          return moneda(
+            value
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Cobrados",
+
+      dataIndex:
+        "clientes_cobrados",
+
+      key:
+        "clientes_cobrados",
+
+      align:
+        "center",
+
+      width:
+        95,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          if (
+            dato.lapso ===
+            "Otros"
+          ) {
+
+            return value;
+
+          }
+
+
+          return (
+
+            <button
+              type="button"
+              className="report-effectiveness-link report-effectiveness-link--success"
+              onClick={
+                function (
+                  event
+                ) {
+
+                  abrirClientesCobrados(
+                    event,
+                    dato
+                  );
+
+                }
+              }
+            >
+
+              {
+                value
+              }
+
+            </button>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Total percibido",
+
+      dataIndex:
+        "monto_cobrado",
+
+      key:
+        "monto_cobrado",
+
+      align:
+        "right",
+
+      width:
+        135,
+
+      render:
+        function (
+          value
+        ) {
+
+          return (
+
+            <strong>
+
+              {
+                moneda(
+                  value
+                )
+              }
+
+            </strong>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Por cobrar",
+
+      dataIndex:
+        "clientes_por_cobrar",
+
+      key:
+        "clientes_por_cobrar",
+
+      align:
+        "center",
+
+      width:
+        100,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          if (
+            dato.lapso ===
+            "Otros"
+          ) {
+
+            return value;
+
+          }
+
+
+          return (
+
+            <button
+              type="button"
+              className="report-effectiveness-link report-effectiveness-link--danger"
+              onClick={
+                function (
+                  event
+                ) {
+
+                  abrirClientesPorCobrar(
+                    event,
+                    dato
+                  );
+
+                }
+              }
+            >
+
+              {
+                value
+              }
+
+            </button>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Pendiente",
+
+      dataIndex:
+        "pendiente_por_cobrar",
+
+      key:
+        "pendiente_por_cobrar",
+
+      align:
+        "right",
+
+      width:
+        130,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          return (
+
+            <button
+              type="button"
+              className="report-effectiveness-money-button"
+              onClick={
+                function (
+                  event
+                ) {
+
+                  abrirClientesPorCobrar(
+                    event,
+                    dato
+                  );
+
+                }
+              }
+            >
+
+              {
+                moneda(
+                  value
+                )
+              }
+
+            </button>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "% importe",
+
+      dataIndex:
+        "porcentaje_importe",
+
+      key:
+        "porcentaje_importe",
+
+      width:
+        150,
+
+      render:
+        function (
+          value
+        ) {
+
+          const porcentaje =
+            porcentajeSeguro(
+              value
+            );
+
+
+          return (
+
+            <Progress
+              percent={
+                porcentaje
+              }
+              size="small"
+              format={
+                function () {
+
+                  return (
+                    porcentajeTexto(
+                      porcentaje
+                    )
+                  );
+
+                }
+              }
+            />
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "% clientes",
+
+      dataIndex:
+        "porcentaje_clientes",
+
+      key:
+        "porcentaje_clientes",
+
+      width:
+        150,
+
+      render:
+        function (
+          value
+        ) {
+
+          const porcentaje =
+            porcentajeSeguro(
+              value
+            );
+
+
+          return (
+
+            <Progress
+              percent={
+                porcentaje
+              }
+              size="small"
+              format={
+                function () {
+
+                  return (
+                    porcentajeTexto(
+                      porcentaje
+                    )
+                  );
+
+                }
+              }
+            />
+
+          );
+
+        },
+    },
+
+  ];
+
+
+  /* ==========================================================
+     CLIENTES CONGELADOS
+     ========================================================== */
+
+  const columnasCongelados = [
+
+    {
+      title:
+        "Proyecto / Lote",
+
+      dataIndex:
+        "lote",
+
+      key:
+        "lote",
+
+      width:
+        140,
+    },
+
+
+    {
+      title:
+        "Cliente",
+
+      dataIndex:
+        "nombre_completo",
+
+      key:
+        "nombre_completo",
+
+      width:
+        220,
+
+      render:
+        function (
+          value
+        ) {
+
+          return (
+
+            <strong>
+
+              {
+                value
+              }
+
+            </strong>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Importe vencido",
+
+      dataIndex:
+        "importe_vencido",
+
+      key:
+        "importe_vencido",
+
+      align:
+        "right",
+
+      width:
+        130,
+
+      render:
+        function (
+          value
+        ) {
+
+          return (
+
+            <span className="report-effectiveness-danger">
+
+              {
+                moneda(
+                  value
+                )
+              }
+
+            </span>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Saldo pagado",
+
+      dataIndex:
+        "saldo",
+
+      key:
+        "saldo",
+
+      align:
+        "right",
+
+      width:
+        125,
+
+      render:
+        function (
+          value
+        ) {
+
+          return moneda(
+            value
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Percibido",
+
+      dataIndex:
+        "pago_fechas",
+
+      key:
+        "pago_fechas",
+
+      align:
+        "right",
+
+      width:
+        120,
+
+      render:
+        function (
+          value
+        ) {
+
+          return moneda(
+            value
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Último pago",
+
+      dataIndex:
+        "ultimo_pago",
+
+      key:
+        "ultimo_pago",
+
+      width:
+        115,
+    },
+
+
+    {
+      title:
+        "Fecha congeló",
+
+      dataIndex:
+        "fecha_congelado",
+
+      key:
+        "fecha_congelado",
+
+      width:
+        115,
+    },
+
+
+    {
+      title:
+        "Fecha termina",
+
+      dataIndex:
+        "fecha_termina",
+
+      key:
+        "fecha_termina",
+
+      width:
+        115,
+    },
+
+  ];
+
+
+  /* ==========================================================
+     ANUALIDADES
+     ========================================================== */
+
+  const columnasAnualidades = [
+
+    {
+      title:
+        "Proyecto / Lote",
+
+      key:
+        "lote",
+
+      width:
+        130,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          return (
+            dato &&
+            dato.info_lote
+              ? dato.info_lote.lote
+              : ""
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Cliente",
+
+      key:
+        "cliente",
+
+      width:
+        220,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          return (
+
+            <strong>
+
+              {
+                dato &&
+                dato.info_cliente
+                  ? dato.info_cliente.nombre_completo
+                  : ""
+              }
+
+            </strong>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Importe vencido",
+
+      key:
+        "vencido",
+
+      align:
+        "right",
+
+      width:
+        130,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          return (
+
+            <span className="report-effectiveness-danger">
+
+              {
+                moneda(
+                  obtenerInfoLote(
+                    dato,
+                    "monto_vencido_anualidades"
+                  )
+                )
+              }
+
+            </span>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Saldo restante",
+
+      key:
+        "saldo",
+
+      align:
+        "right",
+
+      width:
+        130,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          const total =
+            numeroSeguro(
+              obtenerInfoLote(
+                dato,
+                "monto_total_anualidades"
+              )
+            );
+
+
+          const pagado =
+            numeroSeguro(
+              obtenerInfoLote(
+                dato,
+                "monto_pagado_anualidades"
+              )
+            );
+
+
+          return moneda(
+            Math.max(
+              0,
+              total -
+              pagado
+            )
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Monto requerido",
+
+      key:
+        "requerido",
+
+      align:
+        "right",
+
+      width:
+        125,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          return moneda(
+            obtenerInfoLote(
+              dato,
+              "monto_pago_requerido_anualidad"
+            )
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Requerido a la fecha",
+
+      key:
+        "esperado",
+
+      align:
+        "right",
+
+      width:
+        145,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          return moneda(
+            obtenerInfoLote(
+              dato,
+              "esperado_ala_fecha_anualidad"
+            )
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "Documentos",
+
+      key:
+        "documentos",
+
+      width:
+        195,
+
+      render:
+        function (
+          value,
+          dato
+        ) {
+
+          const lote =
+            dato &&
+            dato.info_lote
+              ? dato.info_lote
+              : {};
+
+
+          return (
+
+            <div className="report-effectiveness-documents">
+
+              <Button
+                size="small"
+                onClick={
+                  function () {
+
+                    window.open(
+                      "https://api.santamariadelaluz.com/iUsuarios/" +
+                      lote.solicitud_id +
+                      ".pdf"
+                    );
+
+                  }
+                }
+              >
+
+                Amortización
+
+              </Button>
+
+
+              <Button
+                size="small"
+                onClick={
+                  function () {
+
+                    window.open(
+                      "https://api.santamariadelaluz.com/getClienteByLote/" +
+                      lote.terreno_id +
+                      "/" +
+                      lote.lote_id +
+                      ".pdf"
+                    );
+
+                  }
+                }
+              >
+
+                Estado de cuenta
+
+              </Button>
+
+            </div>
+
+          );
+
+        },
+    },
+
+  ];
+
+
+  /* ==========================================================
+     RENDER
+     ========================================================== */
 
   return (
-    <>
-      {loading && (
-        <>
-          <Loader80 />
-        </>
-      )}
-      <Row>
-        <Col style={{ margin: "auto" }}>
-          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
-            Efectividad Cobranza
+
+    <div className="report-effectiveness-page">
+
+
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
+      <div className="report-effectiveness-header">
+
+        <div>
+
+          <span className="report-effectiveness-header__eyebrow">
+
+            DESEMPEÑO DE COBRANZA
+
+          </span>
+
+
+          <h2 className="report-effectiveness-header__title">
+
+            Efectividad de cobranza
+
+          </h2>
+
+
+          <p className="report-effectiveness-header__description">
+
+            Analiza la recuperación de cartera,
+            los importes esperados, cobrados y pendientes
+            durante el periodo seleccionado.
+
           </p>
-        </Col>
-      </Row>
-      <Form form={form} {...layout} name="busqueda">
-        <Row
-          gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
-          justify="center"
-          style={{ paddingTop: 10 }}
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          FILTROS
+          ===================================================== */}
+
+      <section className="report-effectiveness-filter-card">
+
+        <div className="report-effectiveness-card-header">
+
+          <span>
+
+            FILTROS
+
+          </span>
+
+
+          <h3>
+
+            Periodo de análisis
+
+          </h3>
+
+
+          <p>
+
+            Selecciona mes, año y proyecto
+            para consultar la efectividad.
+
+          </p>
+
+        </div>
+
+
+        <Form
+          form={
+            form
+          }
+          layout="vertical"
+          className="report-effectiveness-form"
         >
-          <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
+
+          <div className="report-effectiveness-filter-grid">
+
+
             <Form.Item
               name="mes"
-              label="Seleccione mes"
-              style={{ width: "100%" }}
+              label="Mes"
             >
+
               <Select
-                placeholder="Todos los meses"
-                optionLabelProp="label"
-                value={mesSelected}
-                onChange={(value) => {
-                  setMesSelected(value);
-                }}
-                options={months}
-                style={{ minWidth: 150 }}
-              ></Select>
+                size="large"
+                placeholder="Seleccione mes"
+                options={
+                  MESES
+                }
+                onChange={
+                  function (
+                    value
+                  ) {
+
+                    setMesSelected(
+                      value
+                    );
+
+                  }
+                }
+              />
+
             </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={4} xxl={4}>
+
+
             <Form.Item
-              name="año"
-              label="Seleccione año"
-              style={{ width: "100%" }}
+              name="anio"
+              label="Año"
             >
+
               <Select
-                placeholder="Todos los Años"
-                optionLabelProp="label"
-                value={añoSelected}
-                onChange={(value) => {
-                  setAñoSelected(value);
-                }}
-                options={years}
-                style={{ minWidth: 150 }}
-              ></Select>
+                size="large"
+                placeholder="Seleccione año"
+                options={
+                  ANIOS
+                }
+                onChange={
+                  function (
+                    value
+                  ) {
+
+                    setAnioSelected(
+                      value
+                    );
+
+                  }
+                }
+              />
+
             </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+
+
             <Form.Item
               name="proyecto"
-              label="Seleccione un Proyecto"
-              style={{ width: "100%" }}
+              label="Proyecto"
             >
-              <Space style={{ width: "100%" }}>
-                <Select
-                  showSearch
-                  placeholder="Seleccione un Proyecto"
-                  style={{ minWidth: 150 }}
-                  optionLabelProp="label"
-                  onChange={handleTerrenos}
+
+              <Select
+                showSearch
+                size="large"
+                placeholder="Todos los proyectos"
+                optionFilterProp="label"
+                onChange={
+                  function (
+                    value
+                  ) {
+
+                    setTerrenoSelected(
+                      Number(
+                        value ||
+                        0
+                      )
+                    );
+
+                  }
+                }
+              >
+
+                <Option
+                  value={
+                    0
+                  }
+                  label="Todos"
                 >
-                  {terrenos &&
-                    opcion.map((item, index) => (
-                      <Option key={item.id} value={item.id} label={item.nombre}>
-                        {item?.nombre}
+
+                  Todos
+
+                </Option>
+
+
+                {terrenos.map(
+                  function (
+                    item
+                  ) {
+
+                    return (
+
+                      <Option
+                        key={
+                          item.id
+                        }
+                        value={
+                          item.id
+                        }
+                        label={
+                          item.nombre
+                        }
+                      >
+
+                        {
+                          item.nombre
+                        }
+
                       </Option>
-                    ))}
-                  {terrenos?.map((item, index) => (
-                    <Option key={item.id} value={item.id} label={item.nombre}>
-                      {item?.nombre}
-                    </Option>
-                  ))}
-                </Select>
 
-                {/* <Button
-                  type="primary"
-                  onClick={() => {
-                    borrarAmortizacion();
-                  }}
-                >
-                  Borrar Todas Las Amortizaciones
-                </Button> */}
-                <Button
-                  // type="primary"
-                  style={{ backgroundColor: "67, 141, 204" }}
-                  onClick={() => {
-                    cargarEfectividadCobranza();
-                  }}
-                >
-                  Buscar
-                </Button>
-              </Space>
+                    );
+
+                  }
+                )}
+
+              </Select>
+
             </Form.Item>
-          </Col>
-        </Row>
-      </Form>
-      <Row justify={"center"} className="mb-5">
-        <Col xs={24} sm={12} md={22} lg={22} xl={22} xxl={22}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Lapso</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Considerada</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Total Clientes</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Esperado</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Anticipo</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Clientes Cobrados</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Total Percibido</p>
-                  </TableCell>
-                  <TableCell /* style={{ width: 180 }} */>
-                    <p>Clientes Por Cobrar</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Pendiente Por Cobrar</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>% Importe</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>% Clientes</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {datos.map((dato, index) => (
-                  <TableRow
-                    key={dato.id}
-                    onClick={() => handleRowClick(dato)}
-                    sx={cambiarColor(dato.lapso)}
-                  >
-                    <TableCell>{dato.lapso}</TableCell>
-                    <TableCell>{dato.fecha_considerada}</TableCell>
-                    <TableCell>{dato.total_clientes}</TableCell>
-                    <TableCell>
-                      $
-                      {formatPrecio(parseFloat(dato.monto_esperado.toFixed(2)))}
-                    </TableCell>
-                    <TableCell>
-                      $
-                      {formatPrecio(parseFloat(dato.monto_anticipo.toFixed(2)))}
-                    </TableCell>
-                    <TableCell
-                      onClick={(e) => {
-                        e.stopPropagation(); // Evita que el evento se propague al TableRow
-                        console.log(
-                          "clientes cobrados: ",
-                          dato.clientes_cobrados
-                        );
-                        if (dato.lapso != "Otros") {
-                          handleClientesPagadosClick(
-                            dato.registros_clientes_cobrados
-                          );
-                        }
-                      }}
-                    >
-                      {dato.clientes_cobrados}
-                    </TableCell>
-                    <TableCell>
-                      ${formatPrecio(parseFloat(dato.monto_cobrado.toFixed(2)))}
-                    </TableCell>
-                    <TableCell
-                      onClick={(e) => {
-                        e.stopPropagation(); // Evita que el evento se propague al TableRow
-                        console.log(
-                          "clientes por cobrar: ",
-                          dato.clientes_por_cobrar
-                        );
-                        debugger
-                        if (dato.lapso != "Otros") {
-                          handleClientesPorPagarClick(
-                            dato.registros_clientes_por_cobrar
-                          );
-                          debugger
-                        }
-                      }}
-                    >
-                      {dato.clientes_por_cobrar}
-                    </TableCell>
-                    <TableCell onClick={(e) => {
-                        e.stopPropagation(); // Evita que el evento se propague al TableRow
-                        console.log(
-                          "clientes por cobrar: ",
-                          dato.clientes_por_cobrar
-                        );
-                        debugger
-                        if (dato.lapso != "Otros") {
-                          handleClientesPorPagarClick(
-                            dato.registros_clientes_por_cobrar
-                          );
-                          debugger
-                        }
-                      }}
-                    >
-                      $
-                      {formatPrecio(
-                        parseFloat(dato.pendiente_por_cobrar.toFixed(2))
-                      )}
 
-                    </TableCell>
-                    <TableCell>
-                      {isNaN(formatPrecio(parseFloat(dato.porcentaje_importe)))
-                        ? "0"
-                        : formatPrecio(parseFloat(dato.porcentaje_importe))}
-                      %
-                    </TableCell>
-                    <TableCell>
-                      {isNaN(formatPrecio(parseFloat(dato.porcentaje_clientes)))
-                        ? "0"
-                        : formatPrecio(parseFloat(dato.porcentaje_clientes))}
-                      %
-                    </TableCell>
-                  </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell>Total: {totalClientes}</TableCell>
-                  <TableCell>
-                    Total: $
-                    {isNaN(totalMontoEsperado)
-                      ? "0"
-                      : formatPrecio(parseFloat(totalMontoEsperado.toFixed(2)))}
-                  </TableCell>
-                  <TableCell>
-                    Total: $
-                    {isNaN(totalMontoAnticipo)
-                      ? "0"
-                      : formatPrecio(parseFloat(totalMontoAnticipo.toFixed(2)))}
-                  </TableCell>
-                  <TableCell></TableCell>
-                  <TableCell>
-                    Total: $
-                    {isNaN(totalMontoCobrado)
-                      ? "0"
-                      : formatPrecio(parseFloat(totalMontoCobrado.toFixed(2)))}
-                  </TableCell>
-                  <TableCell></TableCell>
-                  <TableCell>
-                    Total: $
-                    {isNaN(totalPendienteCobrar)
-                      ? "0"
-                      : formatPrecio(
-                          parseFloat(totalPendienteCobrar.toFixed(2))
-                        )}
-                  </TableCell>
-                  <TableCell>
-                    Total:
-                    {isNaN(totalPorcentajeImporte)
-                      ? "0"
-                      : formatPrecio(parseFloat(totalPorcentajeImporte))}
-                    %
-                  </TableCell>
-                  <TableCell>
-                    Total:
-                    {isNaN(totalPorcentajeClientes)
-                      ? "0"
-                      : formatPrecio(parseFloat(totalPorcentajeClientes))}
-                    %
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Col>
-      </Row>
 
-      <Row>
-        <Col style={{ margin: "auto" }}>
-          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
-            Clientes Congelados
-          </p>
-        </Col>
-      </Row>
+            <div className="report-effectiveness-filter-action">
 
-      <Row justify={"center"} className="mb-5 mt-2">
-        <Col xs={24} sm={12} md={22} lg={22} xl={22} xxl={22}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Terreno/Lote</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Nombre Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Importe Vencido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Saldo Pagado</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Percibido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Ultimo Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Congelo</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Termina</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort2(
-                  datosClientesCongelados,
-                  getComparator2(order2, orderBy2)
-                )
-                  .slice(
-                    page2 * rowsPerPage2,
-                    page2 * rowsPerPage2 + rowsPerPage2
-                  )
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{dato.lote}</TableCell>
-                      <TableCell>{dato.nombre_completo}</TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.importe_vencido))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.saldo))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.pago_fechas))}
-                      </TableCell>
-                      <TableCell>{dato.ultimo_pago}</TableCell>
-                      <TableCell>{dato.fecha_congelado}</TableCell>
-                      <TableCell>{dato.fecha_termina}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datosClientesCongelados.length}
-                    rowsPerPage={rowsPerPage2}
-                    page={page2}
-                    onPageChange={handleChangePage2}
-                    onRowsPerPageChange={handleChangeRowsPerPage2}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Col>
-      </Row>
+              <Button
+                type="primary"
+                size="large"
+                className="report-effectiveness-search-button"
+                onClick={
+                  cargarEfectividadCobranza
+                }
+              >
 
-      <Row>
-        <Col style={{ margin: "auto" }}>
-          <p className="titulo_pantallas" style={{ fontSize: "24px" }}>
-            Anualidades Mes
-          </p>
-        </Col>
-      </Row>
+                Buscar reporte
 
-      <Row justify={"center"} className="mb-5 mt-2">
-        <Col xs={24} sm={12} md={22} lg={22} xl={22} xxl={22}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Terreno/Lote</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Nombre Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Importe Vencido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Saldo Restante</p>
-                  </TableCell>
-                   <TableCell>
-                    <p>Monto Requerido</p>
-                  </TableCell>
-                   <TableCell>
-                    <p>Requerido ala Fecha</p>
-                  </TableCell>
-                   <TableCell>
-                    <p></p>
-                  </TableCell>
-                   <TableCell>
-                    <p></p>
-                  </TableCell>
-                  
-                 
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort2(
-                  datosClientesAnualidad,
-                  getComparator2(order2, orderBy2)
-                )
-                  .slice(
-                    page2 * rowsPerPage2,
-                    page2 * rowsPerPage2 + rowsPerPage2
-                  )
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{dato.info_lote.lote}</TableCell>
-                      <TableCell>{dato.info_cliente.nombre_completo}</TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.info_lote.monto_vencido_anualidades))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat((dato.info_lote.monto_total_anualidades - dato.info_lote.monto_pagado_anualidades)))}
-                      </TableCell>
-                       <TableCell>
-                        ${formatPrecio(parseFloat((dato.info_lote.monto_pago_requerido_anualidad)))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat((dato.info_lote.esperado_ala_fecha_anualidad)))}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          className="boton"
-                          size="large"
-                          onClick={() => {
-                            // terrenoSelected.id,loteSelected.id
-                            window.open(
-                                `https://api.santamariadelaluz.com/iUsuarios/${dato.info_lote.solicitud_id}.pdf`
-                            );
-                          }}
-                        >
-                          Amortizacion
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          className="boton"
-                          size="large"
-                          onClick={() => {
-                            // terrenoSelected.id,loteSelected.id
-                            window.open(
-                              `https://api.santamariadelaluz.com/getClienteByLote/${dato.info_lote.terreno_id}/${dato.info_lote.lote_id}.pdf`
-                            );
-                          }}
-                        >
-                          Estado de Cuenta
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datosClientesAnualidad.length}
-                    rowsPerPage={rowsPerPage2}
-                    page={page2}
-                    onPageChange={handleChangePage2}
-                    onRowsPerPageChange={handleChangeRowsPerPage2}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Col>
-      </Row>
+              </Button>
+
+            </div>
+
+          </div>
+
+        </Form>
+
+      </section>
+
+
+      {/* =====================================================
+          KPIS
+          ===================================================== */}
+
+      {busquedaRealizada && (
+
+        <div className="report-effectiveness-kpis">
+
+          {kpis.map(
+            function (
+              item,
+              index
+            ) {
+
+              return (
+
+                <div
+                  key={
+                    item.label +
+                    "-" +
+                    index
+                  }
+                  className={
+                    [
+                      "report-effectiveness-kpi",
+
+                      item.featured
+                        ? "report-effectiveness-kpi--featured"
+                        : "",
+
+                      item.danger
+                        ? "report-effectiveness-kpi--danger"
+                        : "",
+
+                    ]
+                      .filter(
+                        Boolean
+                      )
+                      .join(
+                        " "
+                      )
+                  }
+                >
+
+                  <span className="report-effectiveness-kpi__label">
+
+                    {
+                      item.label
+                    }
+
+                  </span>
+
+
+                  <strong className="report-effectiveness-kpi__value">
+
+                    {
+                      item.value
+                    }
+
+                  </strong>
+
+                </div>
+
+              );
+
+            }
+          )}
+
+        </div>
+
+      )}
+
+
+      {/* =====================================================
+          EFECTIVIDAD PRINCIPAL
+          ===================================================== */}
+
+      <section className="report-effectiveness-table-card">
+
+        <div className="report-effectiveness-table-card__header">
+
+          <div>
+
+            <span>
+
+              EFECTIVIDAD
+
+            </span>
+
+
+            <h3>
+
+              Resumen por lapso
+
+            </h3>
+
+
+            <p>
+
+              Selecciona una fila o los indicadores
+              de clientes para consultar el detalle.
+
+            </p>
+
+          </div>
+
+
+          <strong>
+
+            {
+              datos.length
+            }
+
+            {" "}registros
+
+          </strong>
+
+        </div>
+
+
+        <Table
+          rowKey={
+            function (
+              dato,
+              index
+            ) {
+
+              return (
+                dato.id ||
+                dato.lapso ||
+                index
+              );
+
+            }
+          }
+          columns={
+            columnasEfectividad
+          }
+          dataSource={
+            datos
+          }
+          size="small"
+          scroll={{
+            x:
+              1450,
+          }}
+          pagination={
+            false
+          }
+          onRow={
+            function (
+              dato
+            ) {
+
+              return {
+
+                onClick:
+                  function () {
+
+                    abrirDetalleLapso(
+                      dato
+                    );
+
+                  },
+
+                className:
+                  "report-effectiveness-main-row",
+
+              };
+
+            }
+          }
+          locale={{
+            emptyText:
+              busquedaRealizada
+                ? "No hay información para el periodo seleccionado."
+                : "Realiza una búsqueda para consultar la efectividad.",
+          }}
+          className="report-effectiveness-table"
+        />
+
+      </section>
+
+
+      {/* =====================================================
+          CONGELADOS
+          ===================================================== */}
+
+      <section className="report-effectiveness-table-card">
+
+        <div className="report-effectiveness-table-card__header">
+
+          <div>
+
+            <span>
+
+              CARTERA CONGELADA
+
+            </span>
+
+
+            <h3>
+
+              Clientes congelados
+
+            </h3>
+
+
+            <p>
+
+              Clientes cuya cobranza permanece congelada
+              dentro del periodo consultado.
+
+            </p>
+
+          </div>
+
+
+          <strong>
+
+            {
+              datosClientesCongelados.length
+            }
+
+            {" "}clientes
+
+          </strong>
+
+        </div>
+
+
+        <Table
+          rowKey={
+            function (
+              dato,
+              index
+            ) {
+
+              return (
+                dato.id ||
+                index
+              );
+
+            }
+          }
+          columns={
+            columnasCongelados
+          }
+          dataSource={
+            datosClientesCongelados
+          }
+          size="small"
+          scroll={{
+            x:
+              1100,
+          }}
+          pagination={{
+            pageSize:
+              10,
+
+            showSizeChanger:
+              true,
+
+            pageSizeOptions: [
+              "5",
+              "10",
+              "25",
+            ],
+
+            showTotal:
+              function (
+                total
+              ) {
+
+                return (
+                  total +
+                  " clientes"
+                );
+
+              },
+          }}
+          locale={{
+            emptyText:
+              busquedaRealizada
+                ? "No hay clientes congelados."
+                : "Realiza una búsqueda para consultar clientes congelados.",
+          }}
+          className="report-effectiveness-table"
+        />
+
+      </section>
+
+
+      {/* =====================================================
+          ANUALIDADES
+          ===================================================== */}
+
+      <section className="report-effectiveness-table-card">
+
+        <div className="report-effectiveness-table-card__header">
+
+          <div>
+
+            <span>
+
+              ANUALIDADES
+
+            </span>
+
+
+            <h3>
+
+              Anualidades del mes
+
+            </h3>
+
+
+            <p>
+
+              Seguimiento de vencimientos, saldos
+              y requerimientos de anualidad.
+
+            </p>
+
+          </div>
+
+
+          <strong>
+
+            {
+              datosClientesAnualidad.length
+            }
+
+            {" "}clientes
+
+          </strong>
+
+        </div>
+
+
+        <Table
+          rowKey={
+            function (
+              dato,
+              index
+            ) {
+
+              return (
+                obtenerInfoLote(
+                  dato,
+                  "solicitud_id"
+                ) ||
+                index
+              );
+
+            }
+          }
+          columns={
+            columnasAnualidades
+          }
+          dataSource={
+            datosClientesAnualidad
+          }
+          size="small"
+          scroll={{
+            x:
+              1250,
+          }}
+          pagination={{
+            pageSize:
+              10,
+
+            showSizeChanger:
+              true,
+
+            pageSizeOptions: [
+              "5",
+              "10",
+              "25",
+            ],
+
+            showTotal:
+              function (
+                total
+              ) {
+
+                return (
+                  total +
+                  " anualidades"
+                );
+
+              },
+          }}
+          locale={{
+            emptyText:
+              busquedaRealizada
+                ? "No hay anualidades para el periodo."
+                : "Realiza una búsqueda para consultar anualidades.",
+          }}
+          className="report-effectiveness-table"
+        />
+
+      </section>
+
+
+      {/* =====================================================
+          MODAL REUTILIZABLE
+          ===================================================== */}
 
       <Modal
-        title={customTitle("Registro de Clientes", 3)}
-        footer={null}
-        width="lg"
-        open={showModal}
-        onCancel={() => handleCloseModal()}
+        title={
+          detalleModal.title
+        }
+        footer={
+          null
+        }
+        width={
+          1150
+        }
+        open={
+          detalleModal.open
+        }
+        destroyOnClose
+        onCancel={
+          cerrarModal
+        }
       >
-        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Nombre Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Num. Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Pago</p>
-                  </TableCell>
-                  {/* <TableCell>
-                    <p>Fecha Pagado</p>
-                  </TableCell> */}
-                  <TableCell>
-                    <p>Monto a Pagar</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Amortización Pagado</p>
-                  </TableCell>
-                  <TableCell /* style={{ width: 180 }} */>
-                    <p>Monto Pendiente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Vencido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto a Favor</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Terreno/Lote</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort2(datosModal, getComparator2(order2, orderBy2))
-                  .slice(
-                    page2 * rowsPerPage2,
-                    page2 * rowsPerPage2 + rowsPerPage2
-                  )
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago}</TableCell>
-                      {/* .join(", ") */}
-                      <TableCell>{dato.fecha_pago}</TableCell>
-                      {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pago))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pagado))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pendiente))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_vencido))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_favor))}
-                      </TableCell>
-                      <TableCell>{dato.terreno}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datosModal.length}
-                    rowsPerPage={rowsPerPage2}
-                    page={page2}
-                    onPageChange={handleChangePage2}
-                    onRowsPerPageChange={handleChangeRowsPerPage2}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Row>
 
-        <div
-          className="terreno-edit__botones-footer"
-          style={{ paddingBottom: 15 }}
-        >
-          <span className="flex gap-2 justify-end">
-            <Button onClick={handleCloseModal} danger size="large">
-              Cerrar
-            </Button>
-          </span>
-        </div>
+        <DetalleModal
+          tipo={
+            detalleModal.tipo
+          }
+          data={
+            detalleModal.data
+          }
+        />
+
       </Modal>
 
-      <Modal
-        title={customTitle("Clientes Cobrados", 3)}
-        footer={null}
-        width="lg"
-        open={showModalClientesCobrados}
-        onCancel={() => handleCloseModalClientesCobrados()}
-      >
-        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Nombre Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Num. Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Pago</p>
-                  </TableCell>
-                  {/* <TableCell>
-                    <p>Fecha Pagado</p>
-                  </TableCell> */}
-                  <TableCell>
-                    <p>Monto a Pagar</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Amortización Pagado</p>
-                  </TableCell>
-                  <TableCell /* style={{ width: 180 }} */>
-                    <p>Monto Pendiente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Vencido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto a Favor</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Terreno/Lote</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort3(
-                  datosModalClientesPagados,
-                  getComparator3(order3, orderBy3)
-                )
-                  .slice(
-                    page3 * rowsPerPage3,
-                    page3 * rowsPerPage3 + rowsPerPage3
-                  )
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago}</TableCell> {/* .join(", ") */}
-                      <TableCell>{dato.fecha_pago}</TableCell>
-                      {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pago))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pagado))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pendiente))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_vencido))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_favor))}
-                      </TableCell>
-                      <TableCell>{dato.terreno}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datosModalClientesPagados.length}
-                    rowsPerPage={rowsPerPage3}
-                    page={page3}
-                    onPageChange={handleChangePage3}
-                    onRowsPerPageChange={handleChangeRowsPerPage3}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Row>
+    </div>
 
-        <div
-          className="terreno-edit__botones-footer"
-          style={{ paddingBottom: 15 }}
-        >
-          <span className="flex gap-2 justify-end">
-            <Button
-              onClick={handleCloseModalClientesCobrados}
-              danger
-              size="large"
-            >
-              Cerrar
-            </Button>
-          </span>
-        </div>
-      </Modal>
-
-      <Modal
-        title={customTitle("Clientes Por Cobrar", 3)}
-        footer={null}
-        width="lg"
-        open={showModalClientesPorCobrar}
-        onCancel={() => handleCloseModalClientesPorCobrar()}
-      >
-        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Nombre Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Num. Pago</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Pago</p>
-                  </TableCell>
-                  {/* <TableCell>
-                    <p>Fecha Pagado</p>
-                  </TableCell> */}
-                  <TableCell>
-                    <p>Monto a Pagar</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Amortización Pagado</p>
-                  </TableCell>
-                  <TableCell /* style={{ width: 180 }} */>
-                    <p>Monto Pendiente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Vencido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto a Favor</p>
-                  </TableCell>
-                  <TableCell /* style={{ width: 180 }} */>
-                    <p>Intereses</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Terreno/Lote</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Telefóno</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort4(
-                  datosModalClientesPorPagar,
-                  getComparator4(order4, orderBy4)
-                )
-                  .slice(
-                    page4 * rowsPerPage4,
-                    page4 * rowsPerPage4 + rowsPerPage4
-                  )
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.no_pago}</TableCell>
-                      {/* //.join(", ") */}
-                      <TableCell>{dato.fecha_pago}</TableCell>
-                      {/* <TableCell>{dato.fecha_pagado}</TableCell> */}
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pago))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pagado))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pendiente))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_vencido))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_favor))}
-                      </TableCell>
-                      <TableCell>
-                        $
-                        {formatPrecio(
-                          isNaN(parseFloat(dato.monto_interes))
-                            ? 0
-                            : parseFloat(dato.monto_interes)
-                        )}
-                      </TableCell>
-                      <TableCell>{dato.terreno}</TableCell>
-                      <TableCell>{dato.telefono}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datosModalClientesPorPagar.length}
-                    rowsPerPage={rowsPerPage4}
-                    page={page4}
-                    onPageChange={handleChangePage4}
-                    onRowsPerPageChange={handleChangeRowsPerPage4}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Row>
-
-        <div
-          className="terreno-edit__botones-footer"
-          style={{ paddingBottom: 15 }}
-        >
-          <span className="flex gap-2 justify-end">
-            <Button
-              onClick={handleCloseModalClientesPorCobrar}
-              danger
-              size="large"
-            >
-              Cerrar
-            </Button>
-          </span>
-        </div>
-      </Modal>
-
-      <Modal
-        title={customTitle("Clientes En Efectivo", 3)}
-        footer={null}
-        width="lg"
-        open={showModalEfectivo}
-        onCancel={() => handleCloseModalEfectivo()}
-      >
-        <Row style={{ paddingTop: 10, justifyContent: "space-evenly" }}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Nombre Cliente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Fecha Solicitud</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Pagado</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Pendiente</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto Vencido</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Monto a Favor</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Terreno/Lote</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort4(
-                  datosModalEfectivo,
-                  getComparator4(order4, orderBy4)
-                )
-                  .slice(
-                    page4 * rowsPerPage4,
-                    page4 * rowsPerPage4 + rowsPerPage4
-                  )
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{dato.nombre_cliente}</TableCell>
-                      <TableCell>{dato.fecha_solicitud}</TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_pagado))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.pendiente))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_vencido))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatPrecio(parseFloat(dato.monto_favor))}
-                      </TableCell>
-                      <TableCell>{dato.terreno}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datosModalEfectivo.length}
-                    rowsPerPage={rowsPerPage4}
-                    page={page4}
-                    onPageChange={handleChangePage4}
-                    onRowsPerPageChange={handleChangeRowsPerPage4}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Row>
-        <div
-          className="terreno-edit__botones-footer"
-          style={{ paddingBottom: 15 }}
-        >
-          <span className="flex gap-2 justify-end">
-            <Button onClick={handleCloseModalEfectivo} danger size="large">
-              Cerrar
-            </Button>
-          </span>
-        </div>
-      </Modal>
-    </>
   );
+
+}
+
+
+/* ============================================================
+   MODAL DETALLE
+   ============================================================ */
+
+function DetalleModal({
+  tipo,
+  data,
+}) {
+
+  let columnas =
+    columnasRegistro();
+
+
+  if (
+    tipo ===
+    "por_cobrar"
+  ) {
+
+    columnas =
+      columnasPorCobrar();
+
+  }
+
+
+  if (
+    tipo ===
+    "efectivo"
+  ) {
+
+    columnas =
+      columnasEfectivo();
+
+  }
+
+
+  return (
+
+    <div className="report-effectiveness-modal">
+
+      <Table
+        rowKey={
+          function (
+            dato,
+            index
+          ) {
+
+            return (
+              dato.id ||
+              (
+                String(
+                  dato.nombre_cliente ||
+                  ""
+                ) +
+                "-" +
+                index
+              )
+            );
+
+          }
+        }
+        columns={
+          columnas
+        }
+        dataSource={
+          Array.isArray(data)
+            ? data
+            : []
+        }
+        size="small"
+        scroll={{
+          x:
+            tipo ===
+            "por_cobrar"
+              ? 1250
+              : 950,
+        }}
+        pagination={{
+          pageSize:
+            10,
+
+          showSizeChanger:
+            true,
+
+          pageSizeOptions: [
+            "5",
+            "10",
+            "25",
+          ],
+        }}
+        locale={{
+          emptyText:
+            "No hay registros disponibles.",
+        }}
+        className="report-effectiveness-table"
+      />
+
+    </div>
+
+  );
+
+}
+
+
+/* ============================================================
+   COLUMNAS REGISTRO
+   ============================================================ */
+
+function columnasRegistro() {
+
+  return [
+
+    {
+      title:
+        "Cliente",
+
+      dataIndex:
+        "nombre_cliente",
+
+      key:
+        "nombre_cliente",
+
+      width:
+        210,
+    },
+
+
+    {
+      title:
+        "No. pago",
+
+      dataIndex:
+        "no_pago",
+
+      key:
+        "no_pago",
+
+      width:
+        80,
+    },
+
+
+    {
+      title:
+        "Fecha pago",
+
+      dataIndex:
+        "fecha_pago",
+
+      key:
+        "fecha_pago",
+
+      width:
+        110,
+    },
+
+
+    {
+      title:
+        "Monto a pagar",
+
+      dataIndex:
+        "monto_pago",
+
+      key:
+        "monto_pago",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Pagado",
+
+      dataIndex:
+        "monto_pagado",
+
+      key:
+        "monto_pagado",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Pendiente",
+
+      dataIndex:
+        "monto_pendiente",
+
+      key:
+        "monto_pendiente",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Vencido",
+
+      dataIndex:
+        "monto_vencido",
+
+      key:
+        "monto_vencido",
+
+      align:
+        "right",
+
+      render:
+        function (
+          value
+        ) {
+
+          return (
+
+            <span className="report-effectiveness-danger">
+
+              {
+                moneda(
+                  value
+                )
+              }
+
+            </span>
+
+          );
+
+        },
+    },
+
+
+    {
+      title:
+        "A favor",
+
+      dataIndex:
+        "monto_favor",
+
+      key:
+        "monto_favor",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Proyecto / Lote",
+
+      dataIndex:
+        "terreno",
+
+      key:
+        "terreno",
+
+      width:
+        130,
+    },
+
+  ];
+
+}
+
+
+/* ============================================================
+   POR COBRAR
+   ============================================================ */
+
+function columnasPorCobrar() {
+
+  const columnas =
+    columnasRegistro();
+
+
+  columnas.splice(
+    8,
+    0,
+    {
+      title:
+        "Intereses",
+
+      dataIndex:
+        "monto_interes",
+
+      key:
+        "monto_interes",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    }
+  );
+
+
+  columnas.push({
+    title:
+      "Teléfono",
+
+    dataIndex:
+      "telefono",
+
+    key:
+      "telefono",
+
+    width:
+      115,
+  });
+
+
+  return columnas;
+
+}
+
+
+/* ============================================================
+   EFECTIVO
+   ============================================================ */
+
+function columnasEfectivo() {
+
+  return [
+
+    {
+      title:
+        "Cliente",
+
+      dataIndex:
+        "nombre_cliente",
+
+      key:
+        "nombre_cliente",
+
+      width:
+        220,
+    },
+
+
+    {
+      title:
+        "Fecha solicitud",
+
+      dataIndex:
+        "fecha_solicitud",
+
+      key:
+        "fecha_solicitud",
+
+      width:
+        120,
+    },
+
+
+    {
+      title:
+        "Pagado",
+
+      dataIndex:
+        "monto_pagado",
+
+      key:
+        "monto_pagado",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Pendiente",
+
+      dataIndex:
+        "pendiente",
+
+      key:
+        "pendiente",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Vencido",
+
+      dataIndex:
+        "monto_vencido",
+
+      key:
+        "monto_vencido",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "A favor",
+
+      dataIndex:
+        "monto_favor",
+
+      key:
+        "monto_favor",
+
+      align:
+        "right",
+
+      render:
+        moneda,
+    },
+
+
+    {
+      title:
+        "Proyecto / Lote",
+
+      dataIndex:
+        "terreno",
+
+      key:
+        "terreno",
+
+      width:
+        140,
+    },
+
+  ];
+
+}
+
+
+/* ============================================================
+   LAPSO
+   ============================================================ */
+
+function obtenerClaseLapso(
+  lapso
+) {
+
+  if (
+    lapso ===
+    "Mes"
+  ) {
+
+    return (
+      "report-effectiveness-period report-effectiveness-period--month"
+    );
+
+  }
+
+
+  if (
+    lapso ===
+    "Quincena - 1"
+  ) {
+
+    return (
+      "report-effectiveness-period report-effectiveness-period--first"
+    );
+
+  }
+
+
+  if (
+    lapso ===
+    "Quincena - 2"
+  ) {
+
+    return (
+      "report-effectiveness-period report-effectiveness-period--second"
+    );
+
+  }
+
+
+  return (
+    "report-effectiveness-period"
+  );
+
+}
+
+
+/* ============================================================
+   INFO LOTE
+   ============================================================ */
+
+function obtenerInfoLote(
+  dato,
+  propiedad
+) {
+
+  if (
+    !dato ||
+    !dato.info_lote
+  ) {
+
+    return 0;
+
+  }
+
+
+  return (
+    dato.info_lote[
+      propiedad
+    ] ||
+    0
+  );
+
+}
+
+
+/* ============================================================
+   FORMATTERS
+   ============================================================ */
+
+function numeroSeguro(
+  value
+) {
+
+  const numero =
+    Number(
+      value ||
+      0
+    );
+
+
+  if (
+    isNaN(
+      numero
+    )
+  ) {
+
+    return 0;
+
+  }
+
+
+  return numero;
+
+}
+
+
+function moneda(
+  value
+) {
+
+  return (
+    "$ " +
+    formatPrecio(
+      numeroSeguro(
+        value
+      )
+    )
+  );
+
+}
+
+
+function entero(
+  value
+) {
+
+  return numeroSeguro(
+    value
+  ).toLocaleString(
+    "es-MX",
+    {
+      maximumFractionDigits:
+        0,
+    }
+  );
+
+}
+
+
+function porcentajeSeguro(
+  value
+) {
+
+  const numero =
+    numeroSeguro(
+      value
+    );
+
+
+  if (
+    numero <
+    0
+  ) {
+
+    return 0;
+
+  }
+
+
+  if (
+    numero >
+    100
+  ) {
+
+    return 100;
+
+  }
+
+
+  return numero;
+
+}
+
+
+function porcentajeTexto(
+  value
+) {
+
+  return (
+    numeroSeguro(
+      value
+    ).toFixed(
+      2
+    ) +
+    "%"
+  );
+
 }

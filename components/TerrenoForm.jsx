@@ -1,436 +1,1062 @@
 "use client";
 
-import { Button, Form, InputNumber, Select, Row, Col } from "antd";
+import { useContext, useRef, useState } from "react";
+
+import {
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Modal,
+} from "antd";
+
 import Swal from "sweetalert2";
-import InputIn from "./Input";
-import { useContext, useState } from "react";
+
+import {
+  BiBuildings,
+  BiMap,
+  BiMoney,
+  BiCheckCircle,
+} from "react-icons/bi";
+
+import {
+  TbRulerMeasure,
+  TbCalendarDollar,
+} from "react-icons/tb";
+
+import { FaArrowLeft } from "react-icons/fa6";
+
 import { LoadingContext } from "@/contexts/loading";
+
 import terrenosService from "@/services/terrenosService";
+
+import AsignarM2 from "@/components/AsignarM2";
+import CrearPlazo from "@/components/CrearPlazo";
+
 import { formatPrecio } from "@/helpers/formatters";
-import { Paper } from "@mui/material";
-import AsignarM2 from "@/app/lotes/asignar/page";
-import PlazosCrear from "@/app/plazos/crear/page";
 
-export default function TerrenoForm({ setTerrenoNuevo, setWatch, watch }) {
+const EMPRESAS = [
+  {
+    id: 1,
+    nombre: "Sucursal 1",
+  },
+];
+
+export default function TerrenoForm({
+  setTerrenoNuevo,
+  setWatch,
+  watch,
+}) {
   const { setIsLoading } = useContext(LoadingContext);
-  const { Option } = Select;
-  const [precio_compra, setPrecioCompra] = useState(0.0);
-  const [superficie_total_proyecto, setSuperficieTotalProyecto] = useState(0.0);
-  const [lotes, setAsignarLotes] = useState(false);
-  const [terreno_info, setTerrenoInfo] = useState(null);
 
-  const empresas = [
-    {
-      id: 1,
-      nombre: "Sucursal 1",
-    },
-  ];
+  const [form] = Form.useForm();
 
-  const onGuardarTerreno = (values) => {
-    Swal.fire({
-      title: "Verifique que los datos sean correctos",
-      icon: "info",
-      html: `Nombre del terreno: ${values.nombreTerreno}<br/><br/>Cantidad de Lotes: ${values.cantidadLotes}`,
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Aceptar",
-      denyButtonText: `Cancelar`,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setIsLoading(true);
-        terrenosService.createTerreno(values, onTerrenoGuardado, onError);
-      }
-    });
-  };
+  const [terrenoCreado, setTerrenoCreado] = useState(null);
+  const [modalActivo, setModalActivo] = useState(null);
 
-  const handleCancel = async () => {
-    //MENSAJE EMERGENTE PARA REAFIRMAR QUE SE VA A
-    //CANCELAR EL PROCESO DE GUARDADO
-    Swal.fire({
-      title: "¿Desea cancelar el proceso?",
-      icon: "info",
-      text: "Se eliminarán los datos ingresados",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Aceptar",
-      denyButtonText: `Cancelar`,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setTerrenoNuevo(false);
-      }
-    });
-  };
+  const formContainerRef = useRef(null);
 
   const validacionMensajes = {
     required: "${label} es requerido",
     types: {
-      number: "${label} no es un número válido!",
+      number: "${label} no es un número válido",
     },
     number: {
       min: "${label} no puede ser menor a ${min}",
     },
   };
 
+  /* =========================================================
+     CALCULAR PRECIO POR M2
+     ========================================================= */
+
+  const onValuesChange = (_, valores) => {
+    const precioCompra = Number(
+      valores.precioCompra || 0
+    );
+
+    const superficieTotal = Number(
+      valores.superficieTotal || 0
+    );
+
+    const precioM2 =
+      superficieTotal > 0
+        ? precioCompra / superficieTotal
+        : 0;
+
+    form.setFieldsValue({
+      precio_m2:
+        precioM2 > 0
+          ? Number(precioM2.toFixed(2))
+          : null,
+    });
+  };
+
+  /* =========================================================
+     GUARDAR
+     ========================================================= */
+
+  const onGuardarTerreno = async (values) => {
+    const resultado = await Swal.fire({
+      title: "Confirmar nuevo terreno",
+      html: `
+        <div class="swal-geanova-summary">
+          <span>Proyecto</span>
+          <strong>${values.nombreTerreno}</strong>
+
+          <span>Cantidad de lotes</span>
+          <strong>${values.cantidadLotes}</strong>
+        </div>
+      `,
+      icon: "question",
+
+      showDenyButton: true,
+      showCancelButton: false,
+
+      confirmButtonText: "Guardar terreno",
+      denyButtonText: "Cancelar",
+
+      buttonsStyling: false,
+
+      customClass: {
+        popup: "swal-geanova",
+        confirmButton: "swal-geanova-confirm",
+        denyButton: "swal-geanova-cancel",
+      },
+    });
+
+    if (!resultado.isConfirmed) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    terrenosService.createTerreno(
+      values,
+      onTerrenoGuardado,
+      onError
+    );
+  };
+
+  /* =========================================================
+     CALLBACK GUARDADO
+     ========================================================= */
+
   const onTerrenoGuardado = (data) => {
     setIsLoading(false);
-    if (data.success) {
-      // setWatch(!watch);
-      setAsignarLotes(true);
-      setTerrenoInfo(data.terreno);
+
+    if (!data?.success) {
       Swal.fire({
-        title: "Guardado con Éxito",
-        icon: "success",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: true,
-        confirmButtonText: "Aceptar",
-      });
-      // setTerrenoNuevo(false);
-    } else {
-      Swal.fire({
-        title: "Error",
+        title: "No se pudo guardar",
+        text:
+          data?.message ||
+          "Ocurrió un error al guardar el terreno.",
         icon: "error",
-        text: data.message,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: true,
+
         confirmButtonText: "Aceptar",
+        buttonsStyling: false,
+
+        customClass: {
+          popup: "swal-geanova",
+          confirmButton: "swal-geanova-confirm",
+        },
+      });
+
+      return;
+    }
+
+    setTerrenoCreado(data.terreno);
+
+    notificarCambio();
+
+    Swal.fire({
+      title: "Terreno registrado",
+      text:
+        "El proyecto se guardó correctamente.",
+      icon: "success",
+
+      confirmButtonText: "Continuar",
+      buttonsStyling: false,
+
+      customClass: {
+        popup: "swal-geanova",
+        confirmButton: "swal-geanova-confirm",
+      },
+    });
+  };
+
+  /* =========================================================
+     ERROR
+     ========================================================= */
+
+  const onError = (error) => {
+    setIsLoading(false);
+
+    console.error(
+      "Error al guardar terreno:",
+      error
+    );
+
+    Swal.fire({
+      title: "Error",
+      text:
+        "No fue posible guardar el terreno. Intente nuevamente.",
+      icon: "error",
+
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+
+      customClass: {
+        popup: "swal-geanova",
+        confirmButton: "swal-geanova-confirm",
+      },
+    });
+  };
+
+  /* =========================================================
+     CANCELAR
+     ========================================================= */
+
+  const handleCancel = async () => {
+    const resultado = await Swal.fire({
+      title: "¿Cancelar registro?",
+      text:
+        "Los datos ingresados en el formulario se perderán.",
+      icon: "warning",
+
+      showDenyButton: true,
+
+      confirmButtonText: "Sí, cancelar",
+      denyButtonText: "Continuar editando",
+
+      buttonsStyling: false,
+
+      customClass: {
+        popup: "swal-geanova",
+        confirmButton: "swal-geanova-danger",
+        denyButton: "swal-geanova-cancel",
+      },
+    });
+
+    if (resultado.isConfirmed) {
+      volverTerrenos();
+    }
+  };
+
+  /* =========================================================
+     REFRESCAR PADRE
+     ========================================================= */
+
+  const notificarCambio = () => {
+    if (typeof setWatch !== "function") {
+      return;
+    }
+
+    if (typeof watch === "boolean") {
+      setWatch(!watch);
+
+      return;
+    }
+
+    if (typeof watch === "number") {
+      setWatch(watch + 1);
+
+      return;
+    }
+
+    setWatch();
+  };
+
+  /* =========================================================
+     VOLVER
+     ========================================================= */
+
+  const volverTerrenos = () => {
+    if (typeof setTerrenoNuevo === "function") {
+      setTerrenoNuevo(false);
+    }
+  };
+
+  /* =========================================================
+     CREAR OTRO
+     ========================================================= */
+
+  const crearOtroTerreno = () => {
+    form.resetFields();
+
+    setTerrenoCreado(null);
+    setModalActivo(null);
+
+    if (formContainerRef.current) {
+      formContainerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
     }
   };
 
-  const onError = (e) => {
-    setIsLoading(false);
-    console.log(e);
-  };
+  /* =========================================================
+     TERRENO GUARDADO
+     ========================================================= */
+
+  if (terrenoCreado) {
+    return (
+      <>
+        <div className="form-success">
+
+          <div className="form-success__icon">
+            <BiCheckCircle />
+          </div>
+
+          <span className="form-success__eyebrow">
+            PROYECTO REGISTRADO
+          </span>
+
+          <h1 className="form-success__title">
+            {terrenoCreado.nombre}
+          </h1>
+
+          <p className="form-success__description">
+            El terreno fue registrado correctamente.
+            Puedes continuar configurando el proyecto.
+          </p>
+
+
+          <div className="form-success__stats">
+
+            <div>
+              <span>
+                Lotes
+              </span>
+
+              <strong>
+                {terrenoCreado.cantidad_lotes || 0}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Superficie
+              </span>
+
+              <strong>
+                {formatNumber(
+                  terrenoCreado.superficie_total
+                )}{" "}
+                m²
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div className="form-success__divider" />
+
+
+          <div className="form-success__next">
+
+            <h2>
+              ¿Qué deseas configurar ahora?
+            </h2>
+
+            <p>
+              Estos pasos también pueden realizarse
+              posteriormente desde el proyecto.
+            </p>
+
+
+            <div className="form-success__actions">
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() =>
+                  setModalActivo("superficie")
+                }
+              >
+                <TbRulerMeasure />
+
+                Asignar superficies
+              </button>
+
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() =>
+                  setModalActivo("plazos")
+                }
+              >
+                <TbCalendarDollar />
+
+                Crear plazos
+              </button>
+
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={volverTerrenos}
+              >
+                Ver terrenos
+              </button>
+
+            </div>
+
+
+            <button
+              type="button"
+              className="form-success__new"
+              onClick={crearOtroTerreno}
+            >
+              Registrar otro terreno
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <Modal
+          open={modalActivo === "superficie"}
+          onCancel={() => setModalActivo(null)}
+          footer={null}
+          width={950}
+          centered
+          destroyOnClose
+          className="geanova-modal"
+          title="Asignar superficies"
+        >
+          <AsignarM2
+            terrenoId={terrenoCreado.id}
+          />
+        </Modal>
+
+
+        <Modal
+          open={modalActivo === "plazos"}
+          onCancel={() => setModalActivo(null)}
+          footer={null}
+          width={950}
+          centered
+          destroyOnClose
+          className="geanova-modal"
+          title="Crear plazos"
+        >
+          <CrearPlazo
+            terrenoId={terrenoCreado.id}
+          />
+        </Modal>
+      </>
+    );
+  }
+
+
+  /* =========================================================
+     FORMULARIO
+     ========================================================= */
 
   return (
-    <div>
-      {lotes && (
-        <>
-          <PlazosCrear terrenoId={terreno_info.id} />
-          <AsignarM2 terrenoId={terreno_info.id} />
-        </>
-      )}
-      {!lotes && (
-        <>
-          <Form
-            name="basic"
-            onFinish={onGuardarTerreno}
-            autoComplete="off"
-            className="grid gap-1"
-            validateMessages={validacionMensajes}
-            layout="vertical"
-          >
-            <Row justify={"center"}>
-              <Col
-                xs={24}
-                sm={20}
-                md={16}
-                lg={12}
-                xl={8}
-                xxl={4}
-                className="titulo_pantallas"
+    <div
+      ref={formContainerRef}
+      className="geanova-form-page"
+    >
+
+      {/* HEADER */}
+
+      <header className="geanova-form-header">
+
+        <div>
+
+          <span className="geanova-form-header__eyebrow">
+            <BiBuildings />
+
+            TERRENOS
+          </span>
+
+          <h1 className="geanova-form-header__title">
+            Nuevo terreno
+          </h1>
+
+          <p className="geanova-form-header__description">
+            Registra la información general,
+            territorial y financiera del proyecto.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={handleCancel}
+        >
+          <FaArrowLeft />
+
+          Volver
+        </button>
+
+      </header>
+
+
+      <Form
+        form={form}
+        name="nuevo-terreno"
+        layout="vertical"
+        autoComplete="off"
+        validateMessages={validacionMensajes}
+        onFinish={onGuardarTerreno}
+        onValuesChange={onValuesChange}
+        className="geanova-form"
+      >
+
+        {/* =====================================================
+            INFORMACION GENERAL
+        ====================================================== */}
+
+        <section className="form-section">
+
+          <div className="form-section__header">
+
+            <div className="form-section__icon">
+              <BiBuildings />
+            </div>
+
+            <div>
+
+              <h2 className="form-section__title">
+                Información general
+              </h2>
+
+              <p className="form-section__description">
+                Datos principales para identificar
+                el proyecto inmobiliario.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="form-section__body">
+
+            <div className="form-grid form-grid--2">
+
+              <Form.Item
+                label="Nombre del propietario"
+                name="nombrePropietario"
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      "Nombre del propietario es requerido",
+                  },
+                ]}
               >
-                <b>DATOS DEL TERRENO</b>
-              </Col>
-            </Row>
+                <Input
+                  placeholder="Ej. Juan Pérez"
+                  size="large"
+                />
+              </Form.Item>
 
-            <Row gutter={[16, 16]} style={{ marginTop: "15px" }}>
-              <Col xs={24} sm={12} lg={12} className="formulario_col">
-                <div className="formulario">
-                  <p>Nombre Del Propietario</p>
 
-                  <InputIn
-                    className="input_formulario"
-                    placeholder="Nombre Del Propietario"
-                    name="nombrePropietario"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nombre del Propietario es requerido",
-                      },
-                    ]}
-                  />
-                  <p>Empresa</p>
+              <Form.Item
+                label="Empresa"
+                name="empresaId"
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      "Seleccione una empresa",
+                  },
+                ]}
+              >
+                <Select
+                  showSearch
+                  size="large"
+                  placeholder="Seleccione una empresa"
+                  optionFilterProp="label"
+                  options={EMPRESAS.map(
+                    (empresa) => ({
+                      label: empresa.nombre,
+                      value: empresa.id,
+                    })
+                  )}
+                />
+              </Form.Item>
 
+
+              <Form.Item
+                label="Nombre del proyecto"
+                name="nombreTerreno"
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      "Nombre del terreno es requerido",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ej. Residencial Santa María"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Ciudad"
+                name="ciudad"
+              >
+                <Input
+                  placeholder="Ej. Aguascalientes"
+                  size="large"
+                />
+              </Form.Item>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* =====================================================
+            UBICACION
+        ====================================================== */}
+
+        <section className="form-section">
+
+          <div className="form-section__header">
+
+            <div className="form-section__icon">
+              <BiMap />
+            </div>
+
+            <div>
+
+              <h2 className="form-section__title">
+                Ubicación
+              </h2>
+
+              <p className="form-section__description">
+                Dirección y localización general
+                del terreno.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="form-section__body">
+
+            <div className="form-grid form-grid--2">
+
+              <Form.Item
+                className="form-grid__full"
+                label="Domicilio"
+                name="domicilioTerreno"
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      "Domicilio del terreno es requerido",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Calle, número o referencia"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Colonia / Localidad"
+                name="colonia"
+              >
+                <Input
+                  placeholder="Ingrese colonia o localidad"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Ciudad"
+                name="ciudadUbicacion"
+              >
+                <Input
+                  placeholder="Ciudad"
+                  size="large"
+                />
+              </Form.Item>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* =====================================================
+            SUPERFICIES
+        ====================================================== */}
+
+        <section className="form-section">
+
+          <div className="form-section__header">
+
+            <div className="form-section__icon">
+              <TbRulerMeasure />
+            </div>
+
+            <div>
+
+              <h2 className="form-section__title">
+                Superficies y lotes
+              </h2>
+
+              <p className="form-section__description">
+                Define la distribución física
+                inicial del proyecto.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="form-section__body">
+
+            <div className="form-grid form-grid--3">
+
+              <Form.Item
+                label="Cantidad de lotes"
+                name="cantidadLotes"
+                rules={[
+                  {
+                    type: "number",
+                    min: 1,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={1}
+                  controls={false}
+                  placeholder="Ej. 150"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Superficie total"
+                name="superficieTotal"
+                rules={[
+                  {
+                    type: "number",
+                    min: 1,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  controls={false}
+                  placeholder="0.00"
+                  suffix="m²"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Área vendible"
+                name="areaVendible"
+                rules={[
+                  {
+                    type: "number",
+                    min: 0,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  controls={false}
+                  placeholder="0.00"
+                  suffix="m²"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Área de reserva"
+                name="areaReserva"
+                rules={[
+                  {
+                    type: "number",
+                    min: 0,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  controls={false}
+                  placeholder="0.00"
+                  suffix="m²"
+                  size="large"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Área de vialidad"
+                name="areaVialidad"
+                rules={[
+                  {
+                    type: "number",
+                    min: 0,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  controls={false}
+                  placeholder="0.00"
+                  suffix="m²"
+                  size="large"
+                />
+              </Form.Item>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* =====================================================
+            FINANZAS
+        ====================================================== */}
+
+        <section className="form-section">
+
+          <div className="form-section__header">
+
+            <div className="form-section__icon">
+              <BiMoney />
+            </div>
+
+            <div>
+
+              <h2 className="form-section__title">
+                Información financiera
+              </h2>
+
+              <p className="form-section__description">
+                Valores económicos principales
+                del proyecto.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="form-section__body">
+
+            <div className="form-grid form-grid--3">
+
+              <Form.Item
+                label="Precio de compra"
+                name="precioCompra"
+                rules={[
+                  {
+                    type: "number",
+                    min: 1,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  controls={false}
+                  placeholder="0.00"
+                  size="large"
+                  formatter={formatPrecio}
+                  parser={parseMoney}
+                  prefix="$"
+                  suffix="MXN"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Precio por m²"
+                name="precio_m2"
+                tooltip="Se calcula automáticamente usando precio de compra ÷ superficie total."
+              >
+                <InputNumber
+                  readOnly
+                  controls={false}
+                  size="large"
+                  formatter={formatPrecio}
+                  parser={parseMoney}
+                  prefix="$"
+                  suffix="MXN/m²"
+                  className="form-control-calculated"
+                />
+              </Form.Item>
+
+
+              <Form.Item
+                label="Venta proyectada de contado"
+                name="precioProyectadoContado"
+                rules={[
+                  {
+                    type: "number",
+                    min: 1,
+                    required: true,
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  controls={false}
+                  placeholder="0.00"
+                  size="large"
+                  formatter={formatPrecio}
+                  parser={parseMoney}
+                  prefix="$"
+                  suffix="MXN"
+                />
+              </Form.Item>
+
+            </div>
+               <div className="form-grid form-grid--3">
                   <Form.Item
-                    name={"empresaId"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      { required: true, message: "Empresa no seleccionada" },
-                    ]}
-                  >
-                    <Select
-                      showSearch
-                      placeholder="Seleccione una Empresa"
-                      optionLabelProp="label"
-                    >
-                      {empresas?.map((item) => (
-                        <Option
-                          key={item.nombre}
-                          value={item.id}
-                          label={item.nombre}
-                        >
-                          {item?.nombre}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                  <p>Nombre del Terreno</p>
-
-                  <InputIn
-                    className="input_formulario"
-                    placeholder="Ingrese el Nombre del Terreno"
-                    name="nombreTerreno"
+                    name="escrituracion_m2"
+                    label="Escrituración por m²"
                     rules={[
                       {
-                        required: true,
-                        message: "Nombre del Terreno es requerido",
-                      },
-                    ]}
-                  />
-                  <p>Domicilio del Terreno</p>
-                  <InputIn
-                    className="input_formulario"
-                    placeholder="Ingrese el Domicilio del Terreno"
-                    name="domicilioTerreno"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Domicilio del Terreno es requerido",
-                      },
-                    ]}
-                  />
-                  <p>Colonia/Localidad</p>
-
-                  <InputIn
-                    className="input_formulario"
-                    placeholder="Colonia/Localidad"
-                    name="colonia"
-                    rules={[
-                      {
+                        type: "number",
+                        min: 0,
                         required: false,
-                        message: "",
                       },
                     ]}
-                  />
-                  <p>Ciudad</p>
-                  <InputIn
-                    className="input_formulario"
-                    placeholder="Ciudad"
-                    name="ciudad"
+                  >
+                    <InputNumber
+                      size="large"
+                      min={0}
+                      controls={false}
+                      formatter={formatPrecio}
+                      parser={parseMoney}
+                      prefix="$"
+                      suffix="MXN/m²"
+                      placeholder="0.00"
+                    />
+                  </Form.Item>
+
+
+                  <Form.Item
+                    name="escrituracion_fija"
+                    label="Escrituración fija"
                     rules={[
                       {
+                        type: "number",
+                        min: 0,
                         required: false,
-                        message: "",
-                      },
-                    ]}
-                  />
-                </div>
-              </Col>
-              <Col xs={24} sm={12} lg={12}>
-                <div className="formulario">
-                  <p> Cantidad De Lotes</p>
-                  <Form.Item
-                    name={"cantidadLotes"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
                       },
                     ]}
                   >
                     <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese la Cantidad de Lotes"
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Precio De Compra</p>
-
-                  <Form.Item
-                    name={"precioCompra"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese El Precio De Compra"
-                      onChange={(data) => setPrecioCompra(data)}
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Superficie Total</p>
-
-                  <Form.Item
-                    name={"superficieTotal"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese la Superficie del Total en M2"
-                      onChange={(data) => setSuperficieTotalProyecto(data)}
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Precio Por M2</p>
-
-                  <Form.Item
-                    name={"precio_m2"}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder={"Ingrese Precio del M2"}
-                      value={precio_compra / superficie_total_proyecto}
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Precio Proyectado De Area Vendible (Contado)</p>
-
-                  <Form.Item
-                    name={"precioProyectadoContado"}
-                    label={""}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese el Precio Proyectado"
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Área de Reserva</p>
-                  <Form.Item
-                    name={"areaReserva"}
-                    label={""}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese el Área de Reserva en M2"
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Área Vendible</p>
-
-                  <Form.Item
-                    name={"areaVendible"}
-                    label={""}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese el Área Vendible en M2"
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </Form.Item>
-                  <p>Área de Vialidad</p>
-
-                  <Form.Item
-                    name={"areaVialidad"}
-                    label={""}
-                    style={{ width: "100%" }}
-                    rules={[
-                      {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      className="input_formulario"
-                      placeholder="Ingrese el Área de Vialidad en M2"
-                      suffix={"M2"}
-                      style={{
-                        width: "100%",
-                      }}
+                      size="large"
+                      min={0}
+                      controls={false}
+                      formatter={formatPrecio}
+                      parser={parseMoney}
+                      prefix="$"
+                      suffix="MXN"
+                      placeholder="0.00"
                     />
                   </Form.Item>
                 </div>
-              </Col>
-            </Row>
+          </div>
 
-            <span className="flex gap-2 justify-end">
-              <Button htmlType="submit" size={"large"} className="boton">
-                Guardar
-              </Button>
+        </section>
 
-              <Button onClick={handleCancel} danger size={"large"}>
-                Cancelar
-              </Button>
-            </span>
-          </Form>
-        </>
-      )}
+
+        {/* =====================================================
+            FOOTER
+        ====================================================== */}
+
+        <footer className="geanova-form-footer">
+
+          <div className="geanova-form-footer__info">
+            Los campos marcados con * son obligatorios.
+          </div>
+
+
+          <div className="geanova-form-footer__actions">
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleCancel}
+            >
+              Cancelar
+            </button>
+
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+            >
+              Guardar terreno
+            </button>
+
+          </div>
+
+        </footer>
+
+      </Form>
+
     </div>
   );
+}
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function parseMoney(value) {
+  if (!value) {
+    return "";
+  }
+
+  return String(value)
+    .replace(/\$\s?/g, "")
+    .replace(/,/g, "")
+    .replace(/MXN/g, "")
+    .trim();
+}
+
+
+function formatNumber(value) {
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat(
+    "es-MX",
+    {
+      maximumFractionDigits: 2,
+    }
+  ).format(number);
 }
