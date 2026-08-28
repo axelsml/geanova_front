@@ -893,7 +893,7 @@ export default function TerrenoForm({
                   formatter={formatPrecio}
                   parser={parseMoney}
                   prefix="$"
-                  suffix="MXN"
+                   
                 />
               </Form.Item>
 
@@ -935,7 +935,7 @@ export default function TerrenoForm({
                   formatter={formatPrecio}
                   parser={parseMoney}
                   prefix="$"
-                  suffix="MXN"
+                   
                 />
               </Form.Item>
 
@@ -983,7 +983,7 @@ export default function TerrenoForm({
                       formatter={formatPrecio}
                       parser={parseMoney}
                       prefix="$"
-                      suffix="MXN"
+                       
                       placeholder="0.00"
                     />
                   </Form.Item>

@@ -2417,6 +2417,7 @@ img {
    ANT INPUT
    ========================================================= */
 
+   
 .geanova-form .ant-input,
 .geanova-form .ant-input-number,
 .geanova-form .ant-select-selector {
@@ -16205,4 +16206,100 @@ html[data-theme="dark"]
     flex-direction: column;
   }
 
+}
+
+.sale-money-field {
+  width: 100%;
+}
+
+
+/* Contenedor del Form.Item */
+.sale-money-field .ant-form-item-control {
+  width: 100%;
+}
+
+
+.sale-money-field .ant-form-item-control-input {
+  width: 100%;
+}
+
+
+.sale-money-field .ant-form-item-control-input-content {
+  width: 100%;
+}
+
+
+/* InputNumber normal */
+.sale-money-field .ant-input-number {
+  width: 100% !important;
+  min-width: 100% !important;
+
+  height: 44px;
+
+  border-radius: 8px;
+}
+
+
+/*
+ * Algunas versiones de Ant Design crean
+ * este wrapper cuando se usa prefix/suffix
+ */
+.sale-money-field .ant-input-number-affix-wrapper {
+  width: 100% !important;
+  min-width: 100% !important;
+
+  height: 44px;
+
+  border-radius: 8px;
+}
+
+
+/* Otro posible wrapper dependiendo de versión */
+.sale-money-field .ant-input-number-group-wrapper {
+  width: 100% !important;
+}
+
+
+/* Input interno */
+.sale-money-field .ant-input-number-input-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+
+.sale-money-field .ant-input-number-input {
+  width: 100%;
+
+  height: 42px;
+
+  padding-left: 10px;
+  padding-right: 10px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* Prefix $ */
+.sale-money-field .ant-input-number-prefix {
+  margin-right: 7px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* Suffix MXN */
+.sale-money-field .ant-input-number-suffix {
+  margin-left: 8px;
+
+  color: var(--text-secondary, #64748b);
+
+  font-size: 9px;
+  font-weight: 600;
+}
+.geanova-form .ant-input-number,
+.geanova-form .ant-input-number-affix-wrapper,
+.geanova-form .ant-input-number-group-wrapper {
+  width: 100% !important;
 }

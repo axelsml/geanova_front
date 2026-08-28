@@ -168,7 +168,7 @@ const PlazosForm = forwardRef(({ terrenoId }, ref) => {
             formatter={formatPrecio}
             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
             prefix="$"
-            suffix="MXN"
+             
           />
         </Form.Item>
 
@@ -192,7 +192,7 @@ const PlazosForm = forwardRef(({ terrenoId }, ref) => {
             formatter={formatPrecio}
             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
             prefix="$"
-            suffix="MXN"
+             
           />
         </Form.Item>
 

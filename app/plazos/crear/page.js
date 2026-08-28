@@ -132,7 +132,7 @@ export default function PlazosCrear({ terrenoId }) {
               formatter={formatPrecio}
               parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               prefix="$"
-              suffix="MXN"
+               
               />
           </Form.Item>
             
@@ -153,7 +153,7 @@ export default function PlazosCrear({ terrenoId }) {
               formatter={formatPrecio}
               parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               prefix="$"
-              suffix="MXN"
+               
             />
           </Form.Item>
             </>

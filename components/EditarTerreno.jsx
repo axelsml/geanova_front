@@ -1450,7 +1450,7 @@ const EditarTerreno = forwardRef(
 
                     prefix="$"
 
-                    suffix="MXN"
+                     
 
                     placeholder="0.00"
                   />
@@ -1534,7 +1534,7 @@ const EditarTerreno = forwardRef(
 
                     prefix="$"
 
-                    suffix="MXN"
+                     
 
                     placeholder="0.00"
                   />
@@ -1582,7 +1582,7 @@ const EditarTerreno = forwardRef(
                     formatter={formatPrecio}
                     parser={parseMoney}
                     prefix="$"
-                    suffix="MXN"
+                     
                     placeholder="0.00"
                   />
                 </Form.Item>

@@ -122,6 +122,7 @@ export default function ClientesInfo() {
     ESCRITURACION: 3,
   };
 
+const [lotePagadoEdit, setLotePagadoEdit] = useState(false);
 
   const abrirSelectorTipoPago = () => {
     setTipoPagoSeleccionado(TIPOS_PAGO.SOLICITUD);
@@ -664,7 +665,9 @@ const confirmarTipoPago = () => {
       setAnticipo(Number(infoLote.anticipo || 0));
       setFinanciamientoId(infoLote.financiamiento_id || null);
       setPlazoId(infoLote.plazo_id || null);
-
+      setLotePagadoEdit(
+        Boolean(infoLote.lote_pagado)
+      );
       setSistemaPagoSelectedModal(
         obtenerSistemaPagoIdActual(
           infoLote,
@@ -734,7 +737,7 @@ const confirmarTipoPago = () => {
       segundoNombre,
       primerApellido,
       segundoApellido,
-
+      lote_pagado: lotePagadoEdit,
       calle,
       colonia,
       numero_ext: numeroExt,
@@ -2409,6 +2412,47 @@ const onClienteActualizado = (data) => {
                       </Form.Item>
                     </div>
                   )}
+                  <div
+                    className={
+                      lotePagadoEdit
+                        ? "client-edit-paid-lot client-edit-paid-lot--active"
+                        : "client-edit-paid-lot"
+                    }
+                  >
+                    <div className="client-edit-paid-lot__content">
+
+                      <strong>
+                        Lote liquidado previamente
+                      </strong>
+
+                      <span>
+                        Al activar esta opción el valor del contrato
+                        se conserva como información histórica, pero
+                        el lote deja de generar saldo por cobrar.
+                      </span>
+
+                    </div>
+
+                    <Checkbox
+                      checked={lotePagadoEdit}
+                      onChange={(event) => {
+                        const checked =
+                          event.target.checked;
+
+                        setLotePagadoEdit(
+                          checked
+                        );
+
+                        setNewAmortizacion(
+                          true
+                        );
+                      }}
+                    >
+                      {lotePagadoEdit
+                        ? "Liquidado"
+                        : "Por cobrar"}
+                    </Checkbox>
+                  </div>
                 </>
               )}
             </div>

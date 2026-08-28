@@ -291,7 +291,7 @@ export default function AgregarCargo() {
                 precision={2}
                 style={{ width: "100%" }}
                 prefix="$"
-                suffix="MXN"
+                 
                 placeholder="0.00"
                 formatter={(value) =>
                   value === undefined ||

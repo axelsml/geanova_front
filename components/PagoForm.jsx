@@ -1822,7 +1822,7 @@ export default function PagoForm({
 
               prefix="$"
 
-              suffix="MXN"
+               
 
             />
 

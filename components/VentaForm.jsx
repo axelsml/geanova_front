@@ -259,6 +259,8 @@ export default function VentaForm() {
 
     monto_contrato: "",
     anticipo: "",
+    
+    lote_pagado: false,
 
     lote_id: "",
 
@@ -1561,44 +1563,43 @@ export default function VentaForm() {
 
 
                 <Form.Item
-                  name="anticipo"
+                name="anticipo"
+                label="Anticipo"
+                className="sale-money-field"
+              >
+                <InputNumber
+                  size="large"
+                  controls={false}
 
-                  label="Anticipo"
-                >
-                  <InputNumber
-                    size="large"
+                  style={{
+                    width: "100%",
+                  }}
 
-                    controls={false}
+                  formatter={formatPrecio}
+                  parser={parseMoney}
 
-                    formatter={
-                      formatPrecio
+                  prefix="$"
+                  suffix="MXN"
+
+                  placeholder="0.00"
+
+                  disabled={
+                    solicitud.lote_pagado
+                  }
+
+                  onChange={(value) => {
+
+                    if (solicitud.lote_pagado) {
+                      return;
                     }
 
-                    parser={
-                      parseMoney
-                    }
-
-                    prefix="$"
-
-                    suffix="MXN"
-
-                    placeholder="0.00"
-
-                    onChange={
-                      (value) => {
-
-                        setSolicitud(
-                          (prev) => ({
-                            ...prev,
-
-                            anticipo:
-                              value,
-                          })
-                        );
-                      }
-                    }
-                  />
-                </Form.Item>
+                    setSolicitud((prev) => ({
+                      ...prev,
+                      anticipo: value,
+                    }));
+                  }}
+                />
+              </Form.Item>
 
 
                 <Form.Item
@@ -2038,42 +2039,34 @@ export default function VentaForm() {
                   <div className="form-grid form-grid--3">
 
                     <Form.Item
-                      name="montoContrato"
+  name="montoContrato"
+  label="Monto contrato"
+  className="sale-money-field"
+>
+  <InputNumber
+    size="large"
+    controls={false}
 
-                      label="Monto contrato"
-                    >
-                      <InputNumber
-                        size="large"
+    style={{
+      width: "100%",
+    }}
 
-                        controls={false}
+    formatter={formatPrecio}
+    parser={parseMoney}
 
-                        formatter={
-                          formatPrecio
-                        }
+    prefix="$"
+    suffix="MXN"
 
-                        parser={
-                          parseMoney
-                        }
+    onChange={(value) => {
 
-                        prefix="$"
+      setSolicitud((prev) => ({
+        ...prev,
+        monto_contrato: value,
+      }));
 
-                        suffix="MXN"
-
-                        onChange={
-                          (value) => {
-
-                            setSolicitud(
-                              (prev) => ({
-                                ...prev,
-
-                                monto_contrato:
-                                  value,
-                              })
-                            );
-                          }
-                        }
-                      />
-                    </Form.Item>
+    }}
+  />
+</Form.Item>
 
 
                     <Form.Item
@@ -2117,9 +2110,82 @@ export default function VentaForm() {
 
                       </div>
                     )}
+                  <Form.Item
+                      name="lote_pagado"
+                      label="Estado actual del lote"
+                      initialValue={false}
+                    >
+                      <Radio.Group
+                        className="sale-payment-status-options"
+                        onChange={(event) => {
 
+                          const lotePagado =
+                            event.target.value === true;
+
+
+                          setSolicitud(
+                            (prev) => ({
+                              ...prev,
+
+                              lote_pagado:
+                                lotePagado,
+
+                              /*
+                              * El anticipo deja de intervenir
+                              * en la cobranza si el lote
+                              * ya estaba liquidado.
+                              */
+                              anticipo:
+                                lotePagado
+                                  ? 0
+                                  : prev.anticipo,
+                            })
+                          );
+
+
+                          if (lotePagado) {
+
+                            form.setFieldsValue({
+                              anticipo: 0,
+                            });
+
+                          }
+
+                        }}
+                      >
+
+                        <Radio.Button value={false}>
+                          Venta normal
+                        </Radio.Button>
+
+
+                        <Radio.Button value={true}>
+                          Lote ya pagado
+                        </Radio.Button>
+
+                      </Radio.Group>
+
+                    </Form.Item>
+                    
                   </div>
+                  {solicitud.lote_pagado && (
+                    <div className="sale-paid-lot-notice">
 
+                      <div className="sale-paid-lot-notice__title">
+                        Lote liquidado previamente
+                      </div>
+                      <p>
+                        Se conservará el monto original del contrato
+                        y la información comercial del lote, pero no
+                        se generará saldo pendiente por el terreno.
+                        Únicamente se cobrará la escrituración,
+                        cuando corresponda.
+                      </p>
+
+                    </div>
+
+                  )}
+                        
                 </div>
 
               </section>
@@ -2445,18 +2511,47 @@ export default function VentaForm() {
                     </strong>
                   </div>
 
-                  {!solicitud.tiempo_extra ? (
-                    <div className="sale-writing-summary__total">
-                      <span>Total operación</span>
+                 {!solicitud.tiempo_extra ? (
 
-                      <strong>
-                        {formatCurrency(
-                          Number(solicitud.monto_contrato || 0) +
-                          Number(solicitud.monto_escrituracion || 0)
-                        )}
-                      </strong>
-                    </div>
-                  ) : (
+                  <div className="sale-writing-summary__total">
+
+                    <span>
+                      {solicitud.lote_pagado
+                        ? "Saldo por cobrar"
+                        : "Total operación"}
+                    </span>
+
+
+                    <strong>
+
+                      {formatCurrency(
+
+                        solicitud.lote_pagado
+
+                          ? Number(
+                              solicitud.monto_escrituracion ||
+                              0
+                            )
+
+                          : (
+                              Number(
+                                solicitud.monto_contrato ||
+                                0
+                              ) +
+
+                              Number(
+                                solicitud.monto_escrituracion ||
+                                0
+                              )
+                            )
+
+                      )}
+
+                    </strong>
+
+                  </div>
+
+                ) : (
                     <div className="sale-writing-summary__total">
                       <span>Monto de cada pago</span>
 
