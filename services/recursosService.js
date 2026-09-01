@@ -1084,6 +1084,75 @@ guardarAplicarPalabraClaveBanco(callback, params, error) {
     });
 }
 
+  updateRelacionTipoMovimientoTarjeta(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("updateRelacionTipoMovimientoTarjeta", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
+
+   updateTarjetaMovimientoTarjeta(callback, params, error) {
+    let call;
+    if (call) {
+      call.cancel();
+    }
+    const CancelToken = axios.CancelToken;
+    call = CancelToken.source();
+    return http
+      .post("updateTarjetaMovimientoTarjeta", params, { cancelToken: call.token })
+      .then((response) => {
+        return callback(response.data);
+      })
+      .catch((response) => {
+        try {
+          if (axios.isCancel(response)) {
+            console.log("Peticion Cancelada");
+          } else {
+            error(response);
+            return Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `Error Handled: ${response}`,
+            });
+          }
+        } catch (err) {
+          console.error("Error Handled", err);
+          return Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `Error Handled: ${err}`,
+          });
+        }
+      });
+  }
   
 }
 

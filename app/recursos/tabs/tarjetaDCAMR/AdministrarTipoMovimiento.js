@@ -1,477 +1,800 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+
+import React, { useEffect, useState } from "react";
+
 import {
+  Form,
+  Input,
+  Select,
+  Button,
   Row,
   Col,
-  Typography,
-  Input,
-  Button,
-  Modal,
-  Tooltip,
-  Form,
-  Select,
-  ColorPicker,
-  theme,
-  Divider,
-} from "antd";
-import {
-  Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TableFooter,
-} from "@mui/material";
-import { FaRegTrashAlt, FaUserTag } from "react-icons/fa";
-import { LoadingContext } from "@/contexts/loading";
-import Swal from "sweetalert2";
+  Tag,
+  Popconfirm,
+  message,
+} from "antd";
+
 import recursosService from "@/services/recursosService";
-import { toTitleCase } from "@/helpers/formatters";
-import {
-  yellow,
-  generate,
-  green,
-  presetPalettes,
-  red,
-} from "@ant-design/colors";
 
-/**
- * Tabla de Roles que muestra la lista de roles con opciones de edición y eliminación.
- * @returns {JSX.Element} - Componente de React que renderiza la tabla de usuarios.
- */
-export default function AdministrarTipoMovimiento() {
-  //Variables del funcionamiento de la Tabla
-  const [orderBy] = useState("created_at");
-  const [order] = useState("asc");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+const { Option } = Select;
 
+export default function AdministrarTipoMovimiento({
+  tarjetas = [],
+  onTiposActualizados,
+}) {
   const [form] = Form.useForm();
 
-  //Variables del modal
-  const [showModal, setShowModal] = useState(false);
+  const [tipos, setTipos] = useState([]);
 
-  //Variables del componente
-  const [datos, setDatos] = useState([]);
-  const [descripcion, setDescripcion] = useState([]);
+  /*
+   * Tenemos un estado local de tarjetas.
+   *
+   * Si el padre ya las trae, las usamos.
+   * Si por alguna razón llegan vacías,
+   * este componente las consulta directamente.
+   */
+  const [
+    tarjetasDisponibles,
+    setTarjetasDisponibles,
+  ] = useState([]);
 
-  const [color, setColor] = useState("#438dcc");
-  const genPresets = (presets = presetPalettes) =>
-    Object.entries(presets).map(([label, colors]) => ({
-      label,
-      colors,
-    }));
-  const { token } = theme.useToken();
-  const presets = genPresets({
-    Azul: generate(token.colorPrimary),
-    Rojo: red,
-    Verde: green,
-    Amarillo: yellow,
-  });
+  const [loading, setLoading] =
+    useState(false);
 
-  const customPanelRender = (_, { components: { Picker, Presets } }) => (
-    <Row justify="space-between" wrap={false}>
-      <Col span={12}>
-        <Presets />
-      </Col>
-      <Divider
-        type="vertical"
-        style={{
-          height: "auto",
-        }}
-      />
-      <Col flex="auto">
-        <Picker />
-      </Col>
-    </Row>
-  );
+  // ==========================================================
+  // INICIO
+  // ==========================================================
 
-  const [tipoIngreso, setTipoIngreso] = useState([]);
-  const { setIsLoading } = useContext(LoadingContext);
-
-  const { Option } = Select;
-
-  // Handlers para cerrar los modales
-  const handleCloseModal = () => {
-    form.resetFields(); // Reset form fields when closing the modal
-    setShowModal(false);
-  };
-
-  // Handler para eliminar un rol
-  async function handleEliminarMovimiento(id, nombre) {
-    await Swal.fire({
-      title: "Eliminar este movimiento?",
-      text: `¿Estás seguro de eliminar '${nombre}' ? `,
-      icon: "question",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      confirmButtonText: "Aceptar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        recursosService
-          .destroyTipoMovimientoTarjeta(onMovimientoEliminado, id, onError)
-          .then(() => {
-            cargarDatos();
-          });
-      }
-    });
-  }
-
-  // Callback cuando se elimina un rol
-  const onMovimientoEliminado = (data) => {
-    setIsLoading(false);
-    if (data.type == "success") {
-      Swal.fire({
-        title: "Movimiento eliminado con éxito",
-        icon: "success",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    } else {
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: data.message,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    }
-  };
-
-  // Títulos personalizados para los modales
-  const customTitle = (
-    <Row justify={"center"}>
-      <Typography.Title level={3}>
-        Registrar Tipo de Movimiento
-      </Typography.Title>
-    </Row>
-  );
-
-  // Handlers para cambiar la página y el número de filas por página
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  // Funciones de comparación para ordenar la tabla
-  const stableSort = (array, comparator) => {
-    const result = Object.keys(array).map((key) => array[key]);
-
-    const stabilizedThis = result.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0], b[0]);
-      if (order !== 0) return order;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  };
-
-  const descendingComparator = (a, b, orderBy) => {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  // Obtiene el comparador según el orden y el campo de ordenamiento
-  const getComparator = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator(a, b, orderBy)
-      : (a, b) => -descendingComparator(a, b, orderBy);
-  };
-
-  // Callback cuando ocurre un error
-  const onError = (e) => {
-    setIsLoading(false);
-    console.log(e);
-  };
-
-  // Efecto para cargar los datos cuando el componente se monta
   useEffect(() => {
-    cargarDatos();
+    cargarTipos();
+    cargarTarjetas();
   }, []);
 
-  // Función para cargar los datos de los roles
-  function cargarDatos() {
-    setIsLoading(true);
-    recursosService.showTipoMovimientoTarjeta(setDatos, onError).then(() => {
-      setIsLoading(false);
-    });
-  }
+  /*
+   * Si el padre actualiza las tarjetas,
+   * sincronizamos el estado local.
+   */
+  useEffect(() => {
+    if (
+      Array.isArray(tarjetas) &&
+      tarjetas.length > 0
+    ) {
+      setTarjetasDisponibles(
+        tarjetas
+      );
+    }
+  }, [tarjetas]);
 
-  // Handler para la búsqueda de roles
-  const onSearch = (value) => {
-    recursosService.showTipoMovimientoTarjetaSearch(value, setDatos, onError);
+  // ==========================================================
+  // ERROR
+  // ==========================================================
+
+  const onError = (error) => {
+    setLoading(false);
+
+    console.error(
+      "AdministrarTipoMovimiento:",
+      error
+    );
+
+    message.error(
+      error?.message ||
+        "Ocurrió un error al realizar la operación."
+    );
   };
 
-  async function handleSubmitNuevo() {
-    setShowModal(false);
-    let forms = {
-      descripcion: descripcion,
-      tipo_ingreso: tipoIngreso,
-      codigo_color: color,
-    };
+  // ==========================================================
+  // CARGAR TIPOS
+  // ==========================================================
 
-    await Swal.fire({
-      title: "Guardar nuevo movimiento?",
-      icon: "question",
-      confirmButtonColor: "#4096ff",
-      cancelButtonColor: "#ff4d4f",
-      showDenyButton: true,
-      confirmButtonText: "Aceptar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        recursosService.createTipoMovimientoTarjeta(
-          onMovimientoGuardado,
-          forms,
-          onError
-        );
-        form.resetFields(); // Reset form fields when closing the modal
-      }
-    });
-  }
-  const onMovimientoGuardado = (data) => {
-    setIsLoading(false);
-    if (data.type == "success") {
-      setDescripcion("");
-      setTipoIngreso("");
-      cargarDatos();
-      Swal.fire({
-        title: "Movimiento guardado con éxito",
-        icon: "success",
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
-    } else {
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: data.message,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
-      });
+  const cargarTipos = () => {
+    setLoading(true);
+
+    recursosService
+      .showTipoMovimientoTarjeta(
+        (response) => {
+          console.log(
+            "TIPOS MOVIMIENTO:",
+            response
+          );
+
+          setTipos(
+            Array.isArray(response)
+              ? response
+              : []
+          );
+
+          setLoading(false);
+        },
+        onError
+      );
+  };
+
+  // ==========================================================
+  // CARGAR TARJETAS
+  // ==========================================================
+
+  const cargarTarjetas = () => {
+    /*
+     * Primero aprovechamos las tarjetas
+     * que ya mandó el padre.
+     */
+    if (
+      Array.isArray(tarjetas) &&
+      tarjetas.length > 0
+    ) {
+      console.log(
+        "TARJETAS DESDE PADRE:",
+        tarjetas
+      );
+
+      setTarjetasDisponibles(
+        tarjetas
+      );
+
+      return;
+    }
+
+    /*
+     * Si por alguna razón todavía no llegaron,
+     * consultamos directamente.
+     *
+     * Este es el mismo patrón que ya utilizas
+     * en AdministrarTarjetas.
+     */
+    recursosService
+      .showTarjeta(
+        (response) => {
+          console.log(
+            "TARJETAS CONSULTADAS:",
+            response
+          );
+
+          setTarjetasDisponibles(
+            Array.isArray(response)
+              ? response
+              : []
+          );
+        },
+        onError
+      );
+  };
+
+  // ==========================================================
+  // REFRESCAR PADRE
+  // ==========================================================
+
+  const refrescarCatalogo = () => {
+    cargarTipos();
+
+    if (
+      typeof onTiposActualizados ===
+      "function"
+    ) {
+      onTiposActualizados();
     }
   };
 
-  return (
-    <div style={{ paddingBottom: 30 }}>
-      <Row
-        style={{
-          paddingTop: 20,
-          paddingBottom: 20,
-        }}
-        justify="space-between"
-      >
-        <Tooltip title="Haz clic aquí para crear un nuevo tipo de movimiento">
-          <Button
-            className="boton"
-            onClick={() => {
-              setShowModal(true);
-              console.log("datos: ", datos);
-            }}
-            size="large"
-          >
-            <FaUserTag className="m-auto" size={"20px"} />
-          </Button>
-        </Tooltip>
-        <Input.Search
-          placeholder="Buscar Movimiento"
+  // ==========================================================
+  // CREAR TIPO
+  // ==========================================================
+
+  const guardar = (values) => {
+    const tarjetaId =
+      parseInt(
+        values.tarjeta_id,
+        10
+      );
+
+    const params = {
+      descripcion:
+        values.descripcion,
+
+      tipo_ingreso:
+        values.tipo_ingreso,
+
+      codigo_color:
+        values.codigo_color,
+
+      /*
+       * 0 = Global
+       * Lo enviamos como null.
+       */
+      tarjeta_id:
+        tarjetaId > 0
+          ? tarjetaId
+          : null,
+    };
+
+    console.log(
+      "CREAR TIPO:",
+      params
+    );
+
+    setLoading(true);
+
+    recursosService.createTipoMovimientoTarjeta(
+      (response) => {
+        setLoading(false);
+
+        if (
+          !response ||
+          response.success === false ||
+          response?.type ===
+            "Error" ||
+          response?.type ===
+            "error"
+        ) {
+          message.error(
+            response?.message ||
+              "No se pudo guardar."
+          );
+
+          return;
+        }
+
+        message.success(
+          response?.message ||
+            "Tipo de movimiento guardado."
+        );
+
+        form.resetFields();
+
+        form.setFieldsValue({
+          tipo_ingreso: 2,
+          tarjeta_id: 0,
+          codigo_color:
+            "#ffffff",
+        });
+
+        refrescarCatalogo();
+      },
+      params,
+      onError
+    );
+  };
+
+  // ==========================================================
+  // CAMBIAR TARJETA DE UN TIPO EXISTENTE
+  // ==========================================================
+
+  const cambiarTarjetaTipo = (
+    tipoMovimientoId,
+    tarjetaId
+  ) => {
+    const tarjetaIdNumero =
+      parseInt(
+        tarjetaId,
+        10
+      );
+
+    const params = {
+      id:
+        tipoMovimientoId,
+
+      tarjeta_id:
+        tarjetaIdNumero > 0
+          ? tarjetaIdNumero
+          : null,
+    };
+
+    console.log(
+      "CAMBIAR RELACION:",
+      params
+    );
+
+    /*
+     * Cambio visual inmediato.
+     */
+    setTipos((prev) =>
+      prev.map((tipo) => {
+        if (
+          parseInt(
+            tipo.id,
+            10
+          ) !==
+          parseInt(
+            tipoMovimientoId,
+            10
+          )
+        ) {
+          return tipo;
+        }
+
+        return {
+          ...tipo,
+
+          tarjeta_id:
+            tarjetaIdNumero > 0
+              ? tarjetaIdNumero
+              : null,
+        };
+      })
+    );
+
+    /*
+     * Este servicio lo agregamos más abajo.
+     */
+    recursosService.updateRelacionTipoMovimientoTarjeta(
+      (response) => {
+        if (
+          !response ||
+          response.success === false ||
+          response.type ===
+            "Error" ||
+          response.type ===
+            "error"
+        ) {
+          message.error(
+            response?.message ||
+              "No se pudo actualizar la relación."
+          );
+
+          cargarTipos();
+
+          return;
+        }
+
+        message.success(
+          "Tarjeta relacionada correctamente."
+        );
+
+        if (
+          typeof onTiposActualizados ===
+          "function"
+        ) {
+          onTiposActualizados();
+        }
+      },
+      params,
+      onError
+    );
+  };
+
+  // ==========================================================
+  // ELIMINAR TIPO
+  // ==========================================================
+
+  const eliminar = (id) => {
+    setLoading(true);
+
+    recursosService.destroyTipoMovimientoTarjeta(
+      (response) => {
+        setLoading(false);
+
+        if (
+          response?.type ===
+            "Error" ||
+          response?.type ===
+            "error"
+        ) {
+          message.error(
+            response?.message ||
+              "No se pudo eliminar."
+          );
+
+          return;
+        }
+
+        message.success(
+          "Tipo de movimiento eliminado."
+        );
+
+        refrescarCatalogo();
+      },
+      {
+        id: id,
+      },
+      onError
+    );
+  };
+
+  // ==========================================================
+  // FORMATEAR TARJETA
+  // ==========================================================
+
+  const formatearNumeroTarjeta = (
+    numero
+  ) => {
+    if (!numero) {
+      return "";
+    }
+
+    const limpio =
+      numero
+        .toString()
+        .replace(
+          /\D/g,
+          ""
+        );
+
+    if (
+      limpio.length < 4
+    ) {
+      return numero;
+    }
+
+    return `•••• ${limpio.slice(
+      -4
+    )}`;
+  };
+
+  const textoTarjeta = (
+    tarjeta
+  ) => {
+    if (!tarjeta) {
+      return "Sin tarjeta";
+    }
+
+    const numero =
+      formatearNumeroTarjeta(
+        tarjeta.tarjeta
+      );
+
+    return `${tarjeta.alias || "Sin alias"}${
+      numero
+        ? ` - ${numero}`
+        : ""
+    }`;
+  };
+
+  // ==========================================================
+  // COLUMNAS
+  // ==========================================================
+
+  const columnas = [
+    {
+      title:
+        "Descripción",
+
+      dataIndex:
+        "descripcion",
+
+      key:
+        "descripcion",
+    },
+
+    {
+      title:
+        "Tipo",
+
+      dataIndex:
+        "tipo_ingreso",
+
+      key:
+        "tipo_ingreso",
+
+      width: 90,
+
+      render: (value) =>
+        parseInt(
+          value,
+          10
+        ) === 1 ? (
+          <Tag color="green">
+            Abono
+          </Tag>
+        ) : (
+          <Tag color="red">
+            Cargo
+          </Tag>
+        ),
+    },
+
+    /*
+     * AHORA LA TARJETA ES EDITABLE.
+     */
+    {
+      title:
+        "Tarjeta",
+
+      dataIndex:
+        "tarjeta_id",
+
+      key:
+        "tarjeta_id",
+
+      width: 250,
+
+      render: (
+        tarjetaId,
+        registro
+      ) => (
+        <Select
+          value={
+            tarjetaId
+              ? parseInt(
+                  tarjetaId,
+                  10
+                )
+              : 0
+          }
           style={{
-            width: "100%",
-            maxWidth: "20vw",
+            width:
+              "100%",
           }}
-          enterButton="Buscar"
-          size="large"
-          onSearch={onSearch}
+          showSearch
+          optionFilterProp="label"
+          onChange={(
+            value
+          ) =>
+            cambiarTarjetaTipo(
+              registro.id,
+              value
+            )
+          }
+        >
+          <Option
+            value={0}
+            label="Global"
+          >
+            Global
+          </Option>
+
+          {tarjetasDisponibles.map(
+            (tarjeta) => (
+              <Option
+                key={
+                  tarjeta.id
+                }
+                value={parseInt(
+                  tarjeta.id,
+                  10
+                )}
+                label={textoTarjeta(
+                  tarjeta
+                )}
+              >
+                {textoTarjeta(
+                  tarjeta
+                )}
+              </Option>
+            )
+          )}
+        </Select>
+      ),
+    },
+
+    {
+      title:
+        "Color",
+
+      dataIndex:
+        "codigo_color",
+
+      key:
+        "codigo_color",
+
+      width: 70,
+
+      render: (color) => (
+        <div
+          style={{
+            width: 24,
+            height: 24,
+
+            margin:
+              "0 auto",
+
+            borderRadius:
+              5,
+
+            backgroundColor:
+              color ||
+              "#ffffff",
+
+            border:
+              "1px solid #d9d9d9",
+          }}
         />
-      </Row>
-      <Row justify={"center"}>
-        <Col xs={24} sm={20} md={16} lg={24} xl={24} xxl={24}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Nombre Movimiento</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Tipo Ingreso</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Color</p>
-                  </TableCell>
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableHead>
+      ),
+    },
 
-              <TableBody>
-                {stableSort(datos, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((dato, index) => (
-                    <TableRow key={dato.id}>
-                      <TableCell>{toTitleCase(dato.descripcion)}</TableCell>
-                      <TableCell>
-                        {dato.tipo_ingreso === 1 ? "Abono" : "Cargo"}
-                      </TableCell>
-                      <TableCell>
-                        <ColorPicker
-                          defaultValue={dato.codigo_color}
-                          showText
-                          disabled
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="Haz clic aquí para eliminar un tipo de movimiento">
-                          <Button
-                            className="boton-eliminar"
-                            key={dato.id}
-                            onClick={() => {
-                              handleEliminarMovimiento(
-                                dato.id,
-                                dato.descripcion
-                              );
-                            }}
-                            size="large"
-                          >
-                            <FaRegTrashAlt className="m-auto" size={"20px"} />
-                          </Button>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={datos.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-        </Col>
-      </Row>
-      <Modal
-        title={customTitle}
-        footer={null}
-        width={600}
-        open={showModal}
-        onCancel={() => handleCloseModal()}
+    {
+      title: "",
+
+      key:
+        "acciones",
+
+      width: 90,
+
+      render: (
+        _,
+        registro
+      ) => (
+        <Popconfirm
+          title="¿Eliminar este tipo?"
+          okText="Eliminar"
+          cancelText="Cancelar"
+          onConfirm={() =>
+            eliminar(
+              registro.id
+            )
+          }
+        >
+          <Button
+            danger
+            size="small"
+          >
+            Eliminar
+          </Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
+  return (
+    <>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={guardar}
+        initialValues={{
+          tipo_ingreso: 2,
+
+          tarjeta_id: 0,
+
+          codigo_color:
+            "#ffffff",
+        }}
       >
-        <div>
-          <Row justify={"center"} style={{ paddingTop: 25, paddingBottom: 25 }}>
-            <Form
-              labelCol={{ span: 10 }}
-              layout="horizontal"
-              name="usuarioForm"
-              form={form}
-              onFinish={handleSubmitNuevo}
-            >
-              <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
-                <Form.Item
-                  name="movimiento"
-                  label="Nombre Movimiento"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Ingresa un nombre de Movimiento!",
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder="Nombre Movimiento"
-                    value={descripcion}
-                    onChange={(e) => {
-                      setDescripcion(e.target.value);
-                    }}
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="tipoIngreso"
-                  label="Tipo de ingreso"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Ingresa un Tipo de ingreso!",
-                    },
-                  ]}
-                >
-                  <Select
-                    placeholder={"Financiamiento"}
-                    optionLabelProp="label"
-                    value={tipoIngreso}
-                    style={{ width: "100%" }}
-                    onChange={(value, label) => {
-                      setTipoIngreso(value);
-                    }}
-                  >
-                    <Option value={1} label={"Abono"}>
-                      Abono
-                    </Option>
-                    <Option value={2} label={"Cargo"}>
-                      Cargo
-                    </Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item name="colorLinea" label="Color">
-                  <ColorPicker
-                    styles={{
-                      popupOverlayInner: {
-                        width: 480,
-                      },
-                    }}
-                    presets={presets}
-                    panelRender={customPanelRender}
-                    showText
-                    format="hex"
-                    defaultValue={color}
-                    onFormatChange="hex"
-                    onChange={(value) => {
-                      setColor(value.toHexString());
-                    }}
-                  />
-                </Form.Item>
+        <Row gutter={16}>
+          <Col
+            xs={24}
+            md={12}
+          >
+            <Form.Item
+              name="descripcion"
+              label="Descripción"
+              rules={[
+                {
+                  required:
+                    true,
 
-                <div
-                  className="terreno-edit__botones-footer"
-                  style={{ paddingBottom: 15 }}
+                  message:
+                    "Ingresa una descripción.",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Ej. Gastos Alonso"
+              />
+            </Form.Item>
+          </Col>
+
+          <Col
+            xs={24}
+            md={12}
+          >
+            <Form.Item
+              name="tipo_ingreso"
+              label="Tipo de movimiento"
+              rules={[
+                {
+                  required:
+                    true,
+                },
+              ]}
+            >
+              <Select>
+                <Option
+                  value={1}
                 >
-                  <span className="flex gap-2 justify-end">
-                    <Button className="boton" htmlType="submit">
-                      Guardar
-                    </Button>
-                  </span>
-                </div>
-              </Col>
-            </Form>
-          </Row>
-        </div>
-      </Modal>
-    </div>
+                  Abono
+                </Option>
+
+                <Option
+                  value={2}
+                >
+                  Cargo
+                </Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col
+            xs={24}
+            md={16}
+          >
+            <Form.Item
+              name="tarjeta_id"
+              label="Tarjeta relacionada"
+              extra="Global significa que el tipo estará disponible para cualquier tarjeta."
+            >
+              <Select
+                showSearch
+                optionFilterProp="label"
+                placeholder="Selecciona una tarjeta"
+              >
+                <Option
+                  value={0}
+                  label="Global / todas las tarjetas"
+                >
+                  Global / todas las tarjetas
+                </Option>
+
+                {tarjetasDisponibles.map(
+                  (tarjeta) => (
+                    <Option
+                      key={
+                        tarjeta.id
+                      }
+                      value={parseInt(
+                        tarjeta.id,
+                        10
+                      )}
+                      label={textoTarjeta(
+                        tarjeta
+                      )}
+                    >
+                      {textoTarjeta(
+                        tarjeta
+                      )}
+                    </Option>
+                  )
+                )}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col
+            xs={24}
+            md={8}
+          >
+            <Form.Item
+              name="codigo_color"
+              label="Color"
+            >
+              <Input
+                type="color"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row justify="end">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={
+              loading
+            }
+          >
+            Guardar tipo
+          </Button>
+        </Row>
+      </Form>
+
+      <div
+        style={{
+          marginTop: 25,
+        }}
+      >
+        <Table
+          rowKey="id"
+          loading={
+            loading
+          }
+          dataSource={
+            tipos
+          }
+          columns={
+            columnas
+          }
+          pagination={{
+            pageSize: 8,
+          }}
+          size="small"
+          scroll={{
+            x: 700,
+          }}
+        />
+      </div>
+    </>
   );
 }

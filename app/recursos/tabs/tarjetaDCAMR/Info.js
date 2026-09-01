@@ -1,5 +1,10 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   Row,
   Col,
@@ -16,6 +21,7 @@ import {
   Input,
   Upload,
 } from "antd";
+
 import {
   Paper,
   Table,
@@ -27,681 +33,1533 @@ import {
   TablePagination,
   TableFooter,
 } from "@mui/material";
-import { FaCircleExclamation } from "react-icons/fa6";
+
+import {
+  FaCircleExclamation,
+} from "react-icons/fa6";
+
 import Loader80 from "@/components/Loader80";
+
 import * as XLSX from "xlsx";
+
 import Swal from "sweetalert2";
-import locale from "antd/lib/date-picker/locale/es_ES"; // Importa el locale que desees
-import { UploadOutlined } from "@ant-design/icons";
+
+import locale from "antd/lib/date-picker/locale/es_ES";
+
+import {
+  UploadOutlined,
+} from "@ant-design/icons";
+
 import recursosService from "@/services/recursosService";
-import { formatPrecio, fechaFormateada } from "@/helpers/formatters";
+
+import {
+  formatPrecio,
+  fechaFormateada,
+} from "@/helpers/formatters";
+
 import AdministrarTipoMovimiento from "./AdministrarTipoMovimiento";
+
 import AdministrarTarjetas from "./AdministrarTarjetas";
-import "./styles.css"; // Archivo CSS personalizado
-import { getCookiePermisos } from "@/helpers/valorPermisos";
 
-const { RangePicker } = DatePicker;
+import "./styles.css";
+
+import {
+  getCookiePermisos,
+} from "@/helpers/valorPermisos";
+
+const {
+  RangePicker,
+} = DatePicker;
+
+const {
+  Option,
+} = Select;
+
 export default function TarjetaDCAMR() {
-  //Variables del funcionamiento de la Tabla
-  const [orderBy] = useState("fechaOperacion");
-  const [order] = useState("desc");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  // ==========================================================
+  // TABLA PRINCIPAL
+  // ==========================================================
 
-  //Variables del funcionamiento de la segunda Tabla
-  const [orderBy2] = useState("fechaOperacion");
-  const [order2] = useState("desc");
-  const [page2, setPage2] = useState(0);
-  const [rowsPerPage2, setRowsPerPage2] = useState(5);
+  const [orderBy] =
+    useState(
+      "fecha_operacion"
+    );
 
-  //Variables del modal
-  const [showModal, setShowModal] = useState(false);
-  const [showModalTarjetas, setShowModalTarjetas] = useState(false);
-  const [showModalDetalles, setShowModalDetalles] = useState(false);
+  const [order] =
+    useState("desc");
 
-  
-  const [tabla, setTabla] = useState([]);
-  const [tablaDetalles, setTablaDetalles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [filtroEstado, setFiltroEstado] = useState("todos");
-const [filtroEstadoDetalle, setFiltroEstadoDetalle] = useState("todos");
-  const [titleDetalles, setTitleDetalles] = useState("");
+  const [
+    page,
+    setPage,
+  ] = useState(0);
 
-  const [range, setRange] = useState([]);
-  const [movimientos, setMovimientos] = useState(false);
-  const [terrenos, setTerrenos] = useState(null);
-  const [terrenoSelected, setTerrenoSelected] = useState(null);
-  const [tipoSelected, setTipoSelected] = useState(null);
-  const [message, setMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [datos, setDatos] = useState([]);
-  const [datosTarjetas, setDatosTarjetas] = useState([]);
-  const [otroAbonos, setOtroAbonos] = useState();
-  const [otroCargo, setOtroCargo] = useState();
-  const [resumenConciliados, setResumenConciliados] = useState();
-  const [totalAbono, setTotalAbono] = useState();
-  const [totalCargo, setTotalCargo] = useState();
+  const [
+    rowsPerPage,
+    setRowsPerPage,
+  ] = useState(5);
 
-  const [formValues, setFormValues] = useState({});
-  const [formValuesSucursal, setFormValuesSucursal] = useState({});
-  const [cookiePermisos, setCookiePermisos] = useState([]);
-  const { Option } = Select;
-  const [excelData, setExcelData] = useState([]);
+  // ==========================================================
+  // TABLA DETALLE
+  // ==========================================================
+
+  const [orderBy2] =
+    useState(
+      "fecha_operacion"
+    );
+
+  const [order2] =
+    useState("desc");
+
+  const [
+    page2,
+    setPage2,
+  ] = useState(0);
+
+  const [
+    rowsPerPage2,
+    setRowsPerPage2,
+  ] = useState(5);
+
+  // ==========================================================
+  // MODALES
+  // ==========================================================
+
+  const [
+    showModal,
+    setShowModal,
+  ] = useState(false);
+
+  const [
+    showModalTarjetas,
+    setShowModalTarjetas,
+  ] = useState(false);
+
+  const [
+    showModalDetalles,
+    setShowModalDetalles,
+  ] = useState(false);
+
+  // ==========================================================
+  // DATOS
+  // ==========================================================
+
+  const [
+    tabla,
+    setTabla,
+  ] = useState([]);
+
+  const [
+    tablaDetalles,
+    setTablaDetalles,
+  ] = useState([]);
+
+  /*
+   * MUY IMPORTANTE
+   *
+   * Antes utilizabas "datos"
+   * tanto para:
+   *
+   * 1. Catálogo
+   * 2. Resumen
+   *
+   * Ahora los separamos.
+   */
+
+  const [
+    catalogoTipos,
+    setCatalogoTipos,
+  ] = useState([]);
+
+  const [
+    datosResumen,
+    setDatosResumen,
+  ] = useState([]);
+
+  const [
+    datosTarjetas,
+    setDatosTarjetas,
+  ] = useState([]);
+
+  // ==========================================================
+  // FILTROS
+  // ==========================================================
+
+  const [
+    filtroEstado,
+    setFiltroEstado,
+  ] =
+    useState("todos");
+
+  const [
+    filtroEstadoDetalle,
+    setFiltroEstadoDetalle,
+  ] =
+    useState("todos");
+
+  const [
+    titleDetalles,
+    setTitleDetalles,
+  ] = useState("");
+
+  const [
+    range,
+    setRange,
+  ] = useState([]);
+
+  const [
+    movimientos,
+    setMovimientos,
+  ] = useState(false);
+
+  const [
+    tipoSelected,
+    setTipoSelected,
+  ] = useState("0");
+
+  // ==========================================================
+  // MENSAJES
+  // ==========================================================
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  const [
+    message,
+    setMessage,
+  ] = useState(null);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
+
+  // ==========================================================
+  // TOTALES
+  // ==========================================================
+
+  const [
+    totalAbono,
+    setTotalAbono,
+  ] = useState(0);
+
+  const [
+    totalCargo,
+    setTotalCargo,
+  ] = useState(0);
+
+  // ==========================================================
+  // SELECT MOVIMIENTOS
+  // ==========================================================
+
+  const [
+    formValues,
+    setFormValues,
+  ] = useState({});
+
+  const [
+    cookiePermisos,
+    setCookiePermisos,
+  ] = useState([]);
+
+  // ==========================================================
+  // ERROR
+  // ==========================================================
 
   const onError = (e) => {
     setLoading(false);
-    console.log(e);
-    if (e.message) {
+
+    console.error(e);
+
+    if (e?.message) {
       setErrorMessage(
-        `Error al realizar la consulta, favor de revisar: ${e.message}`
+        `Error al realizar la consulta: ${e.message}`
       );
     } else {
-      setErrorMessage(`Error al realizar la consulta, favor de revisar ${e}`);
+      setErrorMessage(
+        `Error al realizar la consulta: ${e}`
+      );
     }
   };
 
-  const esMovimientoPendiente = (movimiento) => {
-  const tipoId = parseInt(movimiento.tipo_id, 10);
+  // ==========================================================
+  // PENDIENTE
+  // ==========================================================
 
-  return (
-    movimiento.tipo_id === null ||
-    movimiento.tipo_id === undefined ||
-    movimiento.tipo_id === "" ||
-    isNaN(tipoId) ||
-    tipoId === 0 ||
-    tipoId === 15
-  );
-};
+  const esMovimientoPendiente = (
+    movimiento
+  ) => {
+    const tipoId =
+      parseInt(
+        movimiento.tipo_id,
+        10
+      );
 
-const filtrarMovimientosPorEstado = (movimientos, filtro) => {
-  if (!Array.isArray(movimientos)) {
-    return [];
-  }
-
-  if (filtro === "pendientes") {
-    return movimientos.filter((movimiento) =>
-      esMovimientoPendiente(movimiento)
+    return (
+      movimiento.tipo_id ===
+        null ||
+      movimiento.tipo_id ===
+        undefined ||
+      movimiento.tipo_id ===
+        "" ||
+      isNaN(tipoId) ||
+      tipoId === 0 ||
+      tipoId === 15
     );
-  }
+  };
 
-  if (filtro === "asignados") {
-    return movimientos.filter(
-      (movimiento) => !esMovimientoPendiente(movimiento)
+  const filtrarMovimientosPorEstado = (
+    movimientosLista,
+    filtro
+  ) => {
+    if (
+      !Array.isArray(
+        movimientosLista
+      )
+    ) {
+      return [];
+    }
+
+    if (
+      filtro ===
+      "pendientes"
+    ) {
+      return movimientosLista.filter(
+        (movimiento) =>
+          esMovimientoPendiente(
+            movimiento
+          )
+      );
+    }
+
+    if (
+      filtro ===
+      "asignados"
+    ) {
+      return movimientosLista.filter(
+        (movimiento) =>
+          !esMovimientoPendiente(
+            movimiento
+          )
+      );
+    }
+
+    return movimientosLista;
+  };
+
+  const tablaFiltrada =
+    filtrarMovimientosPorEstado(
+      tabla,
+      filtroEstado
     );
-  }
 
-  return movimientos;
-};
-const tablaFiltrada = filtrarMovimientosPorEstado(
-  tabla,
-  filtroEstado
-);
+  const tablaDetallesFiltrada =
+    filtrarMovimientosPorEstado(
+      tablaDetalles,
+      filtroEstadoDetalle
+    );
 
-const tablaDetallesFiltrada = filtrarMovimientosPorEstado(
-  tablaDetalles,
-  filtroEstadoDetalle
-);
+  // ==========================================================
+  // TIPOS PERMITIDOS SEGUN TARJETA
+  // ==========================================================
 
-  // Handlers para cerrar los modales
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const obtenerTiposMovimiento = (
+    movimiento
+  ) => {
+    const tarjetaId =
+      parseInt(
+        movimiento
+          ?.tarjeta_credito_id,
+        10
+      );
+
+    const tipoActual =
+      parseInt(
+        movimiento?.tipo_id,
+        10
+      );
+
+    return catalogoTipos.filter(
+      (tipo) => {
+        const tarjetaTipo =
+          parseInt(
+            tipo.tarjeta_id,
+            10
+          );
+
+        const tipoId =
+          parseInt(
+            tipo.id,
+            10
+          );
+
+        // -----------------------------------------------
+        // Si ya tiene ese tipo,
+        // lo conservamos visible.
+        // -----------------------------------------------
+
+        if (
+          tipoId ===
+          tipoActual
+        ) {
+          return true;
+        }
+
+        // -----------------------------------------------
+        // GLOBAL
+        // -----------------------------------------------
+
+        if (
+          tipo.tarjeta_id ===
+            null ||
+          tipo.tarjeta_id ===
+            undefined ||
+          tipo.tarjeta_id ===
+            "" ||
+          isNaN(
+            tarjetaTipo
+          ) ||
+          tarjetaTipo === 0
+        ) {
+          return true;
+        }
+
+        // -----------------------------------------------
+        // MISMA TARJETA
+        // -----------------------------------------------
+
+        return (
+          tarjetaTipo ===
+          tarjetaId
+        );
+      }
+    );
   };
-  const handleCloseModalTarjetas = () => {
-    setShowModalTarjetas(false);
-  };
-const handleCloseModalDetalles = () => {
-  setShowModalDetalles(false);
-  setTablaDetalles([]);
-  setTitleDetalles("");
-  setFiltroEstadoDetalle("todos");
-  setPage2(0);
-};
+
+  // ==========================================================
+  // MODALES
+  // ==========================================================
+
+  const handleCloseModal =
+    () => {
+      setShowModal(false);
+    };
+
+  const handleCloseModalTarjetas =
+    () => {
+      setShowModalTarjetas(
+        false
+      );
+    };
+
+  const handleCloseModalDetalles =
+    () => {
+      setShowModalDetalles(
+        false
+      );
+
+      setTablaDetalles([]);
+
+      setTitleDetalles("");
+
+      setFiltroEstadoDetalle(
+        "todos"
+      );
+
+      setPage2(0);
+    };
+
+  // ==========================================================
+  // INICIO
+  // ==========================================================
 
   useEffect(() => {
-    // Obtener la fecha actual
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
-    const today = new Date();
-    getCookiePermisos("depositos", setCookiePermisos);
-    // Función para formatear la fecha en YYYY-MM-DD
-    const formatearFecha = (fecha) => {
-      const year = fecha.getFullYear();
-      const month = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses son de 0 a 11
-      const day = String(fecha.getDate()).padStart(2, "0");
+    const today =
+      new Date();
+
+    const startOfMonth =
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      );
+
+    const formatearFecha = (
+      fecha
+    ) => {
+      const year =
+        fecha.getFullYear();
+
+      const month =
+        String(
+          fecha.getMonth() +
+            1
+        ).padStart(
+          2,
+          "0"
+        );
+
+      const day =
+        String(
+          fecha.getDate()
+        ).padStart(
+          2,
+          "0"
+        );
+
       return `${year}-${month}-${day}`;
     };
 
-    const fechaActual = formatearFecha(today);
-    const fechaAtras = formatearFecha(startOfMonth);
-    setRange([fechaAtras, fechaActual]);
+    setRange([
+      formatearFecha(
+        startOfMonth
+      ),
+
+      formatearFecha(
+        today
+      ),
+    ]);
+
+    getCookiePermisos(
+      "depositos",
+      setCookiePermisos
+    );
+
     setearMovimientos();
+
     cargarTarjetas();
   }, []);
-  function setearMovimientos(params) {
-    recursosService.showTipoMovimientoTarjeta(setDatos, onError).then(() => {
-      setLoading(false);
-    });
-  }
-  function cargarTarjetas() {
-    console.log("cargar tarjetas");
-    recursosService.showTarjeta(setDatosTarjetas, onError).then(() => {
-      setLoading(false);
-    });
-  }
 
-  const onRangeChange = (dates, dateStrings) => {
-    setRange(dateStrings);
-  };
-  const layout = {
-    labelCol: { span: 24 },
-    wrapperCol: { span: 24 },
-  };
-  const layoutResumen = {
-    labelCol: { span: 16 },
-    wrapperCol: { span: 24 },
-  };
+  // ==========================================================
+  // CATALOGO DE TIPOS
+  // ==========================================================
 
-  // Handlers para cambiar la página y el número de filas por página
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleChangePage2 = (event, newPage) => {
-    setPage2(newPage);
-  };
-
-  const handleChangeRowsPerPage2 = (event) => {
-    setRowsPerPage2(parseInt(event.target.value, 10));
-    setPage2(0);
-  };
-
-  // Funciones de comparación para ordenar la tabla
-  const stableSort = (array, comparator) => {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0], b[0]);
-      if (order !== 0) return order;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  };
-
-  const descendingComparator = (a, b, orderBy) => {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  const stableSort2 = (array, comparator) => {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order2 = comparator(a[0], b[0]);
-      if (order2 !== 0) return order2;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  };
-
-  const descendingComparator2 = (a2, b2, orderBy2) => {
-    if (b2[orderBy2] < a2[orderBy2]) {
-      return -1;
-    }
-    if (b2[orderBy2] > a2[orderBy2]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  // Obtiene el comparador según el orden y el campo de ordenamiento
-  const getComparator = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator(a, b, orderBy)
-      : (a, b) => -descendingComparator(a, b, orderBy);
-  };
-  const getComparator2 = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator2(a, b, orderBy)
-      : (a, b) => -descendingComparator2(a, b, orderBy);
-  };
-
-  const filtrarTabla = (movimientos, tipoId) => {
-    let filtrarTabla;
-    if (tipoId) {
-      filtrarTabla = movimientos.filter((dato) => dato.tipo_id === tipoId);
-      setTablaDetalles(filtrarTabla);
-    }
-  };
-function automatizarMovimientos() {
-  Swal.fire({
-    title: "Clasificación automática",
-    text:
-      "Se clasificarán únicamente movimientos que todavía no tengan un tipo asignado.",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Clasificar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#4096ff",
-  }).then((result) => {
-    if (!result.isConfirmed) {
-      return;
-    }
-
-    setLoading(true);
-
-    const params = {
-      fechaInicial: range[0],
-      fechaFinal: range[1],
-      tarjeta: tipoSelected,
-      minimo_registros: 3,
-      confianza: 0.80,
-    };
-
-    recursosService.automatizarTiposMovimientoTarjeta(
-      onAutomatizacionTerminada,
-      params,
-      onError
-    );
-  });
-}
-function onAutomatizacionTerminada(response) {
-  setLoading(false);
-
-  if (!response || !response.success) {
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text:
-        response && response.message
-          ? response.message
-          : "No se pudo realizar la clasificación.",
-    });
-
-    return;
-  }
-
-  Swal.fire({
-    icon: "success",
-    title: "Clasificación terminada",
-    html:
-      "Movimientos clasificados: <b>" +
-      response.total_clasificados +
-      "</b><br/>" +
-      "Pendientes de clasificar: <b>" +
-      response.total_sin_clasificar +
-      "</b>",
-    confirmButtonText: "Aceptar",
-    confirmButtonColor: "#4096ff",
-  }).then(() => {
-    onBuscar();
-  });
-}
-  // Funcion para buscar datos en base a los filtros
-  function onBuscar() {
-    setMessage("");
-    setErrorMessage("");
-    if (range.length === 0) {
-      return Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Debes seleccionar un rango de fechas",
-      });
-    }
-    setLoading(true);
-    let form = {
-      fechaInicial: range[0],
-      fechaFinal: range[1],
-      movimientos: movimientos,
-      tarjeta: tipoSelected,
-    };
-    console.log("form", form);
-    recursosService
-      .getMovimientosTarjetas(form, Consultado, onError)
+  function setearMovimientos() {
+    return recursosService
+      .showTipoMovimientoTarjeta(
+        (response) => {
+          setCatalogoTipos(
+            Array.isArray(
+              response
+            )
+              ? response
+              : []
+          );
+        },
+        onError
+      )
       .then(() => {
         setLoading(false);
       });
   }
 
-  const handleChangeDetalle = (value, movimientoId) => {
-  const params = {
-    id: movimientoId,
-    tipo_movimiento_id: value,
+  // ==========================================================
+  // TARJETAS
+  // ==========================================================
+
+function cargarTarjetas() {
+  return recursosService
+    .showTarjeta(
+      setDatosTarjetas,
+      onError
+    )
+    .then(() => {
+      setLoading(false);
+    });
+}
+
+  // ==========================================================
+  // RANGO
+  // ==========================================================
+
+  const onRangeChange = (
+    dates,
+    dateStrings
+  ) => {
+    setRange(dateStrings);
   };
 
-  setFormValues((prevValues) => ({
-    ...prevValues,
-    [`${movimientoId}`]: value,
-  }));
+  const layout = {
+    labelCol: {
+      span: 24,
+    },
 
-  // Actualizamos inmediatamente la tabla del modal
-  setTablaDetalles((prev) =>
-    prev.map((movimiento) => {
-      if (movimiento.id !== movimientoId) {
+    wrapperCol: {
+      span: 24,
+    },
+  };
+
+  const layoutResumen = {
+    labelCol: {
+      span: 16,
+    },
+
+    wrapperCol: {
+      span: 24,
+    },
+  };
+
+  // ==========================================================
+  // PAGINACION
+  // ==========================================================
+
+  const handleChangePage = (
+    event,
+    newPage
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage =
+    (event) => {
+      setRowsPerPage(
+        parseInt(
+          event.target.value,
+          10
+        )
+      );
+
+      setPage(0);
+    };
+
+  const handleChangePage2 = (
+    event,
+    newPage
+  ) => {
+    setPage2(newPage);
+  };
+
+  const handleChangeRowsPerPage2 =
+    (event) => {
+      setRowsPerPage2(
+        parseInt(
+          event.target.value,
+          10
+        )
+      );
+
+      setPage2(0);
+    };
+
+  // ==========================================================
+  // ORDENAMIENTO
+  // ==========================================================
+
+  const stableSort = (
+    array,
+    comparator
+  ) => {
+    const stabilizedThis =
+      array.map(
+        (el, index) => [
+          el,
+          index,
+        ]
+      );
+
+    stabilizedThis.sort(
+      (a, b) => {
+        const value =
+          comparator(
+            a[0],
+            b[0]
+          );
+
+        if (
+          value !== 0
+        ) {
+          return value;
+        }
+
+        return (
+          a[1] - b[1]
+        );
+      }
+    );
+
+    return stabilizedThis.map(
+      (el) => el[0]
+    );
+  };
+
+  const descendingComparator = (
+    a,
+    b,
+    field
+  ) => {
+    if (
+      b[field] <
+      a[field]
+    ) {
+      return -1;
+    }
+
+    if (
+      b[field] >
+      a[field]
+    ) {
+      return 1;
+    }
+
+    return 0;
+  };
+
+  const getComparator = (
+    orderValue,
+    field
+  ) => {
+    return orderValue ===
+      "desc"
+      ? (a, b) =>
+          descendingComparator(
+            a,
+            b,
+            field
+          )
+      : (a, b) =>
+          -descendingComparator(
+            a,
+            b,
+            field
+          );
+  };
+
+  // ==========================================================
+  // DETALLES
+  // ==========================================================
+
+  const abrirDetalles = (
+    tipo
+  ) => {
+    const movimientosTipo =
+      tabla.filter(
+        (movimiento) =>
+          parseInt(
+            movimiento.tipo_id,
+            10
+          ) ===
+          parseInt(
+            tipo.id,
+            10
+          )
+      );
+
+    setTablaDetalles(
+      movimientosTipo
+    );
+
+    setTitleDetalles(
+      `Detalles de ${tipo.descripcion}`
+    );
+
+    setFiltroEstadoDetalle(
+      "todos"
+    );
+
+    setPage2(0);
+
+    setShowModalDetalles(
+      true
+    );
+  };
+
+  // ==========================================================
+  // AUTOMATIZAR
+  // ==========================================================
+
+  function automatizarMovimientos() {
+    Swal.fire({
+      title:
+        "Clasificación automática",
+
+      text:
+        "Se clasificarán únicamente movimientos que todavía no tengan un tipo asignado.",
+
+      icon:
+        "question",
+
+      showCancelButton:
+        true,
+
+      confirmButtonText:
+        "Clasificar",
+
+      cancelButtonText:
+        "Cancelar",
+
+      confirmButtonColor:
+        "#4096ff",
+    }).then(
+      (result) => {
+        if (
+          !result.isConfirmed
+        ) {
+          return;
+        }
+
+        setLoading(true);
+
+        const params = {
+          fechaInicial:
+            range[0],
+
+          fechaFinal:
+            range[1],
+
+          tarjeta:
+            tipoSelected,
+
+          minimo_registros:
+            3,
+
+          confianza:
+            0.8,
+        };
+
+        recursosService
+          .automatizarTiposMovimientoTarjeta(
+            onAutomatizacionTerminada,
+            params,
+            onError
+          );
+      }
+    );
+  }
+
+  function onAutomatizacionTerminada(
+    response
+  ) {
+    setLoading(false);
+
+    if (
+      !response ||
+      !response.success
+    ) {
+      Swal.fire({
+        icon: "error",
+
+        title:
+          "Error",
+
+        text:
+          response?.message ||
+          "No se pudo realizar la clasificación.",
+      });
+
+      return;
+    }
+
+    Swal.fire({
+      icon:
+        "success",
+
+      title:
+        "Clasificación terminada",
+
+      html:
+        `Movimientos clasificados: <b>${response.total_clasificados || 0}</b><br/>` +
+        `Pendientes de clasificar: <b>${response.total_sin_clasificar || 0}</b>`,
+
+      confirmButtonText:
+        "Aceptar",
+
+      confirmButtonColor:
+        "#4096ff",
+    }).then(() => {
+      onBuscar();
+    });
+  }
+
+  // ==========================================================
+  // BUSCAR
+  // ==========================================================
+
+  function onBuscar() {
+    setMessage(null);
+
+    setErrorMessage("");
+
+    if (
+      !range ||
+      range.length !== 2 ||
+      !range[0] ||
+      !range[1]
+    ) {
+      return Swal.fire({
+        icon: "error",
+
+        title:
+          "Oops...",
+
+        text:
+          "Debes seleccionar un rango de fechas",
+      });
+    }
+
+    setLoading(true);
+
+    const form = {
+      fechaInicial:
+        range[0],
+
+      fechaFinal:
+        range[1],
+
+      movimientos:
+        movimientos,
+
+      tarjeta:
+        tipoSelected,
+    };
+
+    recursosService
+      .getMovimientosTarjetas(
+        form,
+        Consultado,
+        onError
+      )
+      .then(() => {
+        setLoading(false);
+      });
+  }
+
+  // ==========================================================
+  // RESPUESTA BUSQUEDA
+  // ==========================================================
+
+  function Consultado(
+    response
+  ) {
+    setLoading(false);
+
+    const {
+      type,
+      message:
+        messageResponse,
+      movimientos:
+        movimientosResponse,
+      resumenTipo,
+    } = response;
+
+    const listaMovimientos =
+      Array.isArray(
+        movimientosResponse
+      )
+        ? movimientosResponse
+        : [];
+
+    const resumen =
+      Array.isArray(
+        resumenTipo
+      )
+        ? resumenTipo
+        : [];
+
+    setTabla(
+      listaMovimientos
+    );
+
+    setDatosResumen(
+      resumen
+    );
+
+    const initialValues =
+      {};
+
+    listaMovimientos.forEach(
+      (item) => {
+        initialValues[
+          `${item.id}`
+        ] =
+          item.tipo_id;
+      }
+    );
+
+    setFormValues(
+      initialValues
+    );
+
+    setMessage({
+      type:
+        type,
+
+      message:
+        messageResponse,
+    });
+
+    const abonos =
+      sumValuesByStatus(
+        resumen,
+        1
+      );
+
+    const cargos =
+      sumValuesByStatus(
+        resumen,
+        2
+      );
+
+    setTotalAbono(
+      parseFloat(
+        abonos || 0
+      )
+    );
+
+    setTotalCargo(
+      parseFloat(
+        cargos || 0
+      )
+    );
+  }
+
+  // ==========================================================
+  // SUMAS
+  // ==========================================================
+
+  const sumValuesByStatus = (
+    lista,
+    tipoIngreso
+  ) => {
+    if (
+      !Array.isArray(lista)
+    ) {
+      return 0;
+    }
+
+    return lista
+      .filter(
+        (item) =>
+          parseInt(
+            item.tipo_ingreso,
+            10
+          ) ===
+            parseInt(
+              tipoIngreso,
+              10
+            ) &&
+          parseInt(
+            item.tipo_id,
+            10
+          ) !== 15
+      )
+      .reduce(
+        (
+          acc,
+          item
+        ) =>
+          acc +
+          parseFloat(
+            item.total ||
+              0
+          ),
+        0
+      );
+  };
+
+  // ==========================================================
+  // CAMBIAR TIPO PRINCIPAL
+  // ==========================================================
+
+  const handleChange = (
+    value,
+    movimientoId
+  ) => {
+    const params = {
+      id:
+        movimientoId,
+
+      tipo_movimiento_id:
+        value,
+    };
+
+    setFormValues(
+      (
+        prevValues
+      ) => ({
+        ...prevValues,
+
+        [
+          movimientoId
+        ]: value,
+      })
+    );
+
+    actualizarMovimientoLocal(
+      movimientoId,
+      value
+    );
+
+    recursosService.updateTipoMovimientoTarjeta(
+      () => {
+        onBuscar();
+      },
+      params,
+      onError
+    );
+  };
+
+  // ==========================================================
+  // CAMBIAR TIPO DETALLE
+  // ==========================================================
+
+  const handleChangeDetalle = (
+    value,
+    movimientoId
+  ) => {
+    const params = {
+      id:
+        movimientoId,
+
+      tipo_movimiento_id:
+        value,
+    };
+
+    setFormValues(
+      (
+        prevValues
+      ) => ({
+        ...prevValues,
+
+        [
+          movimientoId
+        ]: value,
+      })
+    );
+
+    actualizarMovimientoLocal(
+      movimientoId,
+      value
+    );
+
+    recursosService.updateTipoMovimientoTarjeta(
+      () => {
+        onBuscar();
+      },
+      params,
+      onError
+    );
+  };
+
+  // ==========================================================
+// CAMBIAR TARJETA DEL MOVIMIENTO
+// ==========================================================
+
+const handleChangeTarjetaMovimiento = (
+  tarjetaId,
+  movimientoId
+) => {
+  const tarjeta =
+    datosTarjetas.find(
+      (item) =>
+        parseInt(
+          item.id,
+          10
+        ) ===
+        parseInt(
+          tarjetaId,
+          10
+        )
+    );
+
+  if (!tarjeta) {
+    MessageAntd.error(
+      "No se encontró la tarjeta seleccionada."
+    );
+
+    return;
+  }
+
+  const params = {
+    id:
+      movimientoId,
+
+    tarjeta_credito_id:
+      tarjeta.id,
+  };
+
+  // ========================================================
+  // ACTUALIZAR VISUALMENTE
+  // ========================================================
+
+  const actualizar =
+    (movimiento) => {
+      if (
+        parseInt(
+          movimiento.id,
+          10
+        ) !==
+        parseInt(
+          movimientoId,
+          10
+        )
+      ) {
         return movimiento;
       }
 
-      const tipo = datos.find(
-        (item) => parseInt(item.id) === parseInt(value)
-      );
-
       return {
         ...movimiento,
-        tipo_id: value,
-        descripcion: tipo ? tipo.descripcion : movimiento.descripcion,
-        codigo_color: tipo
-          ? tipo.codigo_color
-          : movimiento.codigo_color,
-      };
-    })
-  );
 
-  // También la tabla principal
+        tarjeta_credito_id:
+          tarjeta.id,
+
+        tarjeta_alias:
+          tarjeta.alias,
+
+        tarjeta_numero:
+          tarjeta.tarjeta,
+      };
+    };
+
   setTabla((prev) =>
-    prev.map((movimiento) => {
-      if (movimiento.id !== movimientoId) {
-        return movimiento;
-      }
-
-      const tipo = datos.find(
-        (item) => parseInt(item.id) === parseInt(value)
-      );
-
-      return {
-        ...movimiento,
-        tipo_id: value,
-        descripcion: tipo ? tipo.descripcion : movimiento.descripcion,
-        codigo_color: tipo
-          ? tipo.codigo_color
-          : movimiento.codigo_color,
-      };
-    })
+    prev.map(
+      actualizar
+    )
   );
 
-  recursosService.updateTipoMovimientoTarjeta(
-    () => {
+  setTablaDetalles(
+    (prev) =>
+      prev.map(
+        actualizar
+      )
+  );
+
+  // ========================================================
+  // GUARDAR EN BD
+  // ========================================================
+
+  recursosService.updateTarjetaMovimientoTarjeta(
+    (response) => {
+      if (
+        !response ||
+        response.success ===
+          false
+      ) {
+        MessageAntd.error(
+          response?.message ||
+            "No fue posible cambiar la tarjeta."
+        );
+
+        /*
+         * Recuperamos el estado
+         * real de BD.
+         */
+        onBuscar();
+
+        return;
+      }
+
+      MessageAntd.success(
+        "Tarjeta actualizada."
+      );
+
+      /*
+       * Recargamos porque cambiar
+       * tarjeta puede cambiar los
+       * tipos permitidos.
+       */
       onBuscar();
     },
     params,
     onError
   );
 };
+  // ==========================================================
+  // ACTUALIZACION LOCAL
+  // ==========================================================
 
-  function Consultado(response) {
-    setLoading(false);
+  const actualizarMovimientoLocal = (
+    movimientoId,
+    tipoId
+  ) => {
+    const tipo =
+      catalogoTipos.find(
+        (item) =>
+          parseInt(
+            item.id,
+            10
+          ) ===
+          parseInt(
+            tipoId,
+            10
+          )
+      );
 
-    let { type, message, movimientos, resumenTipo } = response;
-    let totalSumStatus1;
-    let totalSumStatus2;
-    let tiposMovimientos = resumenTipo;
-    let totalAbonos;
-    let totalCargo;
-    let initialValues = {};
+    const actualizar =
+      (movimiento) => {
+        if (
+          parseInt(
+            movimiento.id,
+            10
+          ) !==
+          parseInt(
+            movimientoId,
+            10
+          )
+        ) {
+          return movimiento;
+        }
 
-    console.log("consultado", response);
-    setTabla(movimientos);
-    movimientos.forEach((item) => {
-      initialValues[`${item.id}`] = item.tipo_id;
-    });
-    setFormValues(initialValues);
-    setDatos(tiposMovimientos);
+        return {
+          ...movimiento,
 
-    setMessage({
-      type: type,
-      message: message,
-    });
+          tipo_id:
+            tipoId,
 
-    if (tiposMovimientos !== null) {
-      totalSumStatus1 = sumValuesByStatus(tiposMovimientos, 1);
-      totalSumStatus2 = sumValuesByStatus(tiposMovimientos, 2);
+          descripcion:
+            tipo
+              ? tipo.descripcion
+              : movimiento.descripcion,
 
-      totalAbonos = parseFloat(totalSumStatus1);
-      totalCargo = parseFloat(totalSumStatus2);
-      setTotalAbono(formatPrecio(totalAbonos));
-      setTotalCargo(formatPrecio(totalCargo));
-    }
-  }
-
-  const totalTodos = tabla.length;
-
-  const totalPendientes = tabla.filter(
-    (movimiento) => esMovimientoPendiente(movimiento)
-  ).length;
-
-  const totalAsignados =
-    totalTodos - totalPendientes;
-
-  function onConsulta(response) {
-    let { type, message, movimientos } = response;
-
-    let totalSumStatus1;
-    let totalSumStatus2;
-    let tiposMovimientos = resumenTotal;
-    let totalAbonos;
-    let totalCargo;
-    let initialValues = {};
-    console.log("response:", response);
-    if (infoAnticipos !== null) {
-      setSolicitudes(infoAnticipos);
-    } else {
-      setSolicitudes([]);
-    }
-    if (infoCobranza !== null) {
-      setCobranza(infoCobranza);
-      infoCobranza.forEach((item) => {
-        initialValues[`${item.id}`] = item.tipo_movimiento_id;
-      });
-      setFormValues(initialValues);
-      setDatos(tiposMovimientos);
-    } else {
-      setCobranza([]);
-    }
-    // Inicializar formValues con los valores obtenidos
-    if (tipoSelected === 2) {
-      setCobranzaResumen(0);
-      setResumenAnticipo(parseFloat(sumaAnticipo));
-      setearMovimientos();
-    } else {
-      setCobranzaResumen(parseFloat(sumaCobranza));
-      setResumenAnticipo(parseFloat(sumaAnticipo));
-    }
-
-    setMessage({
-      type: type,
-      message: message,
-    });
-
-    if (tiposMovimientos !== null) {
-      totalSumStatus1 = sumValuesByStatus(tiposMovimientos, 1);
-      totalSumStatus2 = sumValuesByStatus(tiposMovimientos, 2);
-
-      if (tipoSelected === 0 || tipoSelected === null || tipoSelected === "0") {
-        totalAbonos =
-          Math.abs(totalSumStatus1) +
-          parseFloat(sumaAnticipo) +
-          parseFloat(sumaCobranza);
-      } else {
-        totalAbonos = Math.abs(totalSumStatus1) + parseFloat(sumaCobranza);
-      }
-      totalCargo = totalSumStatus2;
-    } else {
-      totalAbonos = parseFloat(sumaAnticipo);
-      totalCargo = 0;
-    }
-    setTotalAbono(formatPrecio(totalAbonos));
-    setTotalCargo(formatPrecio(totalCargo));
-  }
-
-  function onTablaAlonsoSet(
-    response,
-    responseResumen,
-    responseOtrosAbono,
-    responseOtrosCargos,
-    responseConciliados
-  ) {
-    // Inicializar formValues con los valores obtenidos
-    let initialValues = {};
-    response.forEach((item) => {
-      initialValues[`${item.id}`] = item.tipo_movimiento_id;
-    });
-    setFormValues(initialValues);
-    setDatos(responseResumen);
-    setOtroAbonos(responseOtrosAbono);
-    setOtroCargo(responseOtrosCargos);
-    setResumenConciliados(responseConciliados);
-    const totalSumStatus1 = sumValuesByStatus(responseResumen, 1);
-    const totalSumStatus2 = sumValuesByStatus(responseResumen, 2);
-    let totalAbonos =
-      totalSumStatus1 + responseOtrosAbono + responseConciliados;
-    let totalCargo = totalSumStatus2 + responseOtrosCargos;
-
-    setTotalAbono(formatPrecio(totalAbonos));
-    setTotalCargo(formatPrecio(totalCargo));
-  }
-  function onTablaSucursalSet(response) {
-    // Inicializar formValues con los valores obtenidos
-    let initialValues = {};
-    response.forEach((item) => {
-      initialValues[`${item.id}`] = item.tipo_movimiento_id;
-    });
-    setFormValuesSucursal(initialValues);
-  }
-
-  const sumValuesByStatus = (obj, tipo_ingreso) => {
-    
-    return Object.values(obj)
-      .filter(item => item.tipo_ingreso === tipo_ingreso && parseInt(item.tipo_id) != 15)
-      .reduce((acc, item) => acc + item.total, 0);
-  };
-
-  const handleChange = (value, name) => {
-    let params = {
-      id: name,
-      tipo_movimiento_id: value,
-    };
-
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
-
-    recursosService.updateTipoMovimientoTarjeta(onBuscar, params, onError);
-  };
-
-  const handleChangeSucursal = (value, name) => {
-    let params = {
-      id: name,
-      tipo_movimiento_id: value,
-    };
-
-    setFormValuesSucursal((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
-  };
-
-  function colorDinamicoRow(codigo_color) {
-    return {
-      backgroundColor: codigo_color,
-    };
-  }
-
-  function colorDinamicoText(status) {
-    if (status === 1) {
-      return {
-        color: "white",
+          codigo_color:
+            tipo
+              ? tipo.codigo_color
+              : movimiento.codigo_color,
+        };
       };
-    } else {
-      return {
-        color: "black",
-      };
-    }
-  }
 
-  // Títulos personalizados para los modales
-  const customTitle = (title, level) => {
-    return (
-      <Row justify={"center"}>
-        <Typography.Title level={level}>{title}</Typography.Title>
-      </Row>
+    setTabla((prev) =>
+      prev.map(
+        actualizar
+      )
+    );
+
+    setTablaDetalles(
+      (prev) =>
+        prev.map(
+          actualizar
+        )
     );
   };
 
-  const customTitleDetalles = (
-    <Row justify={"center"} style={{ color: "#438dcc", margin: "0 auto" }}>
-      <Typography.Title level={2}>{titleDetalles}</Typography.Title>
-    </Row>
-  );
-  // Títulos personalizados para los cards
+  // ==========================================================
+  // TOTAL FILTROS
+  // ==========================================================
 
-  function disableSelect(status) {
-    if (status === 1 || cookiePermisos < 2) {
-      return true;
-    } else {
-      return false;
-    }
+  const totalTodos =
+    tabla.length;
+
+  const totalPendientes =
+    tabla.filter(
+      (movimiento) =>
+        esMovimientoPendiente(
+          movimiento
+        )
+    ).length;
+
+  const totalAsignados =
+    totalTodos -
+    totalPendientes;
+
+  // ==========================================================
+  // COLORES
+  // ==========================================================
+
+  function colorDinamicoRow(
+    codigoColor
+  ) {
+    return {
+      backgroundColor:
+        codigoColor ||
+        "transparent",
+    };
   }
 
-  const handleUpload = (file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const dataArr = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      setExcelData(dataArr);
-      MessageAntd.success(`${file.name} Adjuntado`);
-      guardarEstadoCuenta(dataArr);
+  // ==========================================================
+  // TITULOS
+  // ==========================================================
+
+  const customTitle = (
+    title,
+    level
+  ) => (
+    <Row justify="center">
+      <Typography.Title
+        level={level}
+      >
+        {title}
+      </Typography.Title>
+    </Row>
+  );
+
+  const customTitleDetalles =
+    (
+      <Row
+        justify="center"
+        style={{
+          color:
+            "#438dcc",
+
+          margin:
+            "0 auto",
+        }}
+      >
+        <Typography.Title
+          level={2}
+        >
+          {titleDetalles}
+        </Typography.Title>
+      </Row>
+    );
+
+  // ==========================================================
+  // PERMISOS
+  // ==========================================================
+
+  function disableSelect(
+    status
+  ) {
+    return (
+      status === 1 ||
+      cookiePermisos < 2
+    );
+  }
+
+  // ==========================================================
+  // EXCEL
+  // ==========================================================
+
+  const handleUpload = (
+    file
+  ) => {
+    const reader =
+      new FileReader();
+
+    reader.onload = (
+      e
+    ) => {
+      const data =
+        new Uint8Array(
+          e.target.result
+        );
+
+      const workbook =
+        XLSX.read(
+          data,
+          {
+            type:
+              "array",
+          }
+        );
+
+      const sheetName =
+        workbook
+          .SheetNames[0];
+
+      const worksheet =
+        workbook
+          .Sheets[
+          sheetName
+        ];
+
+      const dataArr =
+        XLSX.utils.sheet_to_json(
+          worksheet,
+          {
+            header: 1,
+          }
+        );
+
+      MessageAntd.success(
+        `${file.name} Adjuntado`
+      );
+
+      guardarEstadoCuenta(
+        dataArr
+      );
     };
-    reader.readAsArrayBuffer(file);
+
+    reader.readAsArrayBuffer(
+      file
+    );
   };
 
-  function guardarEstadoCuenta(excel_data) {
-    excel_data.length > 0
-      ? excel_data[0].map((header, index) => ({
-          title: header,
-          dataIndex: index.toString(),
-        }))
-      : [];
+  function guardarEstadoCuenta(
+    excelData
+  ) {
+    if (
+      !excelData ||
+      excelData.length <= 1
+    ) {
+      return;
+    }
 
-    //setLoading(true);
-    var datos = excel_data.slice(1);
-    var datos_formateados = [];
+    const filas =
+      excelData.slice(1);
 
-    for (let i = 0; i < datos.length; i++) {
-      // let fecha = XLSX.SSF.format('YYYY-DD-MM', datos[i][0]);
-      var formattedDate = "";
-      if (typeof datos[i][0] === "number") {
-        let fecha = excelDateToJSDate(datos[i][0]);
-        formattedDate = fecha.toISOString().split("T")[0];
-        formattedDate = convertDateFormat(formattedDate);
-      } else {
-        formattedDate = formatDateString(datos[i][0]);
+    const datosFormateados =
+      [];
+
+    for (
+      let i = 0;
+      i < filas.length;
+      i++
+    ) {
+      if (
+        !filas[i] ||
+        filas[i].length === 0
+      ) {
+        continue;
       }
-      var info = {
-        tarjeta: datos[i][4],
-        fecha_operacion: formattedDate,
-        concepto: datos[i][1],
-        abono: parseFloat(datos[i][2]),
-        cargo: parseFloat(datos[i][3]),
+
+      let formattedDate =
+        "";
+
+      if (
+        typeof filas[i][0] ===
+        "number"
+      ) {
+        const fecha =
+          excelDateToJSDate(
+            filas[i][0]
+          );
+
+        formattedDate =
+          fecha
+            .toISOString()
+            .split("T")[0];
+      } else {
+        formattedDate =
+          formatDateString(
+            filas[i][0]
+          );
+      }
+
+      const info = {
+        tarjeta:
+          filas[i][4],
+
+        fecha_operacion:
+          formattedDate,
+
+        concepto:
+          filas[i][1],
+
+        abono:
+          parseFloat(
+            filas[i][2] ||
+              0
+          ),
+
+        cargo:
+          parseFloat(
+            filas[i][3] ||
+              0
+          ),
       };
 
-      datos_formateados.push(info);
+      datosFormateados.push(
+        info
+      );
     }
-    var params = {
-      movimientos: datos_formateados,
+
+    const params = {
+      movimientos:
+        datosFormateados,
     };
+
+    setLoading(true);
+
     recursosService.guardarMovimientosTarjetas(
       params,
       onMovimientosGuardados,
@@ -709,706 +1567,1156 @@ function onAutomatizacionTerminada(response) {
     );
   }
 
-  async function onMovimientosGuardados(data) {
+  function onMovimientosGuardados(
+    data
+  ) {
     setLoading(false);
+
     if (data.success) {
-      if (data.datos == 0) {
-        Swal.fire({
-          title: "Sin cambios",
-          icon: "warning",
-          text: "No se han registrado cambios",
-          confirmButtonColor: "#4096ff",
-          cancelButtonColor: "#ff4d4f",
-          showDenyButton: false,
-          confirmButtonText: "Aceptar",
-        });
-      } else {
-        Swal.fire({
-          title: "Info",
-          icon: "info",
-          text: "Cantidad De Registros Nuevos Guardados: " + data.datos,
-          confirmButtonColor: "#4096ff",
-          cancelButtonColor: "#ff4d4f",
-          showDenyButton: false,
-          confirmButtonText: "Aceptar",
-        });
-      }
+      Swal.fire({
+        title:
+          data.datos == 0
+            ? "Sin cambios"
+            : "Movimientos guardados",
+
+        icon:
+          data.datos == 0
+            ? "warning"
+            : "success",
+
+        text:
+          data.datos == 0
+            ? "No se han registrado cambios."
+            : `Registros nuevos guardados: ${data.datos}`,
+
+        confirmButtonColor:
+          "#4096ff",
+
+        confirmButtonText:
+          "Aceptar",
+      }).then(() => {
+        onBuscar();
+      });
     } else {
       Swal.fire({
-        title: "Ha ocurrido un Error",
-        icon: "warning",
-        text: data.message,
-        confirmButtonColor: "#4096ff",
-        cancelButtonColor: "#ff4d4f",
-        showDenyButton: false,
-        confirmButtonText: "Aceptar",
+        title:
+          "Ha ocurrido un Error",
+
+        icon:
+          "warning",
+
+        text:
+          data.message,
+
+        confirmButtonColor:
+          "#4096ff",
+
+        confirmButtonText:
+          "Aceptar",
       });
     }
   }
-  function excelDateToJSDate(serial) {
-    const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
-    const timezoneOffset = date.getTimezoneOffset() * 60000; // Compensa el desfase de la zona horaria
-    return new Date(date.getTime() + timezoneOffset);
+
+  function excelDateToJSDate(
+    serial
+  ) {
+    const date =
+      new Date(
+        Math.round(
+          (serial -
+            25569) *
+            86400 *
+            1000
+        )
+      );
+
+    const timezoneOffset =
+      date.getTimezoneOffset() *
+      60000;
+
+    return new Date(
+      date.getTime() +
+        timezoneOffset
+    );
   }
-  function convertDateFormat(dateString) {
-    const [year, day, month] = dateString.split("-");
-    return `${year}-${month}-${day}`;
+
+  function formatDateString(
+    dateString
+  ) {
+    if (!dateString) {
+      return "";
+    }
+
+    const partes =
+      dateString
+        .toString()
+        .split("/")
+        .map(Number);
+
+    if (
+      partes.length !== 3
+    ) {
+      return dateString;
+    }
+
+    const [
+      day,
+      month,
+      year,
+    ] = partes;
+
+    const date =
+      new Date(
+        year,
+        month - 1,
+        day
+      );
+
+    return date
+      .toISOString()
+      .split("T")[0];
   }
-  function formatDateString(dateString) {
-    const [day, month, year] = dateString.split("/").map(Number);
-    const date = new Date(year, month - 1, day); // Meses en JavaScript van de 0 a 11
-    const formattedDate = date.toISOString().split("T")[0]; // Formato YYYY-MM-DD
-    return formattedDate;
-  }
+
+  // ==========================================================
+  // TABLA MOVIMIENTOS REUTILIZABLE
+  // ==========================================================
+
+  const renderTablaMovimientos = ({
+    lista,
+    pagina,
+    filasPorPagina,
+    setPagina,
+    setFilasPorPagina,
+    detalle = false,
+  }) => {
+    return (
+      <TableContainer
+        component={Paper}
+        className="tabla"
+      >
+        <Table>
+          <TableHead
+            className="tabla_encabezado"
+          >
+            <TableRow>
+              <TableCell>
+                <p>Fecha</p>
+              </TableCell>
+
+              <TableCell>
+                <p>
+                  Tarjeta
+                </p>
+              </TableCell>
+
+              <TableCell>
+                <p>
+                  Concepto
+                </p>
+              </TableCell>
+
+              <TableCell>
+                <p>
+                  Cargos
+                </p>
+              </TableCell>
+
+              <TableCell>
+                <p>
+                  Abonos
+                </p>
+              </TableCell>
+
+              <TableCell
+                style={{
+                  width: 220,
+                }}
+              >
+                <p>
+                  Tipo de
+                  movimiento
+                </p>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {stableSort(
+              lista,
+              getComparator(
+                detalle
+                  ? order2
+                  : order,
+
+                detalle
+                  ? orderBy2
+                  : orderBy
+              )
+            )
+              .slice(
+                pagina *
+                  filasPorPagina,
+
+                pagina *
+                  filasPorPagina +
+                  filasPorPagina
+              )
+              .map(
+                (dato) => (
+                  <TableRow
+                    key={
+                      dato.id
+                    }
+                    style={colorDinamicoRow(
+                      dato.codigo_color
+                    )}
+                  >
+                    <TableCell>
+                      {fechaFormateada(
+                        dato.fecha_operacion
+                      )}
+                    </TableCell>
+
+                    <TableCell>
+  <Select
+    value={
+      dato.tarjeta_credito_id
+        ? parseInt(
+            dato.tarjeta_credito_id,
+            10
+          )
+        : undefined
+    }
+    placeholder="Sin identificar"
+    style={{
+      width: 190,
+    }}
+    showSearch
+    optionFilterProp="label"
+    disabled={
+      cookiePermisos < 2
+    }
+    onChange={(value) =>
+      handleChangeTarjetaMovimiento(
+        value,
+        dato.id
+      )
+    }
+  >
+    {datosTarjetas.map(
+      (tarjeta) => {
+        const numero =
+          tarjeta.tarjeta
+            ? tarjeta.tarjeta
+                .toString()
+                .replace(
+                  /\D/g,
+                  ""
+                )
+            : "";
+
+        const ultimos =
+          numero.length >= 4
+            ? `•••• ${numero.slice(
+                -4
+              )}`
+            : tarjeta.tarjeta ||
+              "";
+
+        const texto =
+          `${tarjeta.alias || "Sin alias"}` +
+          `${
+            ultimos
+              ? ` - ${ultimos}`
+              : ""
+          }`;
+
+        return (
+          <Option
+            key={
+              tarjeta.id
+            }
+            value={parseInt(
+              tarjeta.id,
+              10
+            )}
+            label={texto}
+          >
+            {texto}
+          </Option>
+        );
+      }
+    )}
+  </Select>
+</TableCell>
+
+                    <TableCell>
+                      {
+                        dato.concepto
+                      }
+                    </TableCell>
+
+                    <TableCell>
+                      $
+                      {dato.cargo
+                        ? formatPrecio(
+                            dato.cargo
+                          )
+                        : "0.00"}
+                    </TableCell>
+
+                    <TableCell>
+                      $
+                      {dato.abono
+                        ? formatPrecio(
+                            dato.abono
+                          )
+                        : "0.00"}
+                    </TableCell>
+
+                    <TableCell>
+                      <Select
+                        value={
+                          formValues[
+                            `${dato.id}`
+                          ]
+                        }
+                        style={{
+                          width:
+                            "100%",
+
+                          minWidth:
+                            190,
+                        }}
+                        disabled={disableSelect(
+                          dato.status
+                        )}
+                        placeholder="Tipo de movimiento"
+                        onChange={(
+                          value
+                        ) =>
+                          detalle
+                            ? handleChangeDetalle(
+                                value,
+                                dato.id
+                              )
+                            : handleChange(
+                                value,
+                                `${dato.id}`
+                              )
+                        }
+                      >
+                        {obtenerTiposMovimiento(
+                          dato
+                        ).map(
+                          (
+                            option
+                          ) => (
+                            <Option
+                              key={
+                                option.id
+                              }
+                              value={
+                                option.id
+                              }
+                            >
+                              {
+                                option.descripcion
+                              }
+                            </Option>
+                          )
+                        )}
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                )
+              )}
+          </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[
+                  5,
+                  10,
+                  25,
+                ]}
+                count={
+                  lista.length
+                }
+                rowsPerPage={
+                  filasPorPagina
+                }
+                page={
+                  pagina
+                }
+                onPageChange={(
+                  event,
+                  value
+                ) =>
+                  setPagina(
+                    value
+                  )
+                }
+                onRowsPerPageChange={(
+                  event
+                ) => {
+                  setFilasPorPagina(
+                    parseInt(
+                      event
+                        .target
+                        .value,
+                      10
+                    )
+                  );
+
+                  setPagina(
+                    0
+                  );
+                }}
+                labelRowsPerPage="Registros por Página"
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+    );
+  };
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
-    <div className="resources-legacy-panel" style={{ paddingBottom: 30 }}>
+    <div
+      className="resources-legacy-panel"
+      style={{
+        paddingBottom: 30,
+      }}
+    >
       {loading && (
-        <>
-          <Loader80 />
-        </>
+        <Loader80 />
       )}
+
       <Form {...layout}>
         <Row
-          gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
+          gutter={{
+            xs: 8,
+            sm: 16,
+            md: 24,
+            lg: 32,
+          }}
           justify="center"
-          style={{ paddingTop: 10 }}
+          style={{
+            paddingTop: 10,
+          }}
         >
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Form.Item name="range" label="Selecciona fechas">
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={8}
+            xl={6}
+          >
+            <Form.Item
+              name="range"
+              label="Selecciona fechas"
+            >
               <RangePicker
                 locale={locale}
                 format="YYYY-MM-DD"
-                defaultValue={range}
-                onChange={(value, dateString) => {
-                  onRangeChange(value, dateString);
+                onChange={
+                  onRangeChange
+                }
+                style={{
+                  width:
+                    "100%",
                 }}
-                style={{ width: "100%" }}
               />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
+
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={8}
+            xl={6}
+          >
             <Form.Item
               label="Tarjeta"
-              name="statuspago_id"
-              style={{ width: "100%" }}
             >
               <Select
                 placeholder="Todos"
-                optionLabelProp="label"
-                defaultValue={tipoSelected}
-                onChange={(value) => {
-                  setTipoSelected(value || "0");
+                value={
+                  tipoSelected
+                }
+                onChange={(
+                  value
+                ) =>
+                  setTipoSelected(
+                    value ||
+                      "0"
+                  )
+                }
+                style={{
+                  width:
+                    "100%",
                 }}
-                style={{ width: "100%" }}
               >
-                <Option value={"0"} label={"Todos"}>
+                <Option
+                  value="0"
+                >
                   Todos
                 </Option>
-                {datosTarjetas.map((item) => (
-                  <Option key={item.id} value={item.id} label={item.alias}>
-                    {item?.alias}
-                  </Option>
-                ))}
+
+                {datosTarjetas.map(
+                  (
+                    item
+                  ) => (
+                    <Option
+                      key={
+                        item.id
+                      }
+                      value={
+                        item.id
+                      }
+                    >
+                      {
+                        item.alias
+                      }
+                    </Option>
+                  )
+                )}
               </Select>
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <Form.Item name="movimientos" label="Seleccion opcional">
+
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={8}
+            xl={6}
+          >
+            <Form.Item
+              label="Selección opcional"
+            >
               <Checkbox
-                checked={movimientos}
-                onChange={() => setMovimientos(!movimientos)}
+                checked={
+                  movimientos
+                }
+                onChange={() =>
+                  setMovimientos(
+                    !movimientos
+                  )
+                }
               >
-                <Typography.Text>Todos los movimientos</Typography.Text>
+                Todos los
+                movimientos
               </Checkbox>
             </Form.Item>
           </Col>
         </Row>
+
         <Row
           justify="center"
-          gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
+          gutter={16}
           className="mb-5"
         >
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <div>
-              <Button
-                className="boton"
-                onClick={() => {
-                  setShowModal(true);
-                }}
-                disabled={cookiePermisos >= 2 ? false : true}
-                type="primary"
-                block
-              >
-                Administrar Movimientos
-              </Button>
-            </div>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <div>
-              <Button
-                className="boton"
-                onClick={() => {
-                  setShowModalTarjetas(true);
-                }}
-                disabled={cookiePermisos >= 2 ? false : true}
-                type="primary"
-                block
-              >
-                Administrar Tarjetas
-              </Button>
-            </div>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <div>
-              <Button
-                className="boton"
-                onClick={() => {
-                  onBuscar();
-                }}
-                type="primary"
-                block
-              >
-                Buscar
-              </Button>
-            </div>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <div>
-          <Button
-            className="boton"
-            type="primary"
-            block
-            disabled={cookiePermisos < 2}
-            onClick={automatizarMovimientos}
+          <Col
+            xs={24}
+            md={6}
+          >
+            <Button
+              type="primary"
+              block
+              disabled={
+                cookiePermisos <
+                2
+              }
+              onClick={() =>
+                setShowModal(
+                  true
+                )
+              }
             >
-            Clasificar automáticamente
-          </Button>
-            </div>
+              Administrar
+              Movimientos
+            </Button>
           </Col>
 
+          <Col
+            xs={24}
+            md={6}
+          >
+            <Button
+              type="primary"
+              block
+              disabled={
+                cookiePermisos <
+                2
+              }
+              onClick={() =>
+                setShowModalTarjetas(
+                  true
+                )
+              }
+            >
+              Administrar
+              Tarjetas
+            </Button>
+          </Col>
+
+          <Col
+            xs={24}
+            md={6}
+          >
+            <Button
+              type="primary"
+              block
+              onClick={
+                onBuscar
+              }
+            >
+              Buscar
+            </Button>
+          </Col>
+
+          <Col
+            xs={24}
+            md={6}
+          >
+            <Button
+              type="primary"
+              block
+              disabled={
+                cookiePermisos <
+                2
+              }
+              onClick={
+                automatizarMovimientos
+              }
+            >
+              Clasificar
+              automáticamente
+            </Button>
+          </Col>
         </Row>
 
         <Row
           justify="center"
-          gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
-          className="mb-5"
+          style={{
+            marginBottom: 25,
+          }}
         >
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}>
-            <div>
-              <Upload
-                beforeUpload={(file) => {
-                  handleUpload(file);
-                  return false;
-                }}
-                showUploadList={false}
+          <Col
+            xs={24}
+            md={6}
+          >
+            <Upload
+              beforeUpload={(
+                file
+              ) => {
+                handleUpload(
+                  file
+                );
+
+                return false;
+              }}
+              showUploadList={
+                false
+              }
+            >
+              <Button
+                block
+                icon={
+                  <UploadOutlined />
+                }
+                disabled={
+                  cookiePermisos <
+                  2
+                }
               >
-                <Button
-                  block
-                  className="boton"
-                  icon={<UploadOutlined />}
-                  disabled={cookiePermisos >= 2 ? false : true}
-                >
-                  Adjuntar Archivo
-                </Button>
-              </Upload>
-            </div>
+                Adjuntar Archivo
+              </Button>
+            </Upload>
           </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}></Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={6} xxl={6}></Col>
         </Row>
       </Form>
 
-      {Object.keys(message).length > 0 && errorMessage.length == 0 && (
-        <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
+      {message &&
+        !errorMessage && (
           <Alert
-            style={{ width: "100%" }}
-            message={message.type}
-            description={message.message}
+            style={{
+              marginBottom: 25,
+            }}
+            message={
+              message.type
+            }
+            description={
+              message.message
+            }
             type="success"
             showIcon
             closable
           />
-        </Row>
-      )}
-      {errorMessage.length > 0 && (
-        <Row style={{ paddingTop: 10, paddingBottom: 25 }}>
-          <Alert
-            style={{ width: "100%" }}
-            message={"Error"}
-            description={errorMessage}
-            showIcon
-            type="error"
-            closable
-          />
-        </Row>
-      )}
-      <Row justify="space-evenly" gutter={16}>
-        <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
-          <Card
-            className="custom-card"
-            title={customTitle("Abonos", 4)}
-            hoverable
-            bordered={false}
-          >
-            <Form {...layoutResumen} name="basicForm">
-              {datos.map((dato, index) => {
-                if (dato.tipo_ingreso === 1) {
-                  return (
-                    <Form.Item
-                      key={dato.id}
-                      name={`movimiento_${index}`}
-                      label={
-                        <span
-                          style={{ cursor: "pointer" }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#4096ff")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "initial")
-                          }
-                          onClick={() => {
-                            setTablaDetalles(tabla);
-                            filtrarTabla(tabla, dato.id);
-                            setTitleDetalles(
-                              "Detalles de" + " " + dato.descripcion
-                            );
-                            setShowModalDetalles(true);
-                          }}
-                        >
-                          {dato.descripcion}
-                        </span>
-                      }
-                    >
-                      <Input
-                        placeholder={
-                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                        }
-                        readOnly
-                        value={
-                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                        }
-                      />
-                      <p></p>
-                    </Form.Item>
-                  );
-                }
-              })}
+        )}
 
-              <Form.Item name={`totalAbonos`} label={"Total"}>
-                <Input
-                  placeholder={
-                    `$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)
-                  }
-                  readOnly
-                  value={`$ ` + (totalAbono ? formatPrecio(totalAbono) : 0)}
-                />
-                <p></p>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
+      {errorMessage && (
+        <Alert
+          style={{
+            marginBottom: 25,
+          }}
+          message="Error"
+          description={
+            errorMessage
+          }
+          type="error"
+          showIcon
+          closable
+        />
+      )}
 
-        <Col xs={24} sm={24} md={24} lg={10} xl={10} xxl={10}>
-          <Card
-            className="custom-card"
-            title={customTitle("Cargos", 4)}
-            hoverable
-            bordered={false}
-          >
-            <Form {...layoutResumen} name="basic">
-              {datos.map((dato, index) => {
-                if (dato.tipo_ingreso === 2) {
-                  return (
-                    <Form.Item
-                      key={dato.id}
-                      name={`movimiento_${index}`}
-                      label={
-                        <span
-                          style={{ cursor: "pointer" }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#4096ff")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "initial")
-                          }
-                          onClick={() => {
-                            setTablaDetalles(tabla);
-                            filtrarTabla(tabla, dato.id);
-                            setTitleDetalles(
-                              "Detalles de" + " " + dato.descripcion
-                            );
-                            setShowModalDetalles(true);
-                          }}
-                        >
-                          {dato.descripcion}
-                        </span>
-                      }
-                    >
-                      <Input
-                        placeholder={
-                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                        }
-                        readOnly
-                        value={
-                          `$ ` + (dato.total ? formatPrecio(dato.total) : 0)
-                        }
-                      />
-                      <p></p>
-                    </Form.Item>
-                  );
-                }
-              })}
-              <Form.Item name={`totalCargos`} label={"Total"}>
-                <Input
-                  placeholder={
-                    `$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)
-                  }
-                  readOnly
-                  value={`$ ` + (totalCargo ? formatPrecio(totalCargo) : 0)}
-                />
-                <p></p>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+      {/* =======================================================
+          RESUMEN
+      ======================================================= */}
 
       <Row
-        gutter={[8, 8]}
-        justify="center"
-        style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
+        justify="space-evenly"
+        gutter={16}
       >
-       <Row
-        justify="space-between"
-        align="middle"
+        <Col
+          xs={24}
+          lg={10}
+        >
+          <Card
+            className="custom-card"
+            title={customTitle(
+              "Abonos",
+              4
+            )}
+          >
+            <Form
+              {...layoutResumen}
+            >
+              {datosResumen.map(
+                (
+                  dato
+                ) => {
+                  if (
+                    parseInt(
+                      dato.tipo_ingreso,
+                      10
+                    ) !==
+                    1
+                  ) {
+                    return null;
+                  }
+
+                  return (
+                    <Form.Item
+                      key={
+                        dato.id
+                      }
+                      label={
+                        <span
+                          style={{
+                            cursor:
+                              "pointer",
+                          }}
+                          onClick={() =>
+                            abrirDetalles(
+                              dato
+                            )
+                          }
+                        >
+                          {
+                            dato.descripcion
+                          }
+                        </span>
+                      }
+                    >
+                      <Input
+                        readOnly
+                        value={`$ ${
+                          dato.total
+                            ? formatPrecio(
+                                dato.total
+                              )
+                            : "0"
+                        }`}
+                      />
+                    </Form.Item>
+                  );
+                }
+              )}
+
+              <Form.Item
+                label="Total"
+              >
+                <Input
+                  readOnly
+                  value={`$ ${formatPrecio(
+                    totalAbono
+                  )}`}
+                />
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+
+        <Col
+          xs={24}
+          lg={10}
+        >
+          <Card
+            className="custom-card"
+            title={customTitle(
+              "Cargos",
+              4
+            )}
+          >
+            <Form
+              {...layoutResumen}
+            >
+              {datosResumen.map(
+                (
+                  dato
+                ) => {
+                  if (
+                    parseInt(
+                      dato.tipo_ingreso,
+                      10
+                    ) !==
+                    2
+                  ) {
+                    return null;
+                  }
+
+                  return (
+                    <Form.Item
+                      key={
+                        dato.id
+                      }
+                      label={
+                        <span
+                          style={{
+                            cursor:
+                              "pointer",
+                          }}
+                          onClick={() =>
+                            abrirDetalles(
+                              dato
+                            )
+                          }
+                        >
+                          {
+                            dato.descripcion
+                          }
+                        </span>
+                      }
+                    >
+                      <Input
+                        readOnly
+                        value={`$ ${
+                          dato.total
+                            ? formatPrecio(
+                                dato.total
+                              )
+                            : "0"
+                        }`}
+                      />
+                    </Form.Item>
+                  );
+                }
+              )}
+
+              <Form.Item
+                label="Total"
+              >
+                <Input
+                  readOnly
+                  value={`$ ${formatPrecio(
+                    totalCargo
+                  )}`}
+                />
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* =======================================================
+          MOVIMIENTOS
+      ======================================================= */}
+
+      <Row
         style={{
-          width: "100%",
-          marginBottom: 10,
+          marginTop: 25,
         }}
       >
-        <Col>
-          <p
-            className="titulo_pantallas"
-            style={{
-              fontSize: "24px",
-              marginBottom: 0,
-            }}
-          >
-            Movimientos
-          </p>
-        </Col>
-
-        <Col>
-          <Select
-            value={filtroEstado}
-            style={{ width: 190 }}
-            onChange={(value) => {
-              setFiltroEstado(value);
-              setPage(0);
-            }}
-          >
-            <Option value="todos">
-              Todos ({totalTodos})
-            </Option>
-
-            <Option value="asignados">
-              Asignados ({totalAsignados})
-            </Option>
-
-            <Option value="pendientes">
-              Pendientes ({totalPendientes})
-            </Option>
-          </Select>
-        </Col>
-      </Row>
-
         <Col xs={24}>
-          <TableContainer component={Paper} className="tabla">
-            <Table>
-              <TableHead className="tabla_encabezado">
-                <TableRow>
-                  <TableCell>
-                    <p>Fecha</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Tarjeta</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Concepto</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Cargos</p>
-                  </TableCell>
-                  <TableCell>
-                    <p>Abonos</p>
-                  </TableCell>
-                  <TableCell style={{ width: 180 }}>
-                    <p>Tipo de movimiento</p>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stableSort(
-                  tablaFiltrada,
-                  getComparator(order, orderBy)
+          <Row
+            justify="space-between"
+            align="middle"
+            style={{
+              marginBottom: 10,
+            }}
+          >
+            <Typography.Title
+              level={3}
+              style={{
+                margin: 0,
+              }}
+            >
+              Movimientos
+            </Typography.Title>
+
+            <Select
+              value={
+                filtroEstado
+              }
+              style={{
+                width: 190,
+              }}
+              onChange={(
+                value
+              ) => {
+                setFiltroEstado(
+                  value
+                );
+
+                setPage(0);
+              }}
+            >
+              <Option
+                value="todos"
+              >
+                Todos (
+                {totalTodos})
+              </Option>
+
+              <Option
+                value="asignados"
+              >
+                Asignados (
+                {totalAsignados}
                 )
-                  .slice(
-                    page * rowsPerPage,
-                    page * rowsPerPage + rowsPerPage
-                  )
-                  .map((dato, index) => (
-                    <TableRow
-                      key={dato.id}
-                      style={colorDinamicoRow(dato.codigo_color)}
-                    >
-                      <TableCell>
-                        {fechaFormateada(dato.fecha_operacion)}
-                      </TableCell>
-                      <TableCell>{dato.tarjeta}</TableCell>
-                      <TableCell>{dato.concepto}</TableCell>
-                      <TableCell>
-                        ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
-                      </TableCell>
-                      <TableCell>
-                        ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
-                      </TableCell>
-                      <TableCell>
-                        <Form.Item>
-                          <Select
-                            value={formValues[`${dato.id}`]}
-                            style={{ width: "100%" }}
-                            disabled={disableSelect(dato.status)}
-                            placeholder={dato.tipo_id}
-                            onChange={(value) =>
-                              handleChange(value, `${dato.id}`)
-                            }
-                          >
-                            {datos.map((option) => (
-                              <Option key={option.id} value={option.id}>
-                                {option.descripcion}
-                              </Option>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    count={tablaFiltrada.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Registros por Página"
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
+              </Option>
+
+              <Option
+                value="pendientes"
+              >
+                Pendientes (
+                {totalPendientes}
+                )
+              </Option>
+            </Select>
+          </Row>
+
+          {renderTablaMovimientos({
+            lista:
+              tablaFiltrada,
+
+            pagina:
+              page,
+
+            filasPorPagina:
+              rowsPerPage,
+
+            setPagina:
+              setPage,
+
+            setFilasPorPagina:
+              setRowsPerPage,
+
+            detalle:
+              false,
+          })}
         </Col>
       </Row>
 
-      <Modal
-        title={customTitle("Administrar Tipos de Movimientos", 3)}
-        footer={null}
-        width={600}
-        open={showModal}
-        onCancel={() => handleCloseModal()}
-      >
-        {/* Crud de tipo movimientos */}
-        <AdministrarTipoMovimiento></AdministrarTipoMovimiento>
-      </Modal>
-      <Modal
-        title={customTitle("Administrar Tarjetas", 3)}
-        footer={null}
-        width={600}
-        open={showModalTarjetas}
-        onCancel={() => handleCloseModalTarjetas()}
-      >
-        {/* Crud de tipo movimientos */}
-        <AdministrarTarjetas
-          cargarTarjetas={cargarTarjetas}
-        ></AdministrarTarjetas>
-      </Modal>
+      {/* =======================================================
+          ADMINISTRAR TIPOS
+      ======================================================= */}
 
       <Modal
-        title={customTitleDetalles}
+        title={customTitle(
+          "Administrar Tipos de Movimientos",
+          3
+        )}
         footer={null}
-        width={900}
-        open={showModalDetalles}
-        onCancel={() => handleCloseModalDetalles()}
+        width={850}
+        open={showModal}
+        onCancel={
+          handleCloseModal
+        }
       >
-        <div>
-          {tablaDetalles.length === 0 && (
-            <Row
-              justify={"center"}
-              style={{ margin: 16, flexDirection: "column" }}
+        <AdministrarTipoMovimiento
+          tarjetas={
+            datosTarjetas
+          }
+          onTiposActualizados={
+            setearMovimientos
+          }
+        />
+      </Modal>
+
+      {/* =======================================================
+          ADMINISTRAR TARJETAS
+      ======================================================= */}
+
+      <Modal
+        title={customTitle(
+          "Administrar Tarjetas",
+          3
+        )}
+        footer={null}
+        width={600}
+        open={
+          showModalTarjetas
+        }
+        onCancel={
+          handleCloseModalTarjetas
+        }
+      >
+        <AdministrarTarjetas
+          cargarTarjetas={
+            cargarTarjetas
+          }
+        />
+      </Modal>
+
+      {/* =======================================================
+          DETALLE
+      ======================================================= */}
+
+      <Modal
+        title={
+          customTitleDetalles
+        }
+        footer={null}
+        width={950}
+        open={
+          showModalDetalles
+        }
+        onCancel={
+          handleCloseModalDetalles
+        }
+      >
+        {tablaDetalles.length ===
+        0 ? (
+          <Row
+            justify="center"
+            style={{
+              margin: 30,
+              flexDirection:
+                "column",
+            }}
+          >
+            <Typography.Title
+              level={3}
+              style={{
+                color:
+                  "orange",
+
+                textAlign:
+                  "center",
+              }}
             >
-              <Row>
-                <Typography.Title
-                  level={3}
-                  style={{
-                    color: "orange",
-                    textAlign: "center",
-                    margin: "0 auto",
-                  }}
-                >
-                  No hay {titleDetalles} disponibles con la información
-                  solicitada
-                </Typography.Title>
-              </Row>
-              <Row style={{ margin: "24px" }}>
-                <FaCircleExclamation
-                  className="m-auto"
-                  size={"60px"}
-                  color="orange"
-                />
-              </Row>
-            </Row>
-          )}
-          {tablaDetalles.length > 0 && (
+              No hay movimientos
+              disponibles
+            </Typography.Title>
+
+            <FaCircleExclamation
+              style={{
+                margin:
+                  "20px auto",
+              }}
+              size={60}
+              color="orange"
+            />
+          </Row>
+        ) : (
+          <>
             <Row
-              gutter={[8, 8]}
-              justify="center"
-              style={{ paddingTop: 10, paddingBottom: 10, margin: 0 }}
+              justify="space-between"
+              align="middle"
+              style={{
+                marginBottom: 10,
+              }}
             >
-              <Row
-                justify="space-between"
-                align="middle"
+              <Typography.Title
+                level={4}
                 style={{
-                  width: "100%",
-                  marginBottom: 10,
+                  margin: 0,
                 }}
               >
-                <Col>
-                  <Typography.Title
-                    level={3}
-                    style={{ marginBottom: 0 }}
-                  >
-                    Movimientos
-                  </Typography.Title>
-                </Col>
+                Movimientos
+              </Typography.Title>
 
-                <Col>
-                  <Select
-                    value={filtroEstadoDetalle}
-                    style={{ width: 180 }}
-                    onChange={(value) => {
-                      setFiltroEstadoDetalle(value);
-                      setPage2(0);
-                    }}
-                  >
-                    <Option value="todos">
-                      Todos
-                    </Option>
+              <Select
+                value={
+                  filtroEstadoDetalle
+                }
+                style={{
+                  width:
+                    180,
+                }}
+                onChange={(
+                  value
+                ) => {
+                  setFiltroEstadoDetalle(
+                    value
+                  );
 
-                    <Option value="asignados">
-                      Asignados
-                    </Option>
+                  setPage2(
+                    0
+                  );
+                }}
+              >
+                <Option
+                  value="todos"
+                >
+                  Todos
+                </Option>
 
-                    <Option value="pendientes">
-                      Pendientes
-                    </Option>
-                  </Select>
-                </Col>
-              </Row>
+                <Option
+                  value="asignados"
+                >
+                  Asignados
+                </Option>
 
-              <Col xs={24}>
-                <TableContainer component={Paper} className="tabla">
-                  <Table>
-                    <TableHead className="tabla_encabezado">
-                      <TableRow>
-                        <TableCell>
-                          <p>Fecha</p>
-                        </TableCell>
-                        <TableCell>
-                          <p>Tarjeta</p>
-                        </TableCell>
-                        <TableCell>
-                          <p>Concepto</p>
-                        </TableCell>
-                        <TableCell>
-                          <p>Cargos</p>
-                        </TableCell>
-                        <TableCell>
-                          <p>Abonos</p>
-                        </TableCell>
-                        <TableCell style={{ width: 180 }}>
-                          <p>Tipo de movimiento</p>
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {stableSort2(
-                          tablaDetallesFiltrada,
-                          getComparator2(order2, orderBy2)
-                        )
-                        .slice(
-                          page2 * rowsPerPage2,
-                          page2 * rowsPerPage2 + rowsPerPage2
-                        )
-                        .map((dato, index) => (
-                          <TableRow
-                            key={dato.id}
-                            style={colorDinamicoRow(dato.codigo_color)}
-                          >
-                            <TableCell>
-                              {fechaFormateada(dato.fecha_operacion)}
-                            </TableCell>
-                            <TableCell>{dato.tarjeta}</TableCell>
-                            <TableCell>{dato.concepto}</TableCell>
-                            <TableCell>
-                              ${dato.cargo ? formatPrecio(dato.cargo) : "0.00"}
-                            </TableCell>
-                            <TableCell>
-                              ${dato.abono ? formatPrecio(dato.abono) : "0.00"}
-                            </TableCell>
-                            <TableCell>
-                                <Select
-                                  value={formValues[`${dato.id}`]}
-                                  style={{ width: "100%", minWidth: 180 }}
-                                  disabled={disableSelect(dato.status)}
-                                  placeholder="Tipo de movimiento"
-                                  onChange={(value) =>
-                                    handleChangeDetalle(value, dato.id)
-                                  }
-                                >
-                                  {datos.map((option) => (
-                                    <Option
-                                      key={option.id}
-                                      value={option.id}
-                                    >
-                                      {option.descripcion}
-                                    </Option>
-                                  ))}
-                                </Select>
-                              </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                    <TableFooter>
-                      <TableRow>
-                        <TablePagination
-                          rowsPerPageOptions={[5, 10, 25]}
-                          count={tablaDetallesFiltrada.length}
-                          rowsPerPage={rowsPerPage2}
-                          page={page2}
-                          onPageChange={handleChangePage2}
-                          onRowsPerPageChange={handleChangeRowsPerPage2}
-                          labelRowsPerPage="Registros por Página"
-                        />
-                      </TableRow>
-                    </TableFooter>
-                  </Table>
-                </TableContainer>
-              </Col>
+                <Option
+                  value="pendientes"
+                >
+                  Pendientes
+                </Option>
+              </Select>
             </Row>
-          )}
-        </div>
+
+            {renderTablaMovimientos({
+              lista:
+                tablaDetallesFiltrada,
+
+              pagina:
+                page2,
+
+              filasPorPagina:
+                rowsPerPage2,
+
+              setPagina:
+                setPage2,
+
+              setFilasPorPagina:
+                setRowsPerPage2,
+
+              detalle:
+                true,
+            })}
+          </>
+        )}
       </Modal>
     </div>
   );
