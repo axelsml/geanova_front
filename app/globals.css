@@ -16303,3 +16303,121 @@ html[data-theme="dark"]
 .geanova-form .ant-input-number-group-wrapper {
   width: 100% !important;
 }
+/* ==========================================================
+   JERARQUÍA VISUAL DE LAPSOS
+   ========================================================== */
+
+/*
+  MES
+  Nivel principal.
+  Azul más fuerte.
+*/
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--month
+> td {
+  background: #d7e9fb !important;
+}
+
+
+/*
+  QUINCENA
+  Segundo nivel.
+*/
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--fortnight
+> td {
+  background: #e9f3fd !important;
+}
+
+
+/*
+  SEMANA
+  Tercer nivel.
+  Azul prácticamente blanco.
+*/
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--week
+> td {
+  background: #f7fbff !important;
+}
+
+
+/*
+  OTROS
+*/
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--others
+> td {
+  background: #ffffff !important;
+}
+
+
+/* ==========================================================
+   HOVER
+   ========================================================== */
+
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--month:hover
+> td {
+  background: #c9e1f8 !important;
+}
+
+
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--fortnight:hover
+> td {
+  background: #dcecfb !important;
+}
+
+
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--week:hover
+> td {
+  background: #edf6fe !important;
+}
+
+
+.report-effectiveness-table
+.ant-table-tbody
+> tr.report-effectiveness-row--others:hover
+> td {
+  background: #f8fafc !important;
+}
+
+
+/* ==========================================================
+   TOTAL GENERAL
+   ========================================================== */
+
+.report-effectiveness-table
+.report-effectiveness-total-row
+> td {
+  background: #c8def5 !important;
+
+  border-top:
+    2px solid
+    #6d9dcc !important;
+
+  border-bottom:
+    1px solid
+    #a9c8e6 !important;
+
+  font-weight:
+    600;
+}
+
+
+.report-effectiveness-total-title {
+  color: #204f7a;
+
+  font-weight: 700;
+
+  letter-spacing: 0.03em;
+}

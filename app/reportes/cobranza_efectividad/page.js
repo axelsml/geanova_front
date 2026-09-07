@@ -307,8 +307,72 @@ export default function EfectividadCobranza() {
     },
     []
   );
+function obtenerClaseFilaLapso(
+  lapso
+) {
+
+  const texto =
+    String(
+      lapso ||
+      ""
+    );
 
 
+  if (
+    texto ===
+    "Mes"
+  ) {
+
+    return (
+      "report-effectiveness-row--month"
+    );
+
+  }
+
+
+  if (
+    texto.indexOf(
+      "Quincena"
+    ) ===
+    0
+  ) {
+
+    return (
+      "report-effectiveness-row--fortnight"
+    );
+
+  }
+
+
+  if (
+    texto.indexOf(
+      "Sem"
+    ) ===
+    0
+  ) {
+
+    return (
+      "report-effectiveness-row--week"
+    );
+
+  }
+
+
+  if (
+    texto ===
+    "Otros"
+  ) {
+
+    return (
+      "report-effectiveness-row--others"
+    );
+
+  }
+
+
+  return "";
+
+}
   /* ==========================================================
      ERROR
      ========================================================== */
@@ -762,7 +826,74 @@ export default function EfectividadCobranza() {
 
   }
 
+  /* ==========================================================
+     TOTAL GENERAL TABLA
+     ========================================================== */
 
+  const totalGeneralTabla =
+    useMemo(
+      function () {
+
+        const filaMes =
+          datos.find(
+            function (item) {
+
+              return (
+                item &&
+                item.lapso === "Mes"
+              );
+
+            }
+          ) || {};
+
+
+        return {
+
+          total_clientes:
+            totalClientes,
+
+          monto_esperado:
+            totalMontoEsperado,
+
+          monto_anticipo:
+            totalMontoAnticipo,
+
+          clientes_cobrados:
+            numeroSeguro(
+              filaMes.clientes_cobrados
+            ),
+
+          monto_cobrado:
+            totalMontoCobrado,
+
+          clientes_por_cobrar:
+            numeroSeguro(
+              filaMes.clientes_por_cobrar
+            ),
+
+          pendiente_por_cobrar:
+            totalPendienteCobrar,
+
+          porcentaje_importe:
+            totalPorcentajeImporte,
+
+          porcentaje_clientes:
+            totalPorcentajeClientes,
+
+        };
+
+      },
+      [
+        datos,
+        totalClientes,
+        totalMontoEsperado,
+        totalMontoAnticipo,
+        totalMontoCobrado,
+        totalPendienteCobrar,
+        totalPorcentajeImporte,
+        totalPorcentajeClientes,
+      ]
+    );
   /* ==========================================================
      COLUMNAS EFECTIVIDAD
      ========================================================== */
@@ -2074,21 +2205,347 @@ export default function EfectividadCobranza() {
         </div>
 
 
-        <Table
-          rowKey={
-            function (
-              dato,
-              index
-            ) {
+       <Table
+  rowKey={
+    function (
+      dato,
+      index
+    ) {
 
-              return (
-                dato.id ||
-                dato.lapso ||
-                index
-              );
+      return (
+        dato.id ||
+        dato.lapso ||
+        index
+      );
 
-            }
-          }
+    }
+  }
+
+  columns={
+    columnasEfectividad
+  }
+
+  dataSource={
+    datos
+  }
+
+  size="small"
+
+  scroll={{
+    x:
+      1450,
+  }}
+
+  pagination={
+    false
+  }
+
+  onRow={
+    function (
+      dato
+    ) {
+
+      return {
+
+        onClick:
+          function () {
+
+            abrirDetalleLapso(
+              dato
+            );
+
+          },
+
+        className:
+          [
+            "report-effectiveness-main-row",
+
+            obtenerClaseFilaLapso(
+              dato.lapso
+            ),
+
+          ]
+            .filter(
+              Boolean
+            )
+            .join(
+              " "
+            ),
+
+      };
+
+    }
+  }
+
+  summary={
+    function () {
+
+      if (
+        !busquedaRealizada
+      ) {
+
+        return null;
+
+      }
+
+
+      return (
+
+        <Table.Summary>
+
+          <Table.Summary.Row
+            className="report-effectiveness-total-row"
+          >
+
+            {/* LAPSO + FECHA */}
+
+            <Table.Summary.Cell
+              index={
+                0
+              }
+              colSpan={
+                2
+              }
+            >
+
+              <strong className="report-effectiveness-total-title">
+
+                TOTAL GENERAL
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* CLIENTES */}
+
+            <Table.Summary.Cell
+              index={
+                2
+              }
+              align="center"
+            >
+
+              <strong>
+
+                {
+                  entero(
+                    totalGeneralTabla.total_clientes
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* MONTO ESPERADO */}
+
+            <Table.Summary.Cell
+              index={
+                3
+              }
+              align="right"
+            >
+
+              <strong>
+
+                {
+                  moneda(
+                    totalGeneralTabla.monto_esperado
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* ANTICIPO */}
+
+            <Table.Summary.Cell
+              index={
+                4
+              }
+              align="right"
+            >
+
+              <strong>
+
+                {
+                  moneda(
+                    totalGeneralTabla.monto_anticipo
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* COBRADOS */}
+
+            <Table.Summary.Cell
+              index={
+                5
+              }
+              align="center"
+            >
+
+              <strong>
+
+                {
+                  entero(
+                    totalGeneralTabla.clientes_cobrados
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* TOTAL PERCIBIDO */}
+
+            <Table.Summary.Cell
+              index={
+                6
+              }
+              align="right"
+            >
+
+              <strong>
+
+                {
+                  moneda(
+                    totalGeneralTabla.monto_cobrado
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* POR COBRAR */}
+
+            <Table.Summary.Cell
+              index={
+                7
+              }
+              align="center"
+            >
+
+              <strong>
+
+                {
+                  entero(
+                    totalGeneralTabla.clientes_por_cobrar
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* PENDIENTE */}
+
+            <Table.Summary.Cell
+              index={
+                8
+              }
+              align="right"
+            >
+
+              <strong className="report-effectiveness-danger">
+
+                {
+                  moneda(
+                    totalGeneralTabla.pendiente_por_cobrar
+                  )
+                }
+
+              </strong>
+
+            </Table.Summary.Cell>
+
+
+            {/* % IMPORTE */}
+
+            <Table.Summary.Cell
+              index={
+                9
+              }
+            >
+
+              <Progress
+                percent={
+                  porcentajeSeguro(
+                    totalGeneralTabla.porcentaje_importe
+                  )
+                }
+                size="small"
+                format={
+                  function () {
+
+                    return porcentajeTexto(
+                      totalGeneralTabla.porcentaje_importe
+                    );
+
+                  }
+                }
+              />
+
+            </Table.Summary.Cell>
+
+
+            {/* % CLIENTES */}
+
+            <Table.Summary.Cell
+              index={
+                10
+              }
+            >
+
+              <Progress
+                percent={
+                  porcentajeSeguro(
+                    totalGeneralTabla.porcentaje_clientes
+                  )
+                }
+                size="small"
+                format={
+                  function () {
+
+                    return porcentajeTexto(
+                      totalGeneralTabla.porcentaje_clientes
+                    );
+
+                  }
+                }
+              />
+
+            </Table.Summary.Cell>
+
+          </Table.Summary.Row>
+
+        </Table.Summary>
+
+      );
+
+    }
+  }
+
+  locale={{
+    emptyText:
+      busquedaRealizada
+        ? "No hay información para el periodo seleccionado."
+        : "Realiza una búsqueda para consultar la efectividad.",
+  }}
+
+  className="report-effectiveness-table"
+/>
           columns={
             columnasEfectividad
           }
