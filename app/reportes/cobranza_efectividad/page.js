@@ -2546,51 +2546,7 @@ function obtenerClaseFilaLapso(
 
   className="report-effectiveness-table"
 />
-          columns={
-            columnasEfectividad
-          }
-          dataSource={
-            datos
-          }
-          size="small"
-          scroll={{
-            x:
-              1450,
-          }}
-          pagination={
-            false
-          }
-          onRow={
-            function (
-              dato
-            ) {
 
-              return {
-
-                onClick:
-                  function () {
-
-                    abrirDetalleLapso(
-                      dato
-                    );
-
-                  },
-
-                className:
-                  "report-effectiveness-main-row",
-
-              };
-
-            }
-          }
-          locale={{
-            emptyText:
-              busquedaRealizada
-                ? "No hay información para el periodo seleccionado."
-                : "Realiza una búsqueda para consultar la efectividad.",
-          }}
-          className="report-effectiveness-table"
-        />
 
       </section>
 
