@@ -79,15 +79,10 @@ export default function Reportes() {
         <Tabs
 
           defaultActiveKey="1"
-
-          className="reports-tabs"
-
+          className="resources-tabs"
           animated={false}
-
           tabBarGutter={26}
-
           destroyInactiveTabPane={false}
-
         >
 
 
