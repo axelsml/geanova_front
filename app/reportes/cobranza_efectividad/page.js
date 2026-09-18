@@ -177,8 +177,15 @@ export default function EfectividadCobranza() {
      ========================================================== */
 
   const [
-    totalClientes,
-    setTotalClientes,
+    totalRecibos,
+    setTotalRecibos,
+  ] =
+    useState(0);
+
+
+  const [
+    clientesDiferentesPorCobrar,
+    setClientesDiferentesPorCobrar,
   ] =
     useState(0);
 
@@ -526,10 +533,18 @@ function obtenerClaseFilaLapso(
     );
 
 
-    setTotalClientes(
+    setTotalRecibos(
       numeroSeguro(
         response &&
         response.totalClientes
+      )
+    );
+
+
+    setClientesDiferentesPorCobrar(
+      numeroSeguro(
+        response &&
+        response.clientes_diferentes_por_cobrar
       )
     );
 
@@ -596,12 +611,27 @@ function obtenerClaseFilaLapso(
 
           {
             label:
-              "Clientes",
+              "Recibos",
 
             value:
               entero(
-                totalClientes
+                totalRecibos
               ),
+          },
+
+
+          {
+            label:
+              "Clientes por cobrar",
+
+            value:
+              entero(
+                clientesDiferentesPorCobrar
+              ),
+
+            danger:
+              clientesDiferentesPorCobrar >
+              0,
           },
 
 
@@ -684,7 +714,8 @@ function obtenerClaseFilaLapso(
 
       },
       [
-        totalClientes,
+        totalRecibos,
+        clientesDiferentesPorCobrar,
         totalMontoEsperado,
         totalMontoAnticipo,
         totalMontoCobrado,
@@ -849,8 +880,8 @@ function obtenerClaseFilaLapso(
 
         return {
 
-          total_clientes:
-            totalClientes,
+          total_recibos:
+            totalRecibos,
 
           monto_esperado:
             totalMontoEsperado,
@@ -867,9 +898,7 @@ function obtenerClaseFilaLapso(
             totalMontoCobrado,
 
           clientes_por_cobrar:
-            numeroSeguro(
-              filaMes.clientes_por_cobrar
-            ),
+            clientesDiferentesPorCobrar,
 
           pendiente_por_cobrar:
             totalPendienteCobrar,
@@ -885,7 +914,8 @@ function obtenerClaseFilaLapso(
       },
       [
         datos,
-        totalClientes,
+        totalRecibos,
+        clientesDiferentesPorCobrar,
         totalMontoEsperado,
         totalMontoAnticipo,
         totalMontoCobrado,
@@ -957,7 +987,7 @@ function obtenerClaseFilaLapso(
 
     {
       title:
-        "Clientes",
+        "Recibos",
 
       dataIndex:
         "total_clientes",
@@ -2317,7 +2347,7 @@ function obtenerClaseFilaLapso(
             </Table.Summary.Cell>
 
 
-            {/* CLIENTES */}
+            {/* RECIBOS */}
 
             <Table.Summary.Cell
               index={
@@ -2330,7 +2360,7 @@ function obtenerClaseFilaLapso(
 
                 {
                   entero(
-                    totalGeneralTabla.total_clientes
+                    totalGeneralTabla.total_recibos
                   )
                 }
 

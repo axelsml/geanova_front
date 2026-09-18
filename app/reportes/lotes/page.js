@@ -425,7 +425,7 @@ export default function ReporteLotes() {
       icon: BiBuildingHouse,
     },
     {
-      label: "Lotes cobrados",
+      label: "Lotes cobranza Activos",
       value: entero(resumenActivos.cobranza),
       icon: BiCheckCircle,
     },
