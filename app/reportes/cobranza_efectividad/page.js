@@ -622,7 +622,7 @@ function obtenerClaseFilaLapso(
 
           {
             label:
-              "Clientes por cobrar",
+              "Clientes en cobranza",
 
             value:
               entero(
