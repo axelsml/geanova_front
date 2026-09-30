@@ -862,68 +862,142 @@ function obtenerClaseFilaLapso(
      ========================================================== */
 
   const totalGeneralTabla =
-    useMemo(
-      function () {
+  useMemo(
+    function () {
 
-        const filaMes =
-          datos.find(
-            function (item) {
+      const total = datos.reduce(
+        function (
+          acumulado,
+          item
+        ) {
 
-              return (
-                item &&
-                item.lapso === "Mes"
-              );
+          if (!item) {
+            return acumulado;
+          }
 
-            }
-          ) || {};
-
-
-        return {
-
-          total_recibos:
-            totalRecibos,
-
-          monto_esperado:
-            totalMontoEsperado,
-
-          monto_anticipo:
-            totalMontoAnticipo,
-
-          clientes_cobrados:
+          acumulado.total_recibos +=
             numeroSeguro(
-              filaMes.clientes_cobrados
-            ),
+              item.total_clientes
+            );
 
-          monto_cobrado:
-            totalMontoCobrado,
+          acumulado.monto_esperado +=
+            numeroSeguro(
+              item.monto_esperado
+            );
 
-          clientes_por_cobrar:
-            clientesDiferentesPorCobrar,
+          acumulado.monto_anticipo +=
+            numeroSeguro(
+              item.monto_anticipo
+            );
 
-          pendiente_por_cobrar:
-            totalPendienteCobrar,
+          acumulado.clientes_cobrados +=
+            numeroSeguro(
+              item.clientes_cobrados
+            );
 
-          porcentaje_importe:
-            totalPorcentajeImporte,
+          acumulado.monto_cobrado +=
+            numeroSeguro(
+              item.monto_cobrado
+            );
 
-          porcentaje_clientes:
-            totalPorcentajeClientes,
+          acumulado.clientes_por_cobrar +=
+            numeroSeguro(
+              item.clientes_por_cobrar
+            );
 
-        };
+          acumulado.pendiente_por_cobrar +=
+            numeroSeguro(
+              item.pendiente_por_cobrar
+            );
 
-      },
-      [
-        datos,
-        totalRecibos,
-        clientesDiferentesPorCobrar,
-        totalMontoEsperado,
-        totalMontoAnticipo,
-        totalMontoCobrado,
-        totalPendienteCobrar,
-        totalPorcentajeImporte,
-        totalPorcentajeClientes,
-      ]
-    );
+          return acumulado;
+
+        },
+        {
+          total_recibos: 0,
+          monto_esperado: 0,
+          monto_anticipo: 0,
+          clientes_cobrados: 0,
+          monto_cobrado: 0,
+          clientes_por_cobrar: 0,
+          pendiente_por_cobrar: 0,
+          porcentaje_importe: 0,
+          porcentaje_clientes: 0,
+        }
+      );
+
+
+      /* ========================================================
+         EFECTIVIDAD POR IMPORTE
+
+         No se promedian los porcentajes de cada fila.
+
+         Se calcula:
+
+         total cobrado
+         -------------
+         total esperado
+         ======================================================== */
+
+      if (
+        total.monto_esperado >
+        0
+      ) {
+
+        total.porcentaje_importe =
+          (
+            (
+              total.monto_cobrado /
+              total.monto_esperado
+            ) *
+            100
+          );
+
+      } else {
+
+        total.porcentaje_importe =
+          0;
+
+      }
+
+
+      /* ========================================================
+         EFECTIVIDAD DE CLIENTES / RECIBOS
+
+         cobrados
+         --------
+         recibos
+         ======================================================== */
+
+      if (
+        total.total_recibos >
+        0
+      ) {
+
+        total.porcentaje_clientes =
+          (
+            (
+              total.clientes_cobrados /
+              total.total_recibos
+            ) *
+            100
+          );
+
+      } else {
+
+        total.porcentaje_clientes =
+          0;
+
+      }
+
+
+      return total;
+
+    },
+    [
+      datos,
+    ]
+  );
   /* ==========================================================
      COLUMNAS EFECTIVIDAD
      ========================================================== */
