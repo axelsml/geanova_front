@@ -867,7 +867,7 @@ class RecursosService {
       });
   }
 
-  destroyTipoMovimientoTarjeta(callback, id, error) {
+  destroyTipoMovimientoTarjeta(callback, params, error) {
     let call;
     if (call) {
       call.cancel();
@@ -875,7 +875,7 @@ class RecursosService {
     const CancelToken = axios.CancelToken;
     call = CancelToken.source();
     return http
-      .delete(`destroyTipoMovimientoTarjeta/${id}`, { cancelToken: call.token })
+      .post("destroyTipoMovimientoTarjeta", params, { cancelToken: call.token })
       .then((response) => {
         return callback(response.data);
       })
@@ -901,6 +901,41 @@ class RecursosService {
         }
       });
   }
+
+  // destroyTipoMovimientoTarjeta(callback, id, error) {
+  //   let call;
+  //   if (call) {
+  //     call.cancel();
+  //   }
+  //   const CancelToken = axios.CancelToken;
+  //   call = CancelToken.source();
+  //   return http
+  //     .delete(`destroyTipoMovimientoTarjeta/${id}`, { cancelToken: call.token })
+  //     .then((response) => {
+  //       return callback(response.data);
+  //     })
+  //     .catch((response) => {
+  //       try {
+  //         if (axios.isCancel(response)) {
+  //           console.log("Peticion Cancelada");
+  //         } else {
+  //           error(response);
+  //           return Swal.fire({
+  //             icon: "error",
+  //             title: "Oops...",
+  //             text: `Error Handled: ${response}`,
+  //           });
+  //         }
+  //       } catch (err) {
+  //         console.error("Error Handled", err);
+  //         return Swal.fire({
+  //           icon: "error",
+  //           title: "Oops...",
+  //           text: `Error Handled: ${err}`,
+  //         });
+  //       }
+  //     });
+  // }
   getMovimientosTarjetas(params, callback, error) {
     let call;
     if (call) {

@@ -359,6 +359,9 @@ export default function AdministrarTipoMovimiento({
   const eliminar = (id) => {
     setLoading(true);
 
+    const params = {
+      id: id
+    };
     recursosService.destroyTipoMovimientoTarjeta(
       (response) => {
         setLoading(false);
@@ -383,9 +386,7 @@ export default function AdministrarTipoMovimiento({
 
         refrescarCatalogo();
       },
-      {
-        id: id,
-      },
+       params,
       onError
     );
   };
