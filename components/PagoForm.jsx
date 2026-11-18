@@ -224,7 +224,7 @@ export default function PagoForm({
 
 
   const SISTEMAS_CON_COMPROBANTE =
-    [2,,2,3,4,5,6,7,8,9];
+    [2,3,4,5,6,7,8,9];
 
 
   /* ==========================================================
@@ -2087,8 +2087,7 @@ export default function PagoForm({
               TRANSFERENCIA / DEPÓSITO
               ================================================== */}
 
-          {(sistemaSelected === 2 ||
-            sistemaSelected === 5) && (
+          {sistemaSelected != 1 && (
 
             <div>
 
