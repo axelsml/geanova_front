@@ -21,6 +21,7 @@ import {
 } from "antd";
 
 import Swal from "sweetalert2";
+import Loader80 from "@/components/Loader80";
 
 import terrenosService from "@/services/terrenosService";
 import pagosService from "@/services/pagosService";
@@ -68,26 +69,10 @@ const OPCIONES_ESTATUS = [
 
 export default function ReporteEstatusCobranza() {
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
+ 
+  const [isLoading, setLoading] = useState(false);
 
-
-  if (!loadingContext) {
-
-    throw new Error(
-      "ReporteEstatusCobranza debe estar dentro de LoadingProvider"
-    );
-
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
-
+ 
 
   const [
     form,
@@ -245,7 +230,7 @@ export default function ReporteEstatusCobranza() {
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -309,7 +294,7 @@ export default function ReporteEstatusCobranza() {
       }
 
 
-      setIsLoading(
+      setLoading(
         true
       );
 
@@ -360,7 +345,7 @@ export default function ReporteEstatusCobranza() {
     response
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -1490,6 +1475,12 @@ export default function ReporteEstatusCobranza() {
      ========================================================== */
 
   return (
+
+    {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
 
     <div className="report-status-page">
 

@@ -46,7 +46,7 @@ const ESTADOS = [
 export default function ReporteLotes() {
 
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const [terrenos, setTerrenos] = useState([]);
   const [lotes, setLotes] = useState([]);

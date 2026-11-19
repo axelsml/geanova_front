@@ -89,7 +89,7 @@ const ESTADOS_SOLICITUD = [
 
 
 export default function ReporteCobranza() {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
  
   const [
