@@ -22,10 +22,7 @@ import {
   formatPrecio,
 } from "@/helpers/formatters";
 
-import {
-  LoadingContext,
-} from "@/contexts/loading";
-
+import Loader80 from "@/components/Loader80";
 
 const {
   Option,
@@ -94,25 +91,9 @@ const MESES = [
 
 export default function ReporteProyeccion() {
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
+  const [isLoading, setLoading] = useState(false);
 
 
-  if (!loadingContext) {
-
-    throw new Error(
-      "ReporteProyeccion debe estar dentro de LoadingProvider"
-    );
-
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
 
 
   /* ==========================================================
@@ -258,7 +239,7 @@ export default function ReporteProyeccion() {
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -295,7 +276,7 @@ export default function ReporteProyeccion() {
 
   function handleSearch() {
 
-    setIsLoading(
+    setLoading(
       true
     );
 
@@ -351,7 +332,7 @@ export default function ReporteProyeccion() {
     data
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -834,6 +815,11 @@ export default function ReporteProyeccion() {
 
     <div className="report-projection-page">
 
+       {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
 
       {/* =====================================================
           HEADER

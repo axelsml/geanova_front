@@ -25,10 +25,7 @@ import {
 import pagosService from "@/services/pagosService";
 import terrenosService from "@/services/terrenosService";
 
-import {
-  LoadingContext,
-} from "@/contexts/loading";
-
+import Loader80 from "@/components/Loader80";
 
 const {
   Option,
@@ -41,23 +38,10 @@ const {
 
 export default function ReporteIngresos() {
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
+ 
 
+  const [isLoading, setLoading] = useState(false);
 
-  if (!loadingContext) {
-    throw new Error(
-      "ReporteIngresos debe estar dentro de LoadingProvider"
-    );
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
 
 
   /* ==========================================================
@@ -196,7 +180,7 @@ export default function ReporteIngresos() {
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -280,7 +264,7 @@ export default function ReporteIngresos() {
     };
 
 
-    setIsLoading(
+    setLoading(
       true
     );
 
@@ -322,7 +306,7 @@ export default function ReporteIngresos() {
     data
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -1161,7 +1145,11 @@ export default function ReporteIngresos() {
   return (
 
     <div className="report-income-page">
-
+      {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
 
       {/* =====================================================
           HEADER

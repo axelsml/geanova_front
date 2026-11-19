@@ -23,9 +23,7 @@ import {
   formatPrecio,
 } from "@/helpers/formatters";
 
-import {
-  LoadingContext,
-} from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 
 
 const {
@@ -95,25 +93,8 @@ const MESES = [
 
 export default function InformeCortes() {
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
 
-
-  if (!loadingContext) {
-
-    throw new Error(
-      "InformeCortes debe estar dentro de LoadingProvider"
-    );
-
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
+  const [isLoading, setLoading] = useState(false);
 
 
   /* ==========================================================
@@ -259,7 +240,7 @@ export default function InformeCortes() {
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -296,7 +277,7 @@ export default function InformeCortes() {
 
   function handleSearch() {
 
-    setIsLoading(
+    setLoading(
       true
     );
 
@@ -352,7 +333,7 @@ export default function InformeCortes() {
     data
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -557,6 +538,11 @@ export default function InformeCortes() {
 
     <div className="report-history-page">
 
+      {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
 
       {/* =====================================================
           HEADER

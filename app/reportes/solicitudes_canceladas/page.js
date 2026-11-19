@@ -26,9 +26,7 @@ import {
   formatPrecio,
 } from "@/helpers/formatters";
 
-import {
-  LoadingContext,
-} from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
 
 import locale from "antd/lib/date-picker/locale/es_ES";
 
@@ -44,25 +42,10 @@ const {
 
 export default function SolicitudesCanceladas() {
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
+
+  const [isLoading, setLoading] = useState(false);
 
 
-  if (!loadingContext) {
-
-    throw new Error(
-      "SolicitudesCanceladas debe estar dentro de LoadingProvider"
-    );
-
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
 
 
   /* ==========================================================
@@ -258,7 +241,7 @@ export default function SolicitudesCanceladas() {
     }
 
 
-    setIsLoading(
+    setLoading(
       true
     );
 
@@ -280,7 +263,7 @@ export default function SolicitudesCanceladas() {
     data
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -342,7 +325,7 @@ export default function SolicitudesCanceladas() {
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -421,7 +404,7 @@ export default function SolicitudesCanceladas() {
     }
 
 
-    setIsLoading(
+    setLoading(
       true
     );
 
@@ -449,7 +432,7 @@ export default function SolicitudesCanceladas() {
     data
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -1028,6 +1011,11 @@ export default function SolicitudesCanceladas() {
 
     <div className="report-cancelled-page">
 
+      {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
 
       {/* =====================================================
           HEADER
