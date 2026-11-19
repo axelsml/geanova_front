@@ -30,9 +30,9 @@ import {
   formatDate,
 } from "@/helpers/formatters";
 
-import {
-  LoadingContext,
-} from "@/contexts/loading";
+
+
+import Loader80 from "@/components/Loader80";
 
 
 const {
@@ -89,28 +89,9 @@ const ESTADOS_SOLICITUD = [
 
 
 export default function ReporteCobranza() {
+  const [loading, setLoading] = useState(false);
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
-
-
-  if (!loadingContext) {
-
-    throw new Error(
-      "ReporteCobranza debe estar dentro de LoadingProvider"
-    );
-
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
-
-
+ 
   const [
     form,
   ] =
@@ -409,7 +390,7 @@ export default function ReporteCobranza() {
       }
 
 
-      setIsLoading(
+      setLoading(
         true
       );
 
@@ -471,7 +452,7 @@ export default function ReporteCobranza() {
     response
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -587,7 +568,7 @@ export default function ReporteCobranza() {
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -1062,7 +1043,11 @@ export default function ReporteCobranza() {
      ========================================================== */
 
   return (
-
+    {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
     <div className="report-cobranza-page">
 
 

@@ -20,7 +20,8 @@ import Swal from "sweetalert2";
 import terrenosService from "@/services/terrenosService";
 import lotesService from "@/services/lotesService";
 import PagoForm from "@/components/PagoForm";
-import { LoadingContext } from "@/contexts/loading";
+import Loader80 from "@/components/Loader80";
+
 import { formatPrecio } from "@/helpers/formatters";
 import { getCookiePermisos } from "@/helpers/valorPermisos";
 
@@ -43,14 +44,9 @@ const ESTADOS = [
 ];
 
 export default function ReporteLotes() {
-  const loadingContext = useContext(LoadingContext);
 
-  if (!loadingContext) {
-    throw new Error("ReporteLotes debe estar dentro de LoadingProvider");
-  }
-
-  const { setIsLoading } = loadingContext;
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
   const [terrenos, setTerrenos] = useState([]);
   const [lotes, setLotes] = useState([]);
@@ -142,7 +138,7 @@ export default function ReporteLotes() {
     limpiarResultados();
     setConsultado(true);
     setTerrenoConsultado(terrenoIdSeleccionado);
-    setIsLoading(true);
+    setLoading(true);
 
     lotesService.reporteLotes(
       {
@@ -181,7 +177,7 @@ export default function ReporteLotes() {
   }
 
   function onInfoClienteCargado2(data) {
-    setIsLoading(false);
+    setLoading(false);
 
     if (data && data.encontrado) {
       setDataCompleta(data);
@@ -195,7 +191,7 @@ export default function ReporteLotes() {
   }
 
   function onError(error) {
-    setIsLoading(false);
+    setLoading(false);
     console.error("ReporteLotes:", error);
 
     Swal.fire({
@@ -563,6 +559,12 @@ export default function ReporteLotes() {
   ];
 
   return (
+
+    {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
     <div className="report-lotes-page">
       <div className="report-lotes-header">
         <div>
