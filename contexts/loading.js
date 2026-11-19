@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import Loader from "@/components/Loader";
+import Loader80 from "@/components/Loader80";
 
 
 export const LoadingContext =
@@ -34,16 +35,9 @@ export function LoadingProvider({
 
 
       {isLoading && (
-        <div
-          className="global-loader-overlay"
-          role="status"
-          aria-live="polite"
-          aria-label="Cargando"
-        >
-          <div className="global-loader-content">
-            <Loader />
-          </div>
-        </div>
+        <>
+          <Loader80 />
+        </>
       )}
 
     </LoadingContext.Provider>
