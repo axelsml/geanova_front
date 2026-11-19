@@ -1906,9 +1906,7 @@ const handleChangeTarjetaMovimiento = (
                               )
                         }
                       >
-                        {obtenerTiposMovimiento(
-                          dato
-                        ).map(
+                        {catalogoTipos.map(
                           (
                             option
                           ) => (
