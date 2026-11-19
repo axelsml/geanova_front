@@ -560,12 +560,12 @@ export default function ReporteLotes() {
 
   return (
 
-    {isLoading && (
-        <>
-          <Loader80 />
-        </>
-      )}
     <div className="report-lotes-page">
+      {isLoading && (
+          <>
+            <Loader80 />
+          </>
+        )}
       <div className="report-lotes-header">
         <div>
           <span className="report-lotes-header__eyebrow">

@@ -1476,14 +1476,14 @@ export default function ReporteEstatusCobranza() {
 
   return (
 
-    {isLoading && (
-        <>
-          <Loader80 />
-        </>
-      )}
-
+    
     <div className="report-status-page">
 
+      {isLoading && (
+          <>
+            <Loader80 />
+          </>
+        )}
 
       {/* =====================================================
           HEADER

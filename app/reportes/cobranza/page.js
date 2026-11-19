@@ -1043,13 +1043,13 @@ export default function ReporteCobranza() {
      ========================================================== */
 
   return (
-    {isLoading && (
-        <>
-          <Loader80 />
-        </>
-      )}
     <div className="report-cobranza-page">
 
+      {isLoading && (
+          <>
+            <Loader80 />
+          </>
+        )}
 
       {/* =====================================================
           HEADER

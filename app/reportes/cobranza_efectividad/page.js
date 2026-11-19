@@ -25,10 +25,7 @@ import {
 import cobranzaService from "@/services/cobranzaService";
 import terrenosService from "@/services/terrenosService";
 
-import {
-  LoadingContext,
-} from "@/contexts/loading";
-
+import Loader80 from "@/components/Loader80";
 
 const {
   Option,
@@ -81,25 +78,9 @@ for (
 
 export default function EfectividadCobranza() {
 
-  const loadingContext =
-    useContext(
-      LoadingContext
-    );
+ 
 
-
-  if (!loadingContext) {
-
-    throw new Error(
-      "EfectividadCobranza debe estar dentro de LoadingProvider"
-    );
-
-  }
-
-
-  const {
-    setIsLoading,
-  } =
-    loadingContext;
+  const [isLoading, setLoading] = useState(false);
 
 
   const [
@@ -388,7 +369,7 @@ function obtenerClaseFilaLapso(
     error
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -450,7 +431,7 @@ function obtenerClaseFilaLapso(
     }
 
 
-    setIsLoading(
+    setLoading(
       true
     );
 
@@ -493,7 +474,7 @@ function obtenerClaseFilaLapso(
     response
   ) {
 
-    setIsLoading(
+    setLoading(
       false
     );
 
@@ -1957,8 +1938,14 @@ function obtenerClaseFilaLapso(
 
   return (
 
+    
     <div className="report-effectiveness-page">
 
+      {isLoading && (
+        <>
+          <Loader80 />
+        </>
+      )}
 
       {/* =====================================================
           HEADER
